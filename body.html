@@ -1,0 +1,323 @@
+  <body>
+    <noscript>
+      <div style="background:#c45c5c;color:#fff;padding:16px;text-align:center;font-size:1.1rem">
+        JavaScript is required. Use GitHub Pages (see DEPLOY.md) — not Files preview.
+      </div>
+    </noscript>
+    <div id="boot-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#c45c5c;color:#fff;padding:14px 16px;font-size:0.95rem;line-height:1.45">
+      <strong>App did not start.</strong> Local Files often blocks JS on iPad.
+      Use <strong>GitHub Pages</strong> (HTTPS) — see DEPLOY.md in this folder. Open in <strong>Safari</strong>, not Files preview.
+    </div>
+    <header class="app-header">
+      <div class="header-row">
+        <h1 id="header-title">The Pale Tide</h1>
+        <div class="session-timer" id="session-timer">
+          <button type="button" class="timer-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
+          <div class="timer-face">
+            <span class="timer-clock" id="timer-clock">0:00</span>
+            <span class="timer-segment" id="timer-segment">Teleport</span>
+          </div>
+        </div>
+      </div>
+      <div class="timer-alert hidden" id="timer-alert">
+        <span id="timer-alert-text"></span>
+        <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)">✕</button>
+      </div>
+      <div class="meta" id="meta-chips"></div>
+    </header>
+
+    <main>
+      <div id="combat-layout" class="combat-layout">
+        <aside id="init-rail" class="init-rail panel">
+          <h2>Initiative · high → low</h2>
+          <div class="init-ref-strip" id="init-ref-strip"></div>
+          <div id="reminder-panel" class="reminder-panel empty">Tap <strong>Mark</strong> on a row for turn · LA · lair reminders</div>
+          <div class="shuffle-bar">
+            <div>
+              <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase">Shuffle</div>
+              <div id="shuffle-info" style="font-size:0.88rem;margin-top:4px">Round 1 default</div>
+            </div>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-new-round">New Round</button>
+          </div>
+          <div class="init-list" id="init-list"></div>
+          <div class="lair-block">
+            <h2>Lair @ 20 · pick one</h2>
+            <div class="lair-grid" id="lair-quick-ref"></div>
+          </div>
+          <div class="btn-row init-actions">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-shuffle-preview">Re-roll shuffle</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-on">PULSE on</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-off">PULSE off</button>
+          </div>
+        </aside>
+
+        <div id="phase-rail" class="phase-rail">
+          <div class="panel clocks-panel">
+            <h2>Clocks</h2>
+            <div class="clock-row">
+              <div class="clock ritual">
+                <div class="label">Ritual</div>
+                <div class="value"><span id="ritual-val">0</span><span class="max">/20</span></div>
+                <p id="ritual-stop" class="hidden" style="font-size:0.75rem;color:var(--warn);margin:8px 0 0">Ticks stopped</p>
+              </div>
+              <div class="clock breach">
+                <div class="label">Breach</div>
+                <div class="value"><span id="breach-val">0</span><span class="max">/6</span></div>
+                <div class="breach-pips" id="breach-pips"></div>
+              </div>
+            </div>
+            <p id="g-info" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:12px 0 0"></p>
+            <p id="pylon-ac" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:4px 0 0"></p>
+            <div class="btn-row">
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-plus">Ritual +1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-fed">Fed horde +1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-minus">Ritual −1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-plus">Breach +1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-minus">Breach −1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-pylon">Pylon down −2</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-knight">Knight kill −1</button>
+            </div>
+          </div>
+
+      <!-- PHASE 1 — The Tide (~0:05–0:50) -->
+      <section class="tab-panel" data-tab="phase1">
+        <div class="gate-tracker">
+          <div id="gate-banner" class="gate-banner locked">GATE LOCKED</div>
+          <p id="gate-info" class="gate-info">Road spawns only · Lane + Gate fronts · Breach = road lost</p>
+        </div>
+
+        <div class="phase-banner phase-1">
+          <strong>Phase 1 · The Tide</strong>
+          <span>0:05–0:50 · Gate LOCKED · Gate + Lane</span>
+        </div>
+
+        <div class="panel">
+          <h2>Fronts · R1</h2>
+          <ul class="phase-list">
+            <li><strong>Gate</strong> — open iron · Brussel within 15 ft · hold Breach</li>
+            <li><strong>Lane</strong> — ring + NE column · R1 only while locked</li>
+            <li>Road spawns only · hordes 20 ft · graves silent · no pylons</li>
+            <li>Lane empty EOR → Breach +1 · all 5 on Gate → Breach +2</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Gate opens → Phase 2</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Same round: place pylons · G+0 pulse · re-split Gate · Sanctum · Crown's Edge</p>
+          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-open-gate" style="width:100%">Open gate (G+0) → go to Phase 2</button>
+        </div>
+
+        <div class="panel">
+          <h2>EOR · Phase 1</h2>
+          <ul class="phase-list muted">
+            <li>Ritual +1 (+ fed hordes max +2 after R2)</li>
+            <li>Knights R2 · Hood reveal ≤2 bodies · end Horde slot</li>
+            <li>Buy-down: knight kill −1 Ritual</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PHASE 2 — The Ledger (~0:50–2:00) -->
+      <section class="tab-panel hidden" data-tab="phase2">
+        <div class="phase-banner phase-2">
+          <strong>Phase 2 · The Ledger</strong>
+          <span>0:50–2:00 · Gate OPEN · 3 fronts</span>
+        </div>
+
+        <div class="panel">
+          <h2>Fronts</h2>
+          <ul class="phase-list">
+            <li><strong>Gate</strong> — Outer mouth · Task 2 Breach</li>
+            <li><strong>Sanctum</strong> — Inner · Task 1 · stop the count</li>
+            <li><strong>Crown's Edge</strong> — pylons · rim anchors · Task 3</li>
+            <li>Sanctum empty G+3 & G+4 → inner opposed +2</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Inner track</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">3 wins before 2 failures = Ritual −1 (max 3)</p>
+          <div style="text-align:center;margin-bottom:8px">
+            <span style="color:var(--muted);font-size:0.8rem">Wins</span>
+            <div class="track-dots" id="win-dots"></div>
+            <span style="color:var(--muted);font-size:0.8rem">Failures</span>
+            <div class="track-dots" id="fail-dots"></div>
+          </div>
+          <p style="text-align:center;font-size:0.85rem">Buy-downs earned: <strong id="inner-buy">0</strong>/3</p>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-inner-win">+ Win</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-inner-fail">+ Failure</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-inner">Apply −1 Ritual</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-anchor">Anchor bind −1</button>
+          </div>
+          <label class="check-item" style="margin-top:12px"><input type="checkbox" id="woman-friendly" /> Woman friendly → neutral banshee (Ph 3)</label>
+        </div>
+
+        <div class="panel">
+          <h2>Sanctum · at table</h2>
+          <ul class="phase-list muted">
+            <li>Leader + Keeper: Time Armour — parley only Ph 1–2</li>
+            <li>Attack them: backlash · +1 inner fail · Ritual +1</li>
+            <li>Disrupt counting: Insight DC 26 → Ritual −1</li>
+            <li>G+4: push Counting House · crypt · parley</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Rim pylons</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Field AC 25 · 100 HP · Stone 90 HP · Init 20: +d100 shield</p>
+          <div class="pylon-grid">
+            <div class="pylon-card" id="pylon-a">
+              <h3>Pylon A</h3>
+              <div style="font-size:0.78rem;color:var(--muted)">Shield <span id="pylon-a-shield-val">100</span></div>
+              <div class="bar-track"><div class="bar-fill" id="pylon-a-shield" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-shield-minus">−</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-shield-plus">+10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-regen">+d100</button>
+              </div>
+              <div style="font-size:0.78rem;color:var(--muted);margin-top:10px">Stone <span id="pylon-a-stone-val">90</span></div>
+              <div class="bar-track"><div class="bar-fill stone" id="pylon-a-stone" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-stone-minus">−10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="a-destroy">Destroyed</button>
+              </div>
+            </div>
+            <div class="pylon-card" id="pylon-b">
+              <h3>Pylon B</h3>
+              <div style="font-size:0.78rem;color:var(--muted)">Shield <span id="pylon-b-shield-val">100</span></div>
+              <div class="bar-track"><div class="bar-fill" id="pylon-b-shield" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-shield-minus">−</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-shield-plus">+10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-regen">+d100</button>
+              </div>
+              <div style="font-size:0.78rem;color:var(--muted);margin-top:10px">Stone <span id="pylon-b-stone-val">90</span></div>
+              <div class="bar-track"><div class="bar-fill stone" id="pylon-b-stone" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-stone-minus">−10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="b-destroy">Destroyed</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Grave churn</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Cumulative Perception · start 25 · pylons up only</p>
+          <div style="text-align:center;font-size:2rem;font-weight:700" id="grave-val">25</div>
+          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="grave-plus" style="width:100%;margin-top:8px">+ Perception roll</button>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="check-item"><input type="checkbox" id="tier-t25" disabled checked /> 25 — not all form ranks</label>
+            <label class="check-item"><input type="checkbox" id="tier-t50" disabled /> 50 — hiding / running</label>
+            <label class="check-item"><input type="checkbox" id="tier-t75" disabled /> 75 — living movement</label>
+            <label class="check-item"><input type="checkbox" id="tier-t100" disabled /> 100 — avoiding gate · crystals</label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Rim anchors</h2>
+          <label class="check-item"><input type="checkbox" id="rim-rite" /> Rim Rite known</label>
+          <label class="check-item"><input type="checkbox" id="anchor-north-loc" /> North row · located</label>
+          <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> North row · bound (−1 Ritual)</label>
+          <label class="check-item"><input type="checkbox" id="anchor-east-loc" /> East row · located</label>
+          <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> East row · bound (−1 Ritual)</label>
+          <label class="check-item"><input type="checkbox" id="anchor-skull-loc" /> Skull pits · located</label>
+          <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Skull pits · bound (−1 Ritual)</label>
+        </div>
+
+        <div class="panel">
+          <h2>→ Phase 3 (~2:15)</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Break 2:00–2:15 · then Time Collapse</p>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-break">Mark break @ 2:00</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-phase-3">Time Collapse → Phase 3</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PHASE 3 — The Apostle (~2:15–3:45) -->
+      <section class="tab-panel hidden" data-tab="phase3">
+        <div class="phase-banner phase-3">
+          <strong>Phase 3 · The Apostle</strong>
+          <span>2:15–3:45 · Dismissal at vortex threshold</span>
+        </div>
+
+        <div class="panel">
+          <h2>Time Collapse</h2>
+          <ul class="phase-list muted">
+            <li>Leader + Keeper → liches · woman → banshee (unless friendly)</li>
+            <li>Inner fence OFF · Apostle from vortex · Ritual ticks stop on mat</li>
+          </ul>
+          <div class="btn-row" style="margin-top:12px">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Apostle of Myrkul</h2>
+          <label class="check-item"><input type="checkbox" id="apostle-on" /> On mat · Ritual ticks stop</label>
+          <label class="check-item"><input type="checkbox" id="apostle-bloodied" /> Bloodied (≤290)</label>
+          <div class="stepper" style="margin-top:12px;justify-content:center">
+            <span style="color:var(--muted);margin-right:8px">HP</span>
+            <input type="number" id="apostle-hp" min="0" max="580" value="580" />
+            <span style="color:var(--muted);margin-left:8px">/ 580</span>
+          </div>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="apostle-lr-use">LR used (<span id="apostle-lr">3</span> left)</button>
+          </div>
+          <p style="font-size:0.85rem;color:var(--muted);margin:12px 0 8px">Damage wheel (3 rotating immunities)</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <input type="text" id="wheel-0" placeholder="1" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+            <input type="text" id="wheel-1" placeholder="2" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+            <input type="text" id="wheel-2" placeholder="3" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Dismissal · ~3:15</h2>
+          <ul class="phase-list">
+            <li>Apostle out + (bloodied OR both pylons down) at vortex threshold</li>
+            <li>Brussel adjacent for step 2 · Religion/Arcana DC 22 each step</li>
+            <li><strong>Win:</strong> Dismissal · 0 HP</li>
+            <li><strong>Loss:</strong> 2 PCs dead OR Breach 6 + Apostle at 3:45</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Phase 3 spawns</h2>
+          <ul class="phase-list muted">
+            <li>Batch 3: ghosts · banshee (neutral if woman friendly)</li>
+            <li>Batch 5: liches · Apostle · LA 3/4 bloodied</li>
+            <li>Apostle +30 HP init 20 if any pylon intact</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Session</h2>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="btn-reset">Reset encounter</button>
+          </div>
+        </div>
+      </section>
+
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <section class="tab-panel hidden" data-tab="bestiary">
+        <div class="panel" style="padding-bottom:8px">
+          <h2>Stat blocks</h2>
+          <p style="font-size:0.82rem;color:var(--muted);margin:0 0 12px">Tap a creature for full stats · actions · specials · LA</p>
+          <div class="monster-filters" id="monster-filters"></div>
+        </div>
+        <div class="monster-list" id="monster-list"></div>
+      </section>
+    </main>
+
+    <nav class="tabs" aria-label="Main">
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn active" data-tab="phase1"><span class="icon">🌊</span>Ph 1</button>
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn" data-tab="phase2"><span class="icon">📒</span>Ph 2</button>
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn" data-tab="phase3"><span class="icon">💀</span>Ph 3</button>
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn" data-tab="bestiary"><span class="icon">📖</span>Stats</button>
+    </nav>

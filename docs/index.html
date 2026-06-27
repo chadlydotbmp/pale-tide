@@ -135,11 +135,121 @@ header.app-header {
   padding: 12px 16px;
 }
 
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 header.app-header h1 {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  flex: 1;
+  min-width: 0;
+}
+
+.session-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.timer-btn {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  line-height: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.timer-btn.paused {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.timer-face {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 4.5rem;
+}
+
+.timer-clock {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.session-timer.at-marker .timer-clock {
+  color: var(--warn);
+}
+
+.session-timer.overtime .timer-clock {
+  color: var(--danger);
+}
+
+.timer-segment {
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.2;
+  max-width: 9rem;
+}
+
+.timer-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(196, 92, 92, 0.15);
+  border: 1px solid var(--danger);
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  animation: timer-pulse 1.2s ease-in-out 3;
+}
+
+.timer-alert.hidden {
+  display: none;
+}
+
+.timer-alert strong {
+  color: var(--warn);
+}
+
+.timer-alert-dismiss {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+@keyframes timer-pulse {
+  0%,
+  100% {
+    border-color: var(--danger);
+  }
+  50% {
+    border-color: var(--warn);
+    box-shadow: 0 0 0 2px rgba(196, 92, 92, 0.2);
+  }
 }
 
 html[data-app='pale-tide-app-ok-v3'] header.app-header h1::after {
@@ -1025,7 +1135,20 @@ main {
       Use <strong>GitHub Pages</strong> (HTTPS) — see DEPLOY.md in this folder. Open in <strong>Safari</strong>, not Files preview.
     </div>
     <header class="app-header">
-      <h1 id="header-title">The Pale Tide</h1>
+      <div class="header-row">
+        <h1 id="header-title">The Pale Tide</h1>
+        <div class="session-timer" id="session-timer">
+          <button type="button" class="timer-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
+          <div class="timer-face">
+            <span class="timer-clock" id="timer-clock">0:00</span>
+            <span class="timer-segment" id="timer-segment">Teleport</span>
+          </div>
+        </div>
+      </div>
+      <div class="timer-alert hidden" id="timer-alert">
+        <span id="timer-alert-text"></span>
+        <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)">✕</button>
+      </div>
       <div class="meta" id="meta-chips"></div>
     </header>
 
@@ -1344,6 +1467,19 @@ main {
 
   const DEFAULT_ASSIGNMENT = { dead1: 1, dead2: 2, dead3: 3, dead4: 4, dead5: 5 };
 
+  /** Wall-clock spine — SESSION_RUNDOWN.md */
+  const TIME_MARKERS = [
+    { min: 0, label: '0:00', hint: 'Teleport · cold open' },
+    { min: 5, label: '0:05', hint: 'R1 — split Gate · Lane' },
+    { min: 45, label: '0:45', hint: 'Gate open? · set G = round' },
+    { min: 50, label: '0:50', hint: 'Phase 2 — The Ledger' },
+    { min: 90, label: '1:30', hint: 'G+4 cone OR Ritual ≥ 10' },
+    { min: 120, label: '2:00', hint: 'Break — 15 min' },
+    { min: 135, label: '2:15', hint: 'Phase 3 — Apostle on mat' },
+    { min: 195, label: '3:15', hint: 'Dismissal OR Apostle bloodied' },
+    { min: 225, label: '3:45', hint: 'Hard stop · wrap' },
+  ];
+
   function defaultState() {
     return {
       phase: 1,
@@ -1377,6 +1513,11 @@ main {
       apostleBloodied: false,
       apostleWheel: ['', '', ''],
       sessionStart: Date.now(),
+      timerPaused: false,
+      timerPauseStart: null,
+      timerPauseTotal: 0,
+      timerFired: [],
+      timerAlert: null,
       breakTaken: false,
       activeTab: 'phase1',
       monsterFilter: 'all',
@@ -1487,6 +1628,7 @@ main {
           skull: { ...base.anchors.skull, ...((saved.anchors && saved.anchors.skull) || {}) },
         },
         apostleWheel: Array.isArray(saved.apostleWheel) ? saved.apostleWheel : base.apostleWheel,
+        timerFired: Array.isArray(saved.timerFired) ? saved.timerFired : base.timerFired,
       };
     } catch (e) {
       return defaultState();
@@ -1504,12 +1646,36 @@ main {
     return defaultState();
   }
 
+  function timerElapsedMs(state, now) {
+    const t = now == null ? Date.now() : now;
+    if (state.timerPaused && state.timerPauseStart) {
+      return state.timerPauseStart - state.sessionStart - state.timerPauseTotal;
+    }
+    return t - state.sessionStart - state.timerPauseTotal;
+  }
+
+  function timerSegment(elapsedMin) {
+    let seg = TIME_MARKERS[0];
+    for (let i = 0; i < TIME_MARKERS.length; i++) {
+      if (elapsedMin >= TIME_MARKERS[i].min) seg = TIME_MARKERS[i];
+    }
+    return seg;
+  }
+
+  function timerNextMarker(elapsedMin) {
+    return TIME_MARKERS.find((m) => m.min > elapsedMin) || null;
+  }
+
   global.PaleTide = {
     BATCHES,
     SLOT_INIT,
     SLOT_ORDER,
     LAIR_INIT,
     DEFAULT_ASSIGNMENT,
+    TIME_MARKERS,
+    timerElapsedMs,
+    timerSegment,
+    timerNextMarker,
     defaultState,
     rotateAssignment,
     shuffle,
@@ -2184,29 +2350,85 @@ main {
     return n;
   }
 
-  function formatElapsed(ms) {
-    const m = Math.floor(ms / 60000);
-    const h = Math.floor(m / 60);
-    const mm = m % 60;
-    return h > 0 ? `${h}:${String(mm).padStart(2, '0')}` : `${m}m`;
+  function formatSessionClock(ms) {
+    const totalMin = Math.floor(ms / 60000);
+    const h = Math.floor(totalMin / 60);
+    const mm = totalMin % 60;
+    return `${h}:${String(mm).padStart(2, '0')}`;
   }
 
-  function milestoneHint(ms) {
-    const m = ms / 60000;
-    if (m < 5) return 'R1 — split fronts';
-    if (m < 45) return 'Phase 1 · open gate?';
-    if (m < 90) return 'G+4 cone ~1:30';
-    if (m < 120) return 'Phase 2 · Counting House';
-    if (m < 135) return 'Break @ 2:00';
-    if (m < 135 + 15) return 'Break';
-    if (m < 195) return 'Apostle ~2:15';
-    if (m < 255) return 'Dismissal ~3:15';
-    return 'Hard stop 3:45';
+  function checkTimerMarkers() {
+    const elapsed = G.timerElapsedMs(state);
+    const elapsedMin = elapsed / 60000;
+    const fired = state.timerFired.slice();
+    let alert = state.timerAlert;
+    let changed = false;
+
+    for (let i = 0; i < G.TIME_MARKERS.length; i++) {
+      const mk = G.TIME_MARKERS[i];
+      if (mk.min === 0 || fired.indexOf(mk.min) >= 0) continue;
+      if (elapsedMin >= mk.min) {
+        fired.push(mk.min);
+        alert = { label: mk.label, hint: mk.hint };
+        changed = true;
+        try {
+          if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+        } catch (_) {}
+      }
+    }
+
+    if (changed) {
+      state = { ...state, timerFired: fired, timerAlert: alert };
+      G.save(state);
+    }
+  }
+
+  function renderTimer() {
+    checkTimerMarkers();
+    const elapsed = G.timerElapsedMs(state);
+    const elapsedMin = elapsed / 60000;
+    const seg = G.timerSegment(elapsedMin);
+    const next = G.timerNextMarker(elapsedMin);
+    const hardStop = G.TIME_MARKERS[G.TIME_MARKERS.length - 1].min;
+
+    const clockEl = $('#timer-clock');
+    const segEl = $('#timer-segment');
+    const toggleEl = $('#btn-timer-toggle');
+    const wrapEl = $('#session-timer');
+    const alertEl = $('#timer-alert');
+    const alertText = $('#timer-alert-text');
+
+    if (clockEl) clockEl.textContent = formatSessionClock(elapsed);
+    if (segEl) {
+      segEl.textContent = next
+        ? `Next ${next.label} · ${next.hint}`
+        : seg.hint;
+    }
+    if (toggleEl) {
+      toggleEl.textContent = state.timerPaused ? '▶' : '⏸';
+      toggleEl.classList.toggle('paused', state.timerPaused);
+      toggleEl.title = state.timerPaused ? 'Resume timer' : 'Pause timer';
+    }
+    if (wrapEl) {
+      wrapEl.classList.toggle('paused', state.timerPaused);
+      wrapEl.classList.toggle('overtime', elapsedMin >= hardStop);
+      const near =
+        next && next.min - elapsedMin <= 2 && next.min - elapsedMin > 0;
+      wrapEl.classList.toggle('at-marker', !!near);
+    }
+    if (alertEl && alertText) {
+      if (state.timerAlert) {
+        alertEl.classList.remove('hidden');
+        alertText.innerHTML = `<strong>${state.timerAlert.label}</strong> — ${state.timerAlert.hint}`;
+      } else {
+        alertEl.classList.add('hidden');
+        alertText.textContent = '';
+      }
+    }
   }
 
   function renderHeader() {
     const g = G.gTrack(state);
-    const elapsed = Date.now() - state.sessionStart;
     $('#header-title').textContent = 'The Pale Tide';
     $('#meta-chips').innerHTML = [
       `<span class="chip">${BUILD}</span>`,
@@ -2215,10 +2437,11 @@ main {
       state.gateOpen ? '<span class="chip">Gate OPEN</span>' : '<span class="chip">Gate LOCKED</span>',
       state.phase >= 3 ? '<span class="chip phase-3">Phase 3</span>' : `<span class="chip">Phase ${state.phase}</span>`,
       state.pulseOn ? '<span class="chip pulse-on">PULSE</span>' : '',
-      `<span class="chip">${formatElapsed(elapsed)} · ${milestoneHint(elapsed)}</span>`,
+      state.timerPaused ? '<span class="chip">Timer paused</span>' : '',
     ]
       .filter(Boolean)
       .join('');
+    renderTimer();
   }
 
   function renderClocks() {
@@ -2858,7 +3081,30 @@ main {
         }
         return;
       case 'btn-break':
-        setState({ breakTaken: true });
+        setState({
+          breakTaken: true,
+          timerPaused: true,
+          timerPauseStart: Date.now(),
+        });
+        return;
+      case 'btn-timer-toggle': {
+        if (state.timerPaused) {
+          const pauseDur = Date.now() - (state.timerPauseStart || Date.now());
+          setState({
+            timerPaused: false,
+            timerPauseStart: null,
+            timerPauseTotal: state.timerPauseTotal + pauseDur,
+          });
+        } else {
+          setState({
+            timerPaused: true,
+            timerPauseStart: Date.now(),
+          });
+        }
+        return;
+      }
+      case 'btn-timer-dismiss':
+        setState({ timerAlert: null });
         return;
       default:
         break;
@@ -2944,7 +3190,6 @@ main {
     for (var i = 0; i < q.length; i++) {
       publicTap(q[i][0], q[i][1]);
     }
-    document.addEventListener('click', handleTap, true);
     document.addEventListener('change', handleChange, false);
     document.addEventListener('input', handleChange, false);
   }
@@ -2957,8 +3202,8 @@ main {
       var warn = document.getElementById('boot-warn');
       if (warn) warn.style.display = 'none';
       setInterval(function () {
-        safe('header', renderHeader);
-      }, 30000);
+        safe('timer', renderTimer);
+      }, 1000);
     } catch (err) {
       var msg = 'Startup failed: ' + (err && err.message ? err.message : String(err));
       bootError(msg);
