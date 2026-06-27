@@ -426,11 +426,23 @@
     setEl($('#apostle-on'), (el) => {
       el.checked = state.apostleOnMat;
     });
-    const wheel = Array.isArray(state.apostleWheel) ? state.apostleWheel : ['', '', ''];
-    wheel.forEach((v, i) => {
-      setEl($(`#wheel-${i}`), (el) => {
-        el.value = v;
+    const wheel = G.normalizeApostleWheel(state.apostleWheel);
+    G.WHEEL_TYPES.forEach(({ id }) => {
+      setEl($(`#wheel-${id}`), (el) => {
+        el.checked = wheel.includes(id);
       });
+    });
+    setEl($('#wheel-order'), (el) => {
+      if (!wheel.length) {
+        el.textContent = 'None filed yet';
+        return;
+      }
+      el.innerHTML = wheel
+        .map(
+          (id, i) =>
+            `<span class="wheel-slot"><strong>Rot ${i + 1}</strong> ${G.wheelLabel(id)}</span>`
+        )
+        .join('');
     });
   }
 
@@ -890,12 +902,21 @@
       return;
     }
 
-    const wheel = t.id.match(/^wheel-([0-2])$/);
-    if (wheel) {
-      const i = parseInt(wheel[1], 10);
-      const next = state.apostleWheel.slice();
-      next[i] = t.value;
+    const wheelPick = t.id.match(/^wheel-(acid|fire|force|lightning|physical|psychic|radiant|thunder)$/);
+    if (wheelPick) {
+      const type = wheelPick[1];
+      let next = G.normalizeApostleWheel(state.apostleWheel);
+      const idx = next.indexOf(type);
+      if (t.checked) {
+        if (idx === -1) {
+          if (next.length >= 3) next.shift();
+          next.push(type);
+        }
+      } else if (idx !== -1) {
+        next.splice(idx, 1);
+      }
       setState({ apostleWheel: next });
+      return;
     }
   }
 

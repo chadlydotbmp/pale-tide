@@ -30,6 +30,38 @@
     { min: 225, label: '3:45', hint: 'Hard stop · wrap' },
   ];
 
+  /** Apostle rotating immunities — ENEMY_STAT_BLOCKS.md */
+  const WHEEL_TYPES = [
+    { id: 'acid', label: 'Acid' },
+    { id: 'fire', label: 'Fire' },
+    { id: 'force', label: 'Force' },
+    { id: 'lightning', label: 'Lightning' },
+    { id: 'physical', label: 'Physical (B/P/S)' },
+    { id: 'psychic', label: 'Psychic' },
+    { id: 'radiant', label: 'Radiant' },
+    { id: 'thunder', label: 'Thunder' },
+  ];
+
+  const WHEEL_TYPE_IDS = WHEEL_TYPES.map((t) => t.id);
+
+  function normalizeApostleWheel(wheel) {
+    if (!Array.isArray(wheel)) return [];
+    const out = [];
+    wheel.forEach((entry) => {
+      const id = String(entry || '')
+        .toLowerCase()
+        .trim();
+      if (!WHEEL_TYPE_IDS.includes(id) || out.includes(id)) return;
+      out.push(id);
+    });
+    return out.slice(0, 3);
+  }
+
+  function wheelLabel(id) {
+    const t = WHEEL_TYPES.find((x) => x.id === id);
+    return t ? t.label : id;
+  }
+
   function defaultState() {
     return {
       phase: 1,
@@ -61,7 +93,7 @@
       apostleHp: 580,
       apostleLr: 3,
       apostleBloodied: false,
-      apostleWheel: ['', '', ''],
+      apostleWheel: [],
       sessionStart: Date.now(),
       timerPaused: false,
       timerPauseStart: null,
@@ -177,7 +209,7 @@
           east: { ...base.anchors.east, ...((saved.anchors && saved.anchors.east) || {}) },
           skull: { ...base.anchors.skull, ...((saved.anchors && saved.anchors.skull) || {}) },
         },
-        apostleWheel: Array.isArray(saved.apostleWheel) ? saved.apostleWheel : base.apostleWheel,
+        apostleWheel: normalizeApostleWheel(saved.apostleWheel),
         timerFired: Array.isArray(saved.timerFired) ? saved.timerFired : base.timerFired,
       };
     } catch (e) {
@@ -223,6 +255,9 @@
     LAIR_INIT,
     DEFAULT_ASSIGNMENT,
     TIME_MARKERS,
+    WHEEL_TYPES,
+    normalizeApostleWheel,
+    wheelLabel,
     timerElapsedMs,
     timerSegment,
     timerNextMarker,

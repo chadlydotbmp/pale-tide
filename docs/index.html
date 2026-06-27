@@ -830,6 +830,41 @@ main {
   border-color: var(--danger);
 }
 
+.wheel-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.wheel-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.wheel-slot strong {
+  color: var(--accent);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.wheel-checklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.wheel-checklist .check-item {
+  margin: 0;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1486,11 +1521,18 @@ main {
           <div class="btn-row">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="apostle-lr-use">LR used (<span id="apostle-lr">3</span> left)</button>
           </div>
-          <p style="font-size:0.85rem;color:var(--muted);margin:12px 0 8px">Damage wheel (3 rotating immunities)</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-            <input type="text" id="wheel-0" placeholder="1" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
-            <input type="text" id="wheel-1" placeholder="2" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
-            <input type="text" id="wheel-2" placeholder="3" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+          <p style="font-size:0.78rem;color:var(--muted);margin:12px 0 6px">Fixed immune: cold · necrotic · poison</p>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Rotating wheel (max 3 · FIFO)</p>
+          <div id="wheel-order" class="wheel-order">None filed yet</div>
+          <div class="wheel-checklist">
+            <label class="check-item"><input type="checkbox" id="wheel-acid" /> Acid</label>
+            <label class="check-item"><input type="checkbox" id="wheel-fire" /> Fire</label>
+            <label class="check-item"><input type="checkbox" id="wheel-force" /> Force</label>
+            <label class="check-item"><input type="checkbox" id="wheel-lightning" /> Lightning</label>
+            <label class="check-item"><input type="checkbox" id="wheel-physical" /> Physical (B/P/S)</label>
+            <label class="check-item"><input type="checkbox" id="wheel-psychic" /> Psychic</label>
+            <label class="check-item"><input type="checkbox" id="wheel-radiant" /> Radiant</label>
+            <label class="check-item"><input type="checkbox" id="wheel-thunder" /> Thunder</label>
           </div>
         </div>
 
@@ -1574,6 +1616,38 @@ main {
     { min: 225, label: '3:45', hint: 'Hard stop · wrap' },
   ];
 
+  /** Apostle rotating immunities — ENEMY_STAT_BLOCKS.md */
+  const WHEEL_TYPES = [
+    { id: 'acid', label: 'Acid' },
+    { id: 'fire', label: 'Fire' },
+    { id: 'force', label: 'Force' },
+    { id: 'lightning', label: 'Lightning' },
+    { id: 'physical', label: 'Physical (B/P/S)' },
+    { id: 'psychic', label: 'Psychic' },
+    { id: 'radiant', label: 'Radiant' },
+    { id: 'thunder', label: 'Thunder' },
+  ];
+
+  const WHEEL_TYPE_IDS = WHEEL_TYPES.map((t) => t.id);
+
+  function normalizeApostleWheel(wheel) {
+    if (!Array.isArray(wheel)) return [];
+    const out = [];
+    wheel.forEach((entry) => {
+      const id = String(entry || '')
+        .toLowerCase()
+        .trim();
+      if (!WHEEL_TYPE_IDS.includes(id) || out.includes(id)) return;
+      out.push(id);
+    });
+    return out.slice(0, 3);
+  }
+
+  function wheelLabel(id) {
+    const t = WHEEL_TYPES.find((x) => x.id === id);
+    return t ? t.label : id;
+  }
+
   function defaultState() {
     return {
       phase: 1,
@@ -1605,7 +1679,7 @@ main {
       apostleHp: 580,
       apostleLr: 3,
       apostleBloodied: false,
-      apostleWheel: ['', '', ''],
+      apostleWheel: [],
       sessionStart: Date.now(),
       timerPaused: false,
       timerPauseStart: null,
@@ -1721,7 +1795,7 @@ main {
           east: { ...base.anchors.east, ...((saved.anchors && saved.anchors.east) || {}) },
           skull: { ...base.anchors.skull, ...((saved.anchors && saved.anchors.skull) || {}) },
         },
-        apostleWheel: Array.isArray(saved.apostleWheel) ? saved.apostleWheel : base.apostleWheel,
+        apostleWheel: normalizeApostleWheel(saved.apostleWheel),
         timerFired: Array.isArray(saved.timerFired) ? saved.timerFired : base.timerFired,
       };
     } catch (e) {
@@ -1767,6 +1841,9 @@ main {
     LAIR_INIT,
     DEFAULT_ASSIGNMENT,
     TIME_MARKERS,
+    WHEEL_TYPES,
+    normalizeApostleWheel,
+    wheelLabel,
     timerElapsedMs,
     timerSegment,
     timerNextMarker,
@@ -2813,11 +2890,23 @@ main {
     setEl($('#apostle-on'), (el) => {
       el.checked = state.apostleOnMat;
     });
-    const wheel = Array.isArray(state.apostleWheel) ? state.apostleWheel : ['', '', ''];
-    wheel.forEach((v, i) => {
-      setEl($(`#wheel-${i}`), (el) => {
-        el.value = v;
+    const wheel = G.normalizeApostleWheel(state.apostleWheel);
+    G.WHEEL_TYPES.forEach(({ id }) => {
+      setEl($(`#wheel-${id}`), (el) => {
+        el.checked = wheel.includes(id);
       });
+    });
+    setEl($('#wheel-order'), (el) => {
+      if (!wheel.length) {
+        el.textContent = 'None filed yet';
+        return;
+      }
+      el.innerHTML = wheel
+        .map(
+          (id, i) =>
+            `<span class="wheel-slot"><strong>Rot ${i + 1}</strong> ${G.wheelLabel(id)}</span>`
+        )
+        .join('');
     });
   }
 
@@ -3277,12 +3366,21 @@ main {
       return;
     }
 
-    const wheel = t.id.match(/^wheel-([0-2])$/);
-    if (wheel) {
-      const i = parseInt(wheel[1], 10);
-      const next = state.apostleWheel.slice();
-      next[i] = t.value;
+    const wheelPick = t.id.match(/^wheel-(acid|fire|force|lightning|physical|psychic|radiant|thunder)$/);
+    if (wheelPick) {
+      const type = wheelPick[1];
+      let next = G.normalizeApostleWheel(state.apostleWheel);
+      const idx = next.indexOf(type);
+      if (t.checked) {
+        if (idx === -1) {
+          if (next.length >= 3) next.shift();
+          next.push(type);
+        }
+      } else if (idx !== -1) {
+        next.splice(idx, 1);
+      }
       setState({ apostleWheel: next });
+      return;
     }
   }
 

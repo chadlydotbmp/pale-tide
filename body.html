@@ -264,11 +264,18 @@
           <div class="btn-row">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="apostle-lr-use">LR used (<span id="apostle-lr">3</span> left)</button>
           </div>
-          <p style="font-size:0.85rem;color:var(--muted);margin:12px 0 8px">Damage wheel (3 rotating immunities)</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-            <input type="text" id="wheel-0" placeholder="1" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
-            <input type="text" id="wheel-1" placeholder="2" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
-            <input type="text" id="wheel-2" placeholder="3" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+          <p style="font-size:0.78rem;color:var(--muted);margin:12px 0 6px">Fixed immune: cold · necrotic · poison</p>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Rotating wheel (max 3 · FIFO)</p>
+          <div id="wheel-order" class="wheel-order">None filed yet</div>
+          <div class="wheel-checklist">
+            <label class="check-item"><input type="checkbox" id="wheel-acid" /> Acid</label>
+            <label class="check-item"><input type="checkbox" id="wheel-fire" /> Fire</label>
+            <label class="check-item"><input type="checkbox" id="wheel-force" /> Force</label>
+            <label class="check-item"><input type="checkbox" id="wheel-lightning" /> Lightning</label>
+            <label class="check-item"><input type="checkbox" id="wheel-physical" /> Physical (B/P/S)</label>
+            <label class="check-item"><input type="checkbox" id="wheel-psychic" /> Psychic</label>
+            <label class="check-item"><input type="checkbox" id="wheel-radiant" /> Radiant</label>
+            <label class="check-item"><input type="checkbox" id="wheel-thunder" /> Thunder</label>
           </div>
         </div>
 
