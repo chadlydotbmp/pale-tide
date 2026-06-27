@@ -158,3 +158,4 @@ Copy the new `index.html` to the iPad (iCloud sync or AirDrop). After opening in
 - Works offline once loaded.
 
 Source docs: `AT_TABLE_COMBAT.md` · `ENEMY_STAT_BLOCKS.md` · `SANCTUM_CARD.md`
+# pale-tide
