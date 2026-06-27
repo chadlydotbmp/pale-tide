@@ -1,0 +1,2979 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0c0e12" />
+    <title>The Pale Tide</title>
+    <script>
+      window.PaleTideApp = {
+        _q: [],
+        tap: function (el, ev) {
+          if (window.PaleTideApp._go) {
+            window.PaleTideApp._go(el, ev || window.event);
+          } else {
+            window.PaleTideApp._q.push([el, ev || window.event]);
+          }
+        },
+      };
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          if (!document.documentElement.getAttribute('data-app')) {
+            var w = document.getElementById('boot-warn');
+            if (w) w.style.display = 'block';
+          }
+        }, 2000);
+      });
+    </script>
+    <style>
+/* iPad 7th gen · 10.2" · touch-first · Safari */
+:root {
+  --bg: #0c0e12;
+  --surface: #161a22;
+  --surface2: #1e2430;
+  --border: #2a3344;
+  --text: #e8eaef;
+  --muted: #8b95a8;
+  --accent: #6b8cae;
+  --accent-dim: #3d5268;
+  --danger: #c45c5c;
+  --warn: #c9a227;
+  --ok: #5a9a6e;
+  --ritual: #7b6ba8;
+  --breach: #a86b6b;
+  --touch: 48px;
+  --radius: 12px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 17px;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: var(--safe-top) 0 calc(72px + var(--safe-bottom));
+  overscroll-behavior: none;
+  user-select: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: var(--radius);
+  min-height: var(--touch);
+  padding: 0 16px;
+  touch-action: manipulation;
+}
+
+button:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+button.primary {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+button.ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+button:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+input[type='number'] {
+  font: inherit;
+  width: 4.5rem;
+  min-height: var(--touch);
+  padding: 0 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+header.app-header {
+  position: sticky;
+  top: var(--safe-top);
+  z-index: 50;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+
+header.app-header h1 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+html[data-app='pale-tide-app-ok-v3'] header.app-header h1::after {
+  content: ' · live';
+  color: var(--ok);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+header .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface2);
+  font-variant-numeric: tabular-nums;
+}
+
+.chip.phase-3 {
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.chip.pulse-on {
+  border: 1px solid var(--warn);
+  color: var(--warn);
+}
+
+main {
+  padding: 12px 16px;
+  max-width: none;
+  margin: 0;
+}
+
+.combat-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.combat-layout.hidden,
+#combat-layout.hidden {
+  display: none !important;
+}
+
+.init-rail {
+  flex: 0 0 40%;
+  width: 40%;
+  min-width: 280px;
+  max-width: 400px;
+  position: sticky;
+  top: 8px;
+  align-self: flex-start;
+  max-height: calc(100vh - var(--safe-top) - 80px - var(--safe-bottom) - 24px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 0;
+  padding: 12px;
+}
+
+.phase-rail {
+  flex: 1;
+  min-width: 0;
+}
+
+.phase-rail .tab-panel {
+  margin-bottom: 0;
+}
+
+.phase-rail .tab-panel .panel:last-child {
+  margin-bottom: 0;
+}
+
+.lair-block {
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+}
+
+.lair-block h2 {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.init-rail .btn-row.init-actions {
+  margin-top: 10px;
+}
+
+.init-rail .btn-row.init-actions button {
+  font-size: 0.78rem;
+  padding: 0 10px;
+  min-height: 42px;
+}
+
+.init-rail .shuffle-bar {
+  margin-bottom: 8px;
+}
+
+.init-rail .shuffle-bar button {
+  min-width: 0;
+  padding: 0 12px;
+  font-size: 0.82rem;
+}
+
+.init-rail .reminder-panel {
+  font-size: 0.82rem;
+  padding: 10px;
+}
+
+.init-rail .init-ref-strip {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 700px) {
+  .combat-layout {
+    flex-direction: column;
+  }
+
+  .init-rail {
+    width: 100%;
+    max-width: none;
+    position: relative;
+    max-height: none;
+  }
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.clock-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.clock {
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  text-align: center;
+}
+
+.clock .label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.clock .value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.clock.ritual .value {
+  color: var(--ritual);
+}
+
+.clock.breach .value {
+  color: var(--breach);
+}
+
+.clock .max {
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.breach-pips {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.breach-pip {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--breach);
+  background: transparent;
+}
+
+.breach-pip.filled {
+  background: var(--breach);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-row button {
+  flex: 1;
+  min-width: calc(50% - 4px);
+  font-size: 0.88rem;
+}
+
+.init-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.init-row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  border: 2px solid transparent;
+}
+
+.init-row.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.init-row.lair {
+  border-style: dashed;
+}
+
+.init-count {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.init-info .name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.init-info .units {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.shuffle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+
+.shuffle-bar .d5 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.pylon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pylon-card {
+  padding: 14px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+}
+
+.pylon-card.destroyed {
+  opacity: 0.5;
+}
+
+.pylon-card h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.bar-track {
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s;
+}
+
+.bar-fill.stone {
+  background: var(--warn);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper button {
+  width: var(--touch);
+  min-width: var(--touch);
+  padding: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--safe-bottom);
+}
+
+.tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 8px 4px;
+  background: transparent;
+  border-radius: 0;
+  font-size: 0.65rem;
+  color: var(--muted);
+  border: none;
+}
+
+.tab-btn .icon {
+  font-size: 1.35rem;
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  background: var(--surface2);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.check-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  min-height: var(--touch);
+}
+
+.check-item input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+.track-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.dot.win {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+}
+
+.dot.fail {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.gate-banner {
+  padding: 14px;
+  border-radius: var(--radius);
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.gate-banner.locked {
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+}
+
+.gate-banner.open {
+  background: #1a2e1a;
+  border: 1px solid var(--ok);
+  color: var(--ok);
+}
+
+.gate-tracker {
+  margin-bottom: 12px;
+}
+
+.gate-tracker .gate-banner {
+  margin-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.gate-info {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.clocks-panel {
+  margin-bottom: 12px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: calc(16px + var(--safe-bottom));
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal h3 {
+  margin: 0 0 12px;
+}
+
+.modal .btn-row button {
+  min-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .clock-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .btn-row button {
+    min-width: calc(33% - 6px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  header.app-header {
+    position: relative;
+  }
+
+  body {
+    padding-bottom: calc(56px + var(--safe-bottom));
+  }
+}
+
+/* Initiative reminders */
+.init-ref-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.init-ref-chip {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--surface2);
+  font-variant-numeric: tabular-nums;
+}
+
+.init-ref-chip strong {
+  color: var(--accent);
+}
+
+.reminder-panel {
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.reminder-panel.empty {
+  border-color: var(--border);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.reminder-panel h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.reminder-panel ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.reminder-panel .la-block {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.reminder-panel .la-block h4 {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warn);
+}
+
+.reminder-panel .la-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.init-row .reminder-hint {
+  grid-column: 1 / -1;
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.4;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.init-row.active .reminder-hint {
+  color: var(--text);
+}
+
+.lair-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.lair-card {
+  padding: 12px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  text-align: left;
+  min-height: auto;
+  width: 100%;
+}
+
+.lair-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.lair-card .lair-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.lair-card .lair-detail {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.la-counter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.la-counter button {
+  min-height: 36px;
+  min-width: 36px;
+  padding: 0;
+}
+
+/* Bestiary */
+.monster-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.filter-chip {
+  font-size: 0.78rem;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  min-height: 36px;
+}
+
+.filter-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.monster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.monster-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.monster-card.open {
+  border-color: var(--accent);
+}
+
+.monster-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: start;
+  padding: 14px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  min-height: auto;
+}
+
+.monster-head:active {
+  background: var(--bg);
+}
+
+.monster-head .title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.monster-head .sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.monster-head .meta-row {
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-top: 6px;
+}
+
+.monster-head .chevron {
+  font-size: 1.2rem;
+  color: var(--muted);
+  padding-top: 2px;
+}
+
+.monster-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.monster-card.open .monster-body {
+  display: block;
+}
+
+.stat-grid {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0;
+  font-size: 0.85rem;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 8px;
+}
+
+.stat-row dt {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.stat-row dd {
+  margin: 0;
+}
+
+.monster-section {
+  margin-top: 12px;
+}
+
+.monster-section h4 {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warn);
+}
+
+.monster-section ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.action-item {
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.action-item strong {
+  color: var(--text);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.tabs {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.phase-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+
+.phase-banner strong {
+  font-size: 1rem;
+}
+
+.phase-banner span {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.phase-banner.phase-1 {
+  background: #1a2430;
+  border-color: var(--accent-dim);
+}
+
+.phase-banner.phase-2 {
+  background: #1f1a28;
+  border-color: var(--ritual);
+}
+
+.phase-banner.phase-3 {
+  background: #2a1a1a;
+  border-color: var(--danger);
+}
+
+.phase-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.phase-list.muted {
+  color: var(--muted);
+}
+
+.phase-list li {
+  margin-bottom: 6px;
+}
+
+.phase-list li:last-child {
+  margin-bottom: 0;
+}
+
+.tab-btn .icon {
+  font-size: 1.15rem;
+}
+
+.tab-btn {
+  font-size: 0.58rem;
+}
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <div style="background:#c45c5c;color:#fff;padding:16px;text-align:center;font-size:1.1rem">
+        JavaScript is required. Use GitHub Pages (see DEPLOY.md) — not Files preview.
+      </div>
+    </noscript>
+    <div id="boot-warn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#c45c5c;color:#fff;padding:14px 16px;font-size:0.95rem;line-height:1.45">
+      <strong>App did not start.</strong> Local Files often blocks JS on iPad.
+      Use <strong>GitHub Pages</strong> (HTTPS) — see DEPLOY.md in this folder. Open in <strong>Safari</strong>, not Files preview.
+    </div>
+    <header class="app-header">
+      <h1 id="header-title">The Pale Tide</h1>
+      <div class="meta" id="meta-chips"></div>
+    </header>
+
+    <main>
+      <div id="combat-layout" class="combat-layout">
+        <aside id="init-rail" class="init-rail panel">
+          <h2>Initiative · high → low</h2>
+          <div class="init-ref-strip" id="init-ref-strip"></div>
+          <div id="reminder-panel" class="reminder-panel empty">Tap <strong>Mark</strong> on a row for turn · LA · lair reminders</div>
+          <div class="shuffle-bar">
+            <div>
+              <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase">Shuffle</div>
+              <div id="shuffle-info" style="font-size:0.88rem;margin-top:4px">Round 1 default</div>
+            </div>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-new-round">New Round</button>
+          </div>
+          <div class="init-list" id="init-list"></div>
+          <div class="lair-block">
+            <h2>Lair @ 20 · pick one</h2>
+            <div class="lair-grid" id="lair-quick-ref"></div>
+          </div>
+          <div class="btn-row init-actions">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-shuffle-preview">Re-roll shuffle</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-on">PULSE on</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-off">PULSE off</button>
+          </div>
+        </aside>
+
+        <div id="phase-rail" class="phase-rail">
+          <div class="panel clocks-panel">
+            <h2>Clocks</h2>
+            <div class="clock-row">
+              <div class="clock ritual">
+                <div class="label">Ritual</div>
+                <div class="value"><span id="ritual-val">0</span><span class="max">/20</span></div>
+                <p id="ritual-stop" class="hidden" style="font-size:0.75rem;color:var(--warn);margin:8px 0 0">Ticks stopped</p>
+              </div>
+              <div class="clock breach">
+                <div class="label">Breach</div>
+                <div class="value"><span id="breach-val">0</span><span class="max">/6</span></div>
+                <div class="breach-pips" id="breach-pips"></div>
+              </div>
+            </div>
+            <p id="g-info" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:12px 0 0"></p>
+            <p id="pylon-ac" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:4px 0 0"></p>
+            <div class="btn-row">
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-plus">Ritual +1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-fed">Fed horde +1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-minus">Ritual −1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-plus">Breach +1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-minus">Breach −1</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-pylon">Pylon down −2</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-knight">Knight kill −1</button>
+            </div>
+          </div>
+
+      <!-- PHASE 1 — The Tide (~0:05–0:50) -->
+      <section class="tab-panel" data-tab="phase1">
+        <div class="gate-tracker">
+          <div id="gate-banner" class="gate-banner locked">GATE LOCKED</div>
+          <p id="gate-info" class="gate-info">Road spawns only · Lane + Gate fronts · Breach = road lost</p>
+        </div>
+
+        <div class="phase-banner phase-1">
+          <strong>Phase 1 · The Tide</strong>
+          <span>0:05–0:50 · Gate LOCKED · Gate + Lane</span>
+        </div>
+
+        <div class="panel">
+          <h2>Fronts · R1</h2>
+          <ul class="phase-list">
+            <li><strong>Gate</strong> — open iron · Brussel within 15 ft · hold Breach</li>
+            <li><strong>Lane</strong> — ring + NE column · R1 only while locked</li>
+            <li>Road spawns only · hordes 20 ft · graves silent · no pylons</li>
+            <li>Lane empty EOR → Breach +1 · all 5 on Gate → Breach +2</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Gate opens → Phase 2</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Same round: place pylons · G+0 pulse · re-split Gate · Sanctum · Crown's Edge</p>
+          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-open-gate" style="width:100%">Open gate (G+0) → go to Phase 2</button>
+        </div>
+
+        <div class="panel">
+          <h2>EOR · Phase 1</h2>
+          <ul class="phase-list muted">
+            <li>Ritual +1 (+ fed hordes max +2 after R2)</li>
+            <li>Knights R2 · Hood reveal ≤2 bodies · end Horde slot</li>
+            <li>Buy-down: knight kill −1 Ritual</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PHASE 2 — The Ledger (~0:50–2:00) -->
+      <section class="tab-panel hidden" data-tab="phase2">
+        <div class="phase-banner phase-2">
+          <strong>Phase 2 · The Ledger</strong>
+          <span>0:50–2:00 · Gate OPEN · 3 fronts</span>
+        </div>
+
+        <div class="panel">
+          <h2>Fronts</h2>
+          <ul class="phase-list">
+            <li><strong>Gate</strong> — Outer mouth · Task 2 Breach</li>
+            <li><strong>Sanctum</strong> — Inner · Task 1 · stop the count</li>
+            <li><strong>Crown's Edge</strong> — pylons · rim anchors · Task 3</li>
+            <li>Sanctum empty G+3 & G+4 → inner opposed +2</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Inner track</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">3 wins before 2 failures = Ritual −1 (max 3)</p>
+          <div style="text-align:center;margin-bottom:8px">
+            <span style="color:var(--muted);font-size:0.8rem">Wins</span>
+            <div class="track-dots" id="win-dots"></div>
+            <span style="color:var(--muted);font-size:0.8rem">Failures</span>
+            <div class="track-dots" id="fail-dots"></div>
+          </div>
+          <p style="text-align:center;font-size:0.85rem">Buy-downs earned: <strong id="inner-buy">0</strong>/3</p>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-inner-win">+ Win</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-inner-fail">+ Failure</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-inner">Apply −1 Ritual</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-anchor">Anchor bind −1</button>
+          </div>
+          <label class="check-item" style="margin-top:12px"><input type="checkbox" id="woman-friendly" /> Woman friendly → neutral banshee (Ph 3)</label>
+        </div>
+
+        <div class="panel">
+          <h2>Sanctum · at table</h2>
+          <ul class="phase-list muted">
+            <li>Leader + Keeper: Time Armour — parley only Ph 1–2</li>
+            <li>Attack them: backlash · +1 inner fail · Ritual +1</li>
+            <li>Disrupt counting: Insight DC 26 → Ritual −1</li>
+            <li>G+4: push Counting House · crypt · parley</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Rim pylons</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Field AC 25 · 100 HP · Stone 90 HP · Init 20: +d100 shield</p>
+          <div class="pylon-grid">
+            <div class="pylon-card" id="pylon-a">
+              <h3>Pylon A</h3>
+              <div style="font-size:0.78rem;color:var(--muted)">Shield <span id="pylon-a-shield-val">100</span></div>
+              <div class="bar-track"><div class="bar-fill" id="pylon-a-shield" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-shield-minus">−</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-shield-plus">+10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-regen">+d100</button>
+              </div>
+              <div style="font-size:0.78rem;color:var(--muted);margin-top:10px">Stone <span id="pylon-a-stone-val">90</span></div>
+              <div class="bar-track"><div class="bar-fill stone" id="pylon-a-stone" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="a-stone-minus">−10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="a-destroy">Destroyed</button>
+              </div>
+            </div>
+            <div class="pylon-card" id="pylon-b">
+              <h3>Pylon B</h3>
+              <div style="font-size:0.78rem;color:var(--muted)">Shield <span id="pylon-b-shield-val">100</span></div>
+              <div class="bar-track"><div class="bar-fill" id="pylon-b-shield" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-shield-minus">−</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-shield-plus">+10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-regen">+d100</button>
+              </div>
+              <div style="font-size:0.78rem;color:var(--muted);margin-top:10px">Stone <span id="pylon-b-stone-val">90</span></div>
+              <div class="bar-track"><div class="bar-fill stone" id="pylon-b-stone" style="width:100%"></div></div>
+              <div class="stepper">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="b-stone-minus">−10</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="b-destroy">Destroyed</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Grave churn</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Cumulative Perception · start 25 · pylons up only</p>
+          <div style="text-align:center;font-size:2rem;font-weight:700" id="grave-val">25</div>
+          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="grave-plus" style="width:100%;margin-top:8px">+ Perception roll</button>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="check-item"><input type="checkbox" id="tier-t25" disabled checked /> 25 — not all form ranks</label>
+            <label class="check-item"><input type="checkbox" id="tier-t50" disabled /> 50 — hiding / running</label>
+            <label class="check-item"><input type="checkbox" id="tier-t75" disabled /> 75 — living movement</label>
+            <label class="check-item"><input type="checkbox" id="tier-t100" disabled /> 100 — avoiding gate · crystals</label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Rim anchors</h2>
+          <label class="check-item"><input type="checkbox" id="rim-rite" /> Rim Rite known</label>
+          <label class="check-item"><input type="checkbox" id="anchor-north-loc" /> North row · located</label>
+          <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> North row · bound (−1 Ritual)</label>
+          <label class="check-item"><input type="checkbox" id="anchor-east-loc" /> East row · located</label>
+          <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> East row · bound (−1 Ritual)</label>
+          <label class="check-item"><input type="checkbox" id="anchor-skull-loc" /> Skull pits · located</label>
+          <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Skull pits · bound (−1 Ritual)</label>
+        </div>
+
+        <div class="panel">
+          <h2>→ Phase 3 (~2:15)</h2>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Break 2:00–2:15 · then Time Collapse</p>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-break">Mark break @ 2:00</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-phase-3">Time Collapse → Phase 3</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PHASE 3 — The Apostle (~2:15–3:45) -->
+      <section class="tab-panel hidden" data-tab="phase3">
+        <div class="phase-banner phase-3">
+          <strong>Phase 3 · The Apostle</strong>
+          <span>2:15–3:45 · Dismissal at vortex threshold</span>
+        </div>
+
+        <div class="panel">
+          <h2>Time Collapse</h2>
+          <ul class="phase-list muted">
+            <li>Leader + Keeper → liches · woman → banshee (unless friendly)</li>
+            <li>Inner fence OFF · Apostle from vortex · Ritual ticks stop on mat</li>
+          </ul>
+          <div class="btn-row" style="margin-top:12px">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Apostle of Myrkul</h2>
+          <label class="check-item"><input type="checkbox" id="apostle-on" /> On mat · Ritual ticks stop</label>
+          <label class="check-item"><input type="checkbox" id="apostle-bloodied" /> Bloodied (≤290)</label>
+          <div class="stepper" style="margin-top:12px;justify-content:center">
+            <span style="color:var(--muted);margin-right:8px">HP</span>
+            <input type="number" id="apostle-hp" min="0" max="580" value="580" />
+            <span style="color:var(--muted);margin-left:8px">/ 580</span>
+          </div>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="apostle-lr-use">LR used (<span id="apostle-lr">3</span> left)</button>
+          </div>
+          <p style="font-size:0.85rem;color:var(--muted);margin:12px 0 8px">Damage wheel (3 rotating immunities)</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <input type="text" id="wheel-0" placeholder="1" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+            <input type="text" id="wheel-1" placeholder="2" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+            <input type="text" id="wheel-2" placeholder="3" maxlength="12" style="width:100%;min-height:44px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)" />
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Dismissal · ~3:15</h2>
+          <ul class="phase-list">
+            <li>Apostle out + (bloodied OR both pylons down) at vortex threshold</li>
+            <li>Brussel adjacent for step 2 · Religion/Arcana DC 22 each step</li>
+            <li><strong>Win:</strong> Dismissal · 0 HP</li>
+            <li><strong>Loss:</strong> 2 PCs dead OR Breach 6 + Apostle at 3:45</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Phase 3 spawns</h2>
+          <ul class="phase-list muted">
+            <li>Batch 3: ghosts · banshee (neutral if woman friendly)</li>
+            <li>Batch 5: liches · Apostle · LA 3/4 bloodied</li>
+            <li>Apostle +30 HP init 20 if any pylon intact</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h2>Session</h2>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="btn-reset">Reset encounter</button>
+          </div>
+        </div>
+      </section>
+
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <section class="tab-panel hidden" data-tab="bestiary">
+        <div class="panel" style="padding-bottom:8px">
+          <h2>Stat blocks</h2>
+          <p style="font-size:0.82rem;color:var(--muted);margin:0 0 12px">Tap a creature for full stats · actions · specials · LA</p>
+          <div class="monster-filters" id="monster-filters"></div>
+        </div>
+        <div class="monster-list" id="monster-list"></div>
+      </section>
+    </main>
+
+    <nav class="tabs" aria-label="Main">
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn active" data-tab="phase1"><span class="icon">🌊</span>Ph 1</button>
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn" data-tab="phase2"><span class="icon">📒</span>Ph 2</button>
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn" data-tab="phase3"><span class="icon">💀</span>Ph 3</button>
+      <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn" data-tab="bestiary"><span class="icon">📖</span>Stats</button>
+    </nav>
+    <script>
+/* The Pale Tide — game state & rules (no build step) */
+(function (global) {
+  const STORAGE_KEY = 'pale-tide-v1';
+
+  const BATCHES = {
+    1: { name: 'Horde', emoji: '🧟', units: 'Hordes · hooded bodies' },
+    2: { name: 'Knights', emoji: '⚔️', units: 'Death knights' },
+    3: { name: 'Wraiths', emoji: '👻', units: 'Ghosts · banshee' },
+    4: { name: 'Hunters', emoji: '🐕', units: 'Living hoods · hounds' },
+    5: { name: 'Apex', emoji: '💀', units: 'Liches · Apostle' },
+  };
+
+  /** Slots indexed dead1..dead5; init counts fixed */
+  const SLOT_INIT = { dead1: 10, dead2: 31, dead3: 16, dead4: 19, dead5: 25 };
+  const SLOT_ORDER = ['dead2', 'dead5', 'dead4', 'dead3', 'dead1']; // high → low
+  const LAIR_INIT = 20;
+
+  const DEFAULT_ASSIGNMENT = { dead1: 1, dead2: 2, dead3: 3, dead4: 4, dead5: 5 };
+
+  function defaultState() {
+    return {
+      phase: 1,
+      round: 1,
+      gateRound: null,
+      gateOpen: false,
+      pulseOn: false,
+      ritual: 0,
+      ritualStopped: false,
+      breach: 0,
+      fedHordesThisRound: 0,
+      assignment: { ...DEFAULT_ASSIGNMENT },
+      shuffleRoll: null,
+      pylonA: { shield: 100, stone: 90, destroyed: false },
+      pylonB: { shield: 100, stone: 90, destroyed: false },
+      graveChurn: 25,
+      graveTiers: { t25: true, t50: false, t75: false, t100: false },
+      innerWins: 0,
+      innerFails: 0,
+      innerBuydowns: 0,
+      womanFriendly: false,
+      rimRiteKnown: false,
+      anchors: {
+        north: { located: false, bound: false },
+        east: { located: false, bound: false },
+        skull: { located: false, bound: false },
+      },
+      apostleOnMat: false,
+      apostleHp: 580,
+      apostleLr: 3,
+      apostleBloodied: false,
+      apostleWheel: ['', '', ''],
+      sessionStart: Date.now(),
+      breakTaken: false,
+      activeTab: 'phase1',
+      monsterFilter: 'all',
+      monsterOpen: null,
+      turnHighlight: null,
+      lairPick: null,
+      laKnightsUsed: 0,
+      laApostleUsed: 0,
+    };
+  }
+
+  function rotateAssignment(assignment, steps) {
+    const keys = ['dead1', 'dead2', 'dead3', 'dead4', 'dead5'];
+    const batches = keys.map((k) => assignment[k]);
+    const n = batches.length;
+    const s = steps % n;
+    const rotated = [...batches.slice(n - s), ...batches.slice(0, n - s)];
+    const next = {};
+    keys.forEach((k, i) => {
+      next[k] = rotated[i];
+    });
+    return next;
+  }
+
+  function shuffle(d5) {
+    const steps = d5 === 1 ? 0 : d5 - 1;
+    return { assignment: rotateAssignment(DEFAULT_ASSIGNMENT, steps), shuffleRoll: d5 };
+  }
+
+  function nextRound(state) {
+    const d5 = Math.floor(Math.random() * 5) + 1;
+    const sh = shuffle(d5);
+    return {
+      ...state,
+      round: state.round + 1,
+      fedHordesThisRound: 0,
+      assignment:
+        state.round === 1
+          ? { ...DEFAULT_ASSIGNMENT }
+          : rotateAssignment(state.assignment, d5 === 1 ? 0 : d5 - 1),
+      shuffleRoll: state.round === 1 ? null : d5,
+      pulseOn: false,
+    };
+  }
+
+  function gTrack(state) {
+    if (!state.gateOpen || state.gateRound == null) return null;
+    return state.round - state.gateRound + 1;
+  }
+
+  function nextConeG(state) {
+    const g = gTrack(state);
+    if (g == null || g < 1) return null;
+    if (g <= 4) return 4;
+    return g % 2 === 0 ? g + 2 : g + 1;
+  }
+
+  function isConeRound(state) {
+    const g = gTrack(state);
+    return g != null && g >= 4 && (g - 4) % 2 === 0;
+  }
+
+  function resolveOrder(state) {
+    const rows = SLOT_ORDER.map((slot) => ({
+      slot,
+      init: SLOT_INIT[slot],
+      batch: state.assignment[slot],
+      ...BATCHES[state.assignment[slot]],
+    }));
+    rows.splice(2, 0, {
+      slot: 'lair',
+      init: LAIR_INIT,
+      batch: 0,
+      name: 'Lair',
+      emoji: '🌑',
+      units: 'One lair · pylon regen',
+    });
+    return rows.sort((a, b) => b.init - a.init);
+  }
+
+  function pylonAcBonus(state) {
+    const a = !state.pylonA.destroyed && state.pylonA.stone > 0;
+    const b = !state.pylonB.destroyed && state.pylonB.stone > 0;
+    if (a && b) return 5;
+    if (a || b) return 3;
+    return 0;
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultState();
+      const saved = JSON.parse(raw);
+      const base = defaultState();
+      if (saved.activeTab === 'combat') saved.activeTab = 'phase1';
+      if (saved.activeTab === 'pylons' || saved.activeTab === 'sanctum') saved.activeTab = 'phase2';
+      if (saved.activeTab === 'apostle') saved.activeTab = 'phase3';
+      return {
+        ...base,
+        ...saved,
+        assignment: { ...base.assignment, ...(saved.assignment || {}) },
+        pylonA: { ...base.pylonA, ...(saved.pylonA || {}) },
+        pylonB: { ...base.pylonB, ...(saved.pylonB || {}) },
+        graveTiers: { ...base.graveTiers, ...(saved.graveTiers || {}) },
+        anchors: {
+          north: { ...base.anchors.north, ...((saved.anchors && saved.anchors.north) || {}) },
+          east: { ...base.anchors.east, ...((saved.anchors && saved.anchors.east) || {}) },
+          skull: { ...base.anchors.skull, ...((saved.anchors && saved.anchors.skull) || {}) },
+        },
+        apostleWheel: Array.isArray(saved.apostleWheel) ? saved.apostleWheel : base.apostleWheel,
+      };
+    } catch (e) {
+      return defaultState();
+    }
+  }
+
+  function save(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function reset() {
+    localStorage.removeItem(STORAGE_KEY);
+    return defaultState();
+  }
+
+  global.PaleTide = {
+    BATCHES,
+    SLOT_INIT,
+    SLOT_ORDER,
+    LAIR_INIT,
+    DEFAULT_ASSIGNMENT,
+    defaultState,
+    rotateAssignment,
+    shuffle,
+    nextRound,
+    gTrack,
+    nextConeG,
+    isConeRound,
+    resolveOrder,
+    pylonAcBonus,
+    load,
+    save,
+    reset,
+  };
+})(window);
+/* Initiative · LA · Lair reminders — from ENEMY_STAT_BLOCKS.md */
+(function (global) {
+  const BATCH_TURN = {
+    1: {
+      title: 'Horde · Batch 1',
+      lines: [
+        'One mob turn per horde · N→S',
+        '5 attacks +8 each (+10 if Marshal within 30 ft)',
+        'Pin horde: 2 attacks → Str DC 16 grapple',
+        'Spawns enter at start of Horde slot this round',
+        'Hood reveal at ≤2 bodies · end of Horde slot',
+      ],
+      la: null,
+    },
+    2: {
+      title: 'Knights · Batch 2',
+      lines: [
+        'Turn order: Marshal → Heavy → Blade Singer',
+        'Multiattack: 3× Dread Blade +11',
+        'Hellfire Orb · Mortuary Stillness (recharge 5–6)',
+        'Parry reaction: +6 AC vs one melee hit',
+      ],
+      la: {
+        budget: '2/round · Blade Singer 3/round',
+        note: 'End of a PC turn · one headline suppression per round',
+        options: [
+          'Move — half speed, no OA',
+          'Strike — +12 longsword 2d8+6 + 2d6 nec',
+          'Command — one cluster half speed',
+          'Chill Command — Wis 21 or Charmed (non-Raging)',
+          'Bone Litany — Wis 21 or can’t extend Rage',
+          'Crown’s Weight — Wis 21 or auras off (Anax)',
+          'Skull Weight — Wis 21 or no psychic (Theokoles)',
+          'Blade Burst — Blade Singer only · 30-ft line 8d8 force Dex 18 half',
+        ],
+      },
+    },
+    3: {
+      title: 'Wraiths · Batch 3',
+      lines: [
+        'Ghosts N→S · then banshee if Phase 3',
+        'Life Drain +10 · 5d8+6 nec · max HP − damage',
+        'Soul Grit: 4 wraiths on one target or crit → Con 21 or Rage ends',
+        'Banshee friendly → neutral · no LA unless provoked',
+      ],
+      la: {
+        budget: 'Banshee 2/round · hostile only',
+        note: 'End of another creature’s turn',
+        options: [
+          'Drift — fly half speed',
+          'Touch — Corrupting Touch +10',
+          'Keening — Wis 20 or Frightened',
+          'Still Counting — Wis 21 or no healing until her next turn',
+        ],
+      },
+    },
+    4: {
+      title: 'Hunters · Batch 4',
+      lines: [
+        'Living hoods first · then grave hounds',
+        'Hood: +10 dagger×2 · venom Con 19 · Fade bonus',
+        'Hound: bite +11 2d8+6 nec×2 · Cold Howl Wis 19',
+        'Pack Takedown: both bites hit → Str 20 or Prone',
+      ],
+      la: null,
+    },
+    5: {
+      title: 'Apex · Batch 5',
+      lines: [
+        'Leader Lich → Keeper Lich → Apostle last',
+        'Lichens: 2 LA/round each · LR 2/day',
+        'Apostle: 3 LA/round · 4 when bloodied ≤290',
+      ],
+      la: {
+        budget: 'See active unit below',
+        sections: [
+          {
+            name: 'Leader Lich (2/round)',
+            options: [
+              'Cantrip — Ray of Frost',
+              'Frightening Gaze — Wis 20',
+              'Teleport — 60 ft',
+              'Bone Litany — Wis 21 vs Raging',
+            ],
+          },
+          {
+            name: 'Keeper Lich (2/round)',
+            options: [
+              'Cantrip — Chill Touch',
+              'Frightening Gaze — Wis 21',
+              'Teleport — 60 ft',
+              'Ledger’s Tally — Con 21 or conc save at disadv',
+            ],
+          },
+          {
+            name: 'Apostle (3/round · 4 bloodied)',
+            options: [
+              '1 · Swipe — Scythe attack',
+              '2 · Finger of Death — Empowered only · DC 21 · 7d8+30 nec',
+              '3 · Stare of Mortality — Con 20 or +1 Exhaustion',
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const LAIR = {
+    init: 20,
+    title: 'Lair · init 20',
+    pickOne: 'Pick ONE lair action per round',
+    extras: [
+      'Each intact pylon: +d100 shield HP (max 100)',
+      'Phase 3: Apostle +30 HP if any pylon intact',
+      'PULSE turns off after lair (if pulsing)',
+    ],
+    actions: [
+      {
+        name: 'Stillness Between Heartbeats',
+        effect: 'One Raging creature in 60 ft',
+        save: 'Con 21 or Rage ends · undead heal 2d6',
+      },
+      {
+        name: 'Grave Fog',
+        effect: 'Two 15-ft spheres heavily obscured until next init 20',
+        save: 'Start turn inside: Con 21 or 4d6 nec',
+      },
+      {
+        name: 'Negative Pulse',
+        effect: 'Raging creatures disadv on Mortuary Stillness saves this round',
+        save: '—',
+      },
+      {
+        name: 'Clutch of the Fallen',
+        effect: 'One creature on desecrated ground',
+        save: 'Str 21 or Restrained (escape 21) · no dmg before turn end → Rage ends',
+      },
+    ],
+  };
+
+  const INIT_COUNTS = [
+    { init: 31, slot: 'Dead 2', home: 'Knights' },
+    { init: 25, slot: 'Dead 5', home: 'Apex' },
+    { init: 20, slot: 'Lair', home: 'Lair action' },
+    { init: 19, slot: 'Dead 4', home: 'Hunters' },
+    { init: 16, slot: 'Dead 3', home: 'Wraiths' },
+    { init: 10, slot: 'Dead 1', home: 'Horde' },
+  ];
+
+  function reminderForSlot(state, slot) {
+    if (slot === 'lair') return { type: 'lair', ...LAIR };
+    const batch = state.assignment[slot];
+    if (!batch) return null;
+    return { type: 'batch', batch, ...BATCH_TURN[batch] };
+  }
+
+  function reminderForBatch(batch) {
+    return BATCH_TURN[batch] || null;
+  }
+
+  global.PaleTideReminders = {
+    BATCH_TURN,
+    LAIR,
+    INIT_COUNTS,
+    reminderForSlot,
+    reminderForBatch,
+  };
+})(window);
+/* Monster stat blocks — from ENEMY_STAT_BLOCKS.md */
+(function (global) {
+  const MONSTERS = [
+    {
+      id: 'horde',
+      name: 'Horde body',
+      sub: 'Zombie vanguard · minion',
+      batch: 1,
+      phases: [1, 2, 3],
+      qty: '~20 × 5',
+      cr: '—',
+      stats: [
+        ['AC', '14 (+5/+3 pylon ward)'],
+        ['HP', '1 per body'],
+        ['Speed', '20 ft (30 ft gate open)'],
+        ['Attack', '+8 reach 5 ft · 1d6+4 blud/slash'],
+        ['Marshal', '+10 if Marshal within 30 ft'],
+      ],
+      traits: [
+        'Minion: damage kills; 0 damage unaffected',
+        'Undead Fortitude (one horde only): Con 15 or drop to 1 HP once',
+        'Mob turn: 5 attacks per horde on Batch 1',
+        'AoE: 1 body dead per full die (min 1)',
+      ],
+      actions: [
+        {
+          name: 'Pinning Dead',
+          text: 'Replace 2 attacks in one horde · Str DC 16 escape · Grappled/Restrained · no escape/dmg/attack before turn end → can’t extend Rage',
+        },
+      ],
+    },
+    {
+      id: 'hooded-horde',
+      name: 'Hooded horde body',
+      sub: 'Masked minion · Pale Ward crystal',
+      batch: 1,
+      phases: [1, 2, 3],
+      qty: '~3–6',
+      cr: '—',
+      stats: [['Same as horde', '1 HP · +8 (+10 Marshal) · Batch 1']],
+      traits: [
+        'Reveal: horde ≤2 bodies · Perception DC 17 · Investigation DC 18 on corpse',
+        'Crystal: zombies within 30 ft ignore bearer unless Marshal commands',
+      ],
+      actions: [],
+      special: [
+        'Crystal object: AC 12 · HP 10 · immune nec/pois/psych · Dispel Magic DC 18 shatters',
+        'Taken/destroyed: undead within 30 ft no longer ignore figure',
+      ],
+    },
+    {
+      id: 'living-hood',
+      name: 'Living hood',
+      sub: 'Myrkul agent · living · Batch 4',
+      batch: 4,
+      phases: [1, 2, 3],
+      qty: '~1–3',
+      cr: '~8',
+      stats: [
+        ['AC', '16'],
+        ['HP', '98'],
+        ['Speed', '40 ft · Init +6'],
+        ['Saves', 'Dex +9 · Con +8'],
+        ['Skills', 'Stealth +9 · Perception +7'],
+      ],
+      traits: ['Pale Ward crystal', 'Slip the Dead: move through zombie spaces'],
+      actions: [
+        {
+          name: 'Greenglass Dagger ×2',
+          text: '+10 · 1d6+5 pierce + venom Con DC 19 or Poisoned until hood’s next turn',
+        },
+        {
+          name: 'Fade into the Column (Bonus)',
+          text: 'Dash or Disengage',
+        },
+      ],
+      special: [
+        'Targets Brussel if exposed (adv if no PC within 15 ft)',
+        'Flees at half HP · grave spawns may hide/run without engaging',
+      ],
+    },
+    {
+      id: 'grave-hound',
+      name: 'Grave hound',
+      sub: 'Undead ghost dog · Batch 4',
+      batch: 4,
+      phases: [1, 2, 3],
+      qty: '2',
+      cr: '~10',
+      stats: [
+        ['AC', '19 (24/22 pylon)'],
+        ['HP', '148'],
+        ['Speed', '60 ft · Init +5'],
+        ['Immune', 'Blinded, Charmed, Deafened, Frightened, Stunned, Unconscious'],
+      ],
+      traits: ['Incorporeal slip', 'Turn Resistance'],
+      actions: [
+        { name: 'Bite ×2', text: '+11 · 2d8+6 necrotic' },
+        {
+          name: 'Cold Howl (Bonus)',
+          text: '30 ft · Wis DC 19 or Frightened until end of next turn · disadv if saw PC drop to 0 HP',
+        },
+        {
+          name: 'Pack Takedown',
+          text: 'Both bites hit same target → Str DC 20 or Prone',
+        },
+      ],
+      deploy: 'R2: 1 · R4+: 2 if Gate thin · Brussel → casters → flank',
+    },
+    {
+      id: 'ghost',
+      name: 'Ghost',
+      sub: 'Wraith dial · Batch 3',
+      batch: 3,
+      phases: [1, 2, 3],
+      qty: '7',
+      cr: '~10',
+      stats: [
+        ['AC', '15 (20/18 pylon)'],
+        ['HP', '142'],
+        ['Speed', '5 ft · fly 60 hover · Init +5'],
+        ['Resist', 'Acid, B/P/S, Cold, Fire'],
+        ['Immune', 'Necrotic, Poison + conditions'],
+      ],
+      traits: ['Incorporeal Movement', 'Sunlight Sensitivity', 'Turn Resistance'],
+      actions: [
+        {
+          name: 'Life Drain',
+          text: '+10 · 5d8+6 necrotic · max HP − damage dealt',
+        },
+        {
+          name: 'Soul Grit',
+          text: 'Crit or 4 wraiths on one target in a round · Raging: Con DC 21 or Rage ends + expend 1 use',
+        },
+      ],
+      deploy: 'R4: 2 skull pits · Ph3: +3–5 rim · peel Theokoles or Acerian on Tile G',
+    },
+    {
+      id: 'death-knight',
+      name: 'Death knight',
+      sub: '2024 MM + encounter · Batch 2',
+      batch: 2,
+      phases: [1, 2, 3],
+      qty: '3',
+      cr: '17',
+      stats: [
+        ['AC', '20 (25/23 pylon) · Blade Singer 21'],
+        ['HP', '199'],
+        ['Speed', '30 ft · Init +12'],
+        ['Saves', 'Wis +9 · Dex +6 · Con +5'],
+        ['Immune', 'Necrotic, Poison · Exhaustion, Frightened, Poisoned'],
+      ],
+      traits: [
+        'Legendary Resistance 3/day',
+        'Magic Resistance',
+        'Marshal Undead: undead 60 ft adv attacks/saves',
+        'Turn Resistance',
+        'Parry reaction: +6 AC vs one melee hit',
+      ],
+      actions: [
+        { name: 'Multiattack', text: '3× Dread Blade +11 · 2d6+5 slash + 3d8 nec' },
+        {
+          name: 'Hellfire Orb (Recharge 5–6)',
+          text: 'Dex DC 18 · 20-ft radius 120 ft · 10d6 fire + 10d6 nec half',
+        },
+        {
+          name: 'Spellcasting DC 18',
+          text: 'At will: Command, Phantom Steed · 2/day: Destructive Wave (nec), Dispel Magic',
+        },
+        {
+          name: 'Mortuary Stillness (Recharge 5–6)',
+          text: '30-ft radius Con DC 21 · fail 6d6 nec + no healing until Greater Restoration · Rage ends',
+        },
+      ],
+      legendary: [
+        'Move · half speed no OA',
+        'Strike · +12 longsword 2d8+6 + 2d6 nec',
+        'Command · one cluster half speed',
+        'Chill Command · Wis 21 or Charmed (non-Raging)',
+        'Bone Litany · Wis 21 or can’t extend Rage',
+        'Crown’s Weight · Wis 21 or auras off (Anax)',
+        'Skull Weight · Wis 21 or no psychic (Theokoles)',
+        'Blade Burst (Blade Singer LA) · 30-ft line 8d8 force Dex 18 half',
+      ],
+      variants: [
+        'Marshal R2 gate · Marshal of the Dead · hordes +10 · 2 LA/round',
+        'Heavy R6+ · Still Crown Standard · auras suppressed 30 ft · Thunderous Rebuke 60-ft line Dex 21 or 8d6 thunder + Stunned',
+        'Blade Singer rim R4+ · AC+1 · +1 blade · Misty Step 1/day · 3 LA/round',
+      ],
+      special: ['Kill on Outer mat → Ritual −1 (max 3) · one headline LA/round'],
+    },
+    {
+      id: 'leader-lich',
+      name: 'Leader lich',
+      sub: 'Phase 3 · Batch 5 · Counting House',
+      batch: 5,
+      phases: [3],
+      qty: '1',
+      cr: '21→enc',
+      stats: [
+        ['AC', '18'],
+        ['HP', '240'],
+        ['Saves', 'Dex +6 · Con +10 · Int +8 · Wis +9'],
+        ['Immune', 'Necrotic, Poison'],
+        ['Traits', 'LR 2/day · Magic Resistance · Turn Resistance'],
+      ],
+      actions: [
+        {
+          name: 'Multiattack',
+          text: 'Paralyzing Touch + Dread Blade',
+        },
+        {
+          name: 'Paralyzing Touch',
+          text: '+10 · 3d6 cold · Paralyzed Con DC 20 end of turn',
+        },
+        { name: 'Dread Blade', text: '+12 · 2d8+6 slash + 3d8 nec' },
+        {
+          name: 'Spellcasting DC 20',
+          text: 'At will: Mage Hand, Ray of Frost · 3/day: Blight, Counterspell, Dimension Door · 1/day: Cloudkill',
+        },
+      ],
+      legendary: [
+        'Cantrip · Ray of Frost',
+        'Frightening Gaze · Wis DC 20',
+        'Teleport 60 ft',
+        'Bone Litany · Wis DC 21 vs Raging',
+      ],
+    },
+    {
+      id: 'keeper-lich',
+      name: 'Ledger Keeper lich',
+      sub: 'Phase 3 · Batch 5',
+      batch: 5,
+      phases: [3],
+      qty: '1',
+      cr: '21→enc',
+      stats: [
+        ['AC', '17'],
+        ['HP', '200'],
+        ['Saves', 'Dex +5 · Con +9 · Int +9 · Wis +10'],
+        ['Immune', 'Necrotic, Poison'],
+        ['Traits', 'LR 2/day · Magic Resistance · Turn Resistance'],
+      ],
+      actions: [
+        {
+          name: 'Multiattack',
+          text: '2× Paralyzing Touch +9 · 3d6 cold · Paralyzed Con DC 21',
+        },
+        {
+          name: 'Spellcasting DC 21',
+          text: 'At will: Mage Hand, Chill Touch · 3/day: Counterspell, Dispel Magic, Hold Monster, Silence · 1/day: Finger of Death',
+        },
+      ],
+      legendary: [
+        'Cantrip · Chill Touch',
+        'Frightening Gaze · Wis DC 21',
+        'Teleport 60 ft',
+        'Ledger’s Tally · Con DC 21 or concentration save at disadv',
+      ],
+    },
+    {
+      id: 'banshee',
+      name: 'Weeping woman · banshee',
+      sub: 'Phase 3 · Batch 3 · Lower',
+      batch: 3,
+      phases: [3],
+      qty: '1',
+      cr: '13',
+      stats: [
+        ['AC', '16'],
+        ['HP', '178'],
+        ['Speed', '5 ft · fly 60 hover · Init +4'],
+        ['Saves', 'Wis +9 · Cha +11'],
+        ['Resist', 'Acid, B/P/S, Fire, Lightning, Thunder'],
+        ['Immune', 'Cold, Necrotic, Poison + many conditions'],
+      ],
+      traits: [
+        'Detect Life 1 mile',
+        'Incorporeal Movement',
+        'LR 1/day · Turn Resistance',
+        'Counted in the Ledger: first dmg/round Con DC 21 or disadv vs Wail/Horrify',
+      ],
+      actions: [
+        { name: 'Multiattack', text: '2× Corrupting Touch + Horrify' },
+        { name: 'Corrupting Touch', text: '+10 · 3d8+6 necrotic' },
+        {
+          name: 'Horrify',
+          text: 'Wis DC 20 · 60 ft · Frightened until her next turn · success immune 24 hr',
+        },
+        {
+          name: 'Deathly Wail (Recharge 5–6)',
+          text: 'Con DC 21 · 30 ft · 8d8 psychic · ≤100 HP after dmg → 0 HP · Norm’s Echo: adv if friendly',
+        },
+      ],
+      legendary: [
+        'Drift · fly half speed',
+        'Touch · Corrupting Touch',
+        'Keening · Wis DC 20 Frightened',
+        'Still Counting · Wis DC 21 or no healing until her next turn',
+      ],
+      special: [
+        'Friendly → neutral · no LA unless provoked',
+        'Hostile → Deathly Wail opener · peel casters / ignored her',
+      ],
+    },
+    {
+      id: 'apostle',
+      name: 'Apostle of Myrkul',
+      sub: 'Phase 3 boss · Batch 5 last',
+      batch: 5,
+      phases: [3],
+      qty: '1',
+      cr: 'apex',
+      stats: [
+        ['AC', '19'],
+        ['HP', '580 (bloodied 290)'],
+        ['Speed', 'fly 30 hover · Init +8'],
+        ['Saves', 'Str +10 · Con +10 · Wis +9 · Cha +11'],
+        ['Immune', 'Cold, Necrotic, Poison + 3 rotating wheel'],
+        ['Traits', 'LR 3/day · Grave Lord Presence 30 ft · Magical Plate −5 dmg · Turn Resistance'],
+      ],
+      actions: [
+        {
+          name: 'Multiattack',
+          text: '2× Scythe or Scythe + Call of the Damned',
+        },
+        {
+          name: 'Scythe of Reaping',
+          text: '+12 reach 15 ft · 2d8+6 slash + 3d8 nec · Con DC 21 or max HP − nec until long rest',
+        },
+        {
+          name: 'Call of the Damned (Recharge 5–6)',
+          text: '60 ft · Str DC 21 · fail 8d8 nec + pulled 30 ft',
+        },
+        {
+          name: 'Gaze of the Dead (Bonus)',
+          text: '60 ft below max HP · Wis DC 20 or Frightened',
+        },
+      ],
+      reactions: [
+        'Consume the Faithful: minion dies 60 ft → heal 6d8+6 · next Scythe +3d8 nec · Empowered',
+        'Dead Thoughts: on psychic damage · attacker Wis DC 23 or no psychic next turn',
+      ],
+      legendary: [
+        '1 · Swipe · Scythe',
+        '2 · Finger of Death (Empowered only) · DC 21 · 7d8+30 nec',
+        '3 · Stare of Mortality · Con DC 20 or +1 Exhaustion',
+        '3/round · 4 when bloodied',
+      ],
+      special: [
+        'Wheel: acid, fire, force, lightning, physical, psychic, radiant, thunder — FIFO on 4th type',
+        'Arrives: Ritual 20 · both pylons down · clock ≥ 2:15',
+      ],
+    },
+    {
+      id: 'leader-npc',
+      name: 'The Leader',
+      sub: 'Phases 1–2 · Time Armour · no stat block',
+      batch: null,
+      phases: [1, 2],
+      qty: '1',
+      cr: '—',
+      stats: [['Time Armour', 'Cannot be damaged until Time Collapse']],
+      traits: [
+        'Parley on Counting House entry · opposed liturgy',
+        'Attack consequences: backlash · +1 inner fail · Ritual +1 · Marshal next Batch 1',
+      ],
+      actions: [],
+    },
+    {
+      id: 'keeper-npc',
+      name: 'Ledger Keeper',
+      sub: 'Phases 1–2 · Time Armour · Ritual +1/round',
+      batch: null,
+      phases: [1, 2],
+      qty: '1',
+      cr: '—',
+      stats: [
+        ['Time Armour', 'Cannot be damaged until Time Collapse'],
+        ['Bubble', 'Half cover + adv saves for reader · Ritual +1/round'],
+      ],
+      traits: [
+        'Disrupt counting: Insight DC 26 → Ritual −1 (Kilgore)',
+        'Same attack consequences as Leader',
+      ],
+      actions: [],
+    },
+    {
+      id: 'pylon',
+      name: 'Rim pylon',
+      sub: 'Object · 2 on mat when gate opens',
+      batch: null,
+      phases: [2, 3],
+      qty: '2',
+      cr: '—',
+      stats: [
+        ['Shield', 'AC 25 · HP 100 · immune nec/pois/psych · regen +d100 init 20'],
+        ['Stone', 'AC 25 · HP 90 · destroyed Ritual −2'],
+        ['Hardening', 'Both stones +5 AC Outer undead · one +3'],
+      ],
+      traits: [
+        'Ward: no teleport/flight · Misty Step/Dimension Door blocked',
+        'G+0 Wail Wis 21 · G+4+ cone 12d6 + Stillness Con 21',
+        'Null Pulse: no auras · no psychic · radiant healing halved 60 ft',
+      ],
+      actions: [],
+      special: ['Stagger ≥25 dmg since pulse → no cone · stone ≤44 → Null 30 ft only'],
+    },
+  ];
+
+  const FILTERS = [
+    { id: 'all', label: 'All' },
+    { id: '1', label: 'Batch 1' },
+    { id: '2', label: 'Batch 2' },
+    { id: '3', label: 'Batch 3' },
+    { id: '4', label: 'Batch 4' },
+    { id: '5', label: 'Batch 5' },
+    { id: 'npc', label: 'NPC' },
+    { id: 'object', label: 'Objects' },
+  ];
+
+  function filterMonsters(filterId, phase) {
+    return MONSTERS.filter((m) => {
+      if (phase && !m.phases.includes(phase)) return false;
+      if (filterId === 'all') return true;
+      if (filterId === 'npc') return m.id.endsWith('-npc');
+      if (filterId === 'object') return m.id === 'pylon';
+      return String(m.batch) === filterId;
+    });
+  }
+
+  global.PaleTideMonsters = { MONSTERS, FILTERS, filterMonsters };
+})(window);
+/* The Pale Tide — UI (iPad Safari) */
+(function () {
+  const APP_OK = 'pale-tide-app-ok-v3';
+  const BUILD = '2026-06-27';
+
+  function bootError(msg) {
+    let bar = document.getElementById('boot-error');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'boot-error';
+      bar.style.cssText =
+        'position:fixed;top:0;left:0;right:0;z-index:9999;background:#c45c5c;color:#fff;padding:12px 16px;font-size:14px;line-height:1.4';
+      document.body.appendChild(bar);
+    }
+    bar.textContent = msg;
+  }
+
+  if (!window.PaleTide || !window.PaleTideReminders || !window.PaleTideMonsters) {
+    bootError('App failed to load — re-copy index.html or use serve.sh on your Mac.');
+    return;
+  }
+
+  const G = window.PaleTide;
+  const R = window.PaleTideReminders;
+  const M = window.PaleTideMonsters;
+  let state = G.load();
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  function setEl(el, fn) {
+    if (el) fn(el);
+  }
+
+  function commit() {
+    G.save(state);
+    render();
+  }
+
+  function safe(name, fn) {
+    try {
+      fn();
+    } catch (err) {
+      bootError(name + ': ' + (err && err.message ? err.message : String(err)));
+    }
+  }
+
+  function setState(patch) {
+    state = { ...state, ...patch };
+    commit();
+  }
+
+  function el(tag, cls, html) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  }
+
+  function formatElapsed(ms) {
+    const m = Math.floor(ms / 60000);
+    const h = Math.floor(m / 60);
+    const mm = m % 60;
+    return h > 0 ? `${h}:${String(mm).padStart(2, '0')}` : `${m}m`;
+  }
+
+  function milestoneHint(ms) {
+    const m = ms / 60000;
+    if (m < 5) return 'R1 — split fronts';
+    if (m < 45) return 'Phase 1 · open gate?';
+    if (m < 90) return 'G+4 cone ~1:30';
+    if (m < 120) return 'Phase 2 · Counting House';
+    if (m < 135) return 'Break @ 2:00';
+    if (m < 135 + 15) return 'Break';
+    if (m < 195) return 'Apostle ~2:15';
+    if (m < 255) return 'Dismissal ~3:15';
+    return 'Hard stop 3:45';
+  }
+
+  function renderHeader() {
+    const g = G.gTrack(state);
+    const elapsed = Date.now() - state.sessionStart;
+    $('#header-title').textContent = 'The Pale Tide';
+    $('#meta-chips').innerHTML = [
+      `<span class="chip">${BUILD}</span>`,
+      `<span class="chip">R${state.round}</span>`,
+      g != null ? `<span class="chip">G+${g - 1}${g === 1 ? ' (open)' : ''}</span>` : '',
+      state.gateOpen ? '<span class="chip">Gate OPEN</span>' : '<span class="chip">Gate LOCKED</span>',
+      state.phase >= 3 ? '<span class="chip phase-3">Phase 3</span>' : `<span class="chip">Phase ${state.phase}</span>`,
+      state.pulseOn ? '<span class="chip pulse-on">PULSE</span>' : '',
+      `<span class="chip">${formatElapsed(elapsed)} · ${milestoneHint(elapsed)}</span>`,
+    ]
+      .filter(Boolean)
+      .join('');
+  }
+
+  function renderClocks() {
+    $('#ritual-val').textContent = state.ritual;
+    $('#breach-val').textContent = state.breach;
+    $('#ritual-stop').classList.toggle('hidden', !state.ritualStopped);
+
+    const pips = $('#breach-pips');
+    pips.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+      pips.appendChild(el('span', `breach-pip${i < state.breach ? ' filled' : ''}`));
+    }
+
+    const g = G.gTrack(state);
+    const cone = G.nextConeG(state);
+    const gEl = $('#g-info');
+    const pylonEl = $('#pylon-ac');
+    if (gEl) {
+      if (g == null) {
+        gEl.classList.add('hidden');
+      } else {
+        gEl.classList.remove('hidden');
+        gEl.textContent = `G = R${state.gateRound} · next cone G+${cone}${G.isConeRound(state) ? ' ← THIS ROUND' : ''}`;
+      }
+    }
+    if (pylonEl) {
+      if (!state.gateOpen) {
+        pylonEl.classList.add('hidden');
+      } else {
+        pylonEl.classList.remove('hidden');
+        pylonEl.textContent = `Pale Ward +${G.pylonAcBonus(state)} AC on Outer undead`;
+      }
+    }
+  }
+
+  function shortHint(row) {
+    if (row.slot === 'lair') {
+      return 'Pick ONE lair · +d100/pylon · Apostle +30 if Ph3';
+    }
+    const t = R.reminderForBatch(row.batch);
+    if (!t) return '';
+    if (t.la && t.la.budget) return t.lines[0] + ' · LA: ' + t.la.budget;
+    return t.lines[0];
+  }
+
+  function renderInitRefStrip() {
+    const strip = $('#init-ref-strip');
+    strip.innerHTML = R.INIT_COUNTS.map(
+      (c) =>
+        `<span class="init-ref-chip"><strong>${c.init}</strong> ${c.home}</span>`
+    ).join('');
+  }
+
+  function renderReminderPanel() {
+    const panel = $('#reminder-panel');
+    const slot = state.turnHighlight;
+
+    if (!slot) {
+      panel.className = 'reminder-panel empty';
+      panel.innerHTML =
+        'Tap <strong>Mark</strong> on an initiative row · reminders for that batch, legendary actions, or lair (20)';
+      return;
+    }
+
+    panel.className = 'reminder-panel';
+    const info = R.reminderForSlot(state, slot);
+    if (!info) {
+      panel.className = 'reminder-panel empty';
+      panel.innerHTML = 'Unknown batch — tap <strong>Mark</strong> again or tap <strong>New Round</strong>';
+      return;
+    }
+
+    if (info.type === 'lair') {
+      const cards = info.actions
+        .map(
+          (a) => `
+        <button type="button" class="lair-card${state.lairPick === a.name ? ' selected' : ''}" data-lair="${a.name}" onclick="PaleTideApp.tap(this,event)">
+          <div class="lair-name">${a.name}</div>
+          <div class="lair-detail">${a.effect}<br><strong>Save:</strong> ${a.save}</div>
+        </button>`
+        )
+        .join('');
+      panel.innerHTML = `
+        <h3>🌑 Init 20 · Lair (one per round)</h3>
+        <ul>${info.extras.map((e) => `<li>${e}</li>`).join('')}</ul>
+        <div class="lair-grid">${cards}</div>
+        <p class="la-note" style="margin-top:10px">${info.pickOne}</p>
+      `;
+      return;
+    }
+
+    let html = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3><ul>`;
+    info.lines.forEach((line) => {
+      html += `<li>${line}</li>`;
+    });
+    html += '</ul>';
+
+    if (info.la) {
+      html += '<div class="la-block"><h4>Legendary actions</h4>';
+      html += `<p class="la-note">${info.la.note || ''} · <strong>${info.la.budget}</strong></p>`;
+      if (info.batch === 2) {
+        html += `<div class="la-counter">
+          <span>Knights LA this round:</span>
+          <button type="button" id="la-knights-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+          <strong id="la-knights-val">${state.laKnightsUsed}</strong>/2
+          <button type="button" id="la-knights-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+        </div>`;
+      }
+      if (info.batch === 5 && state.apostleOnMat) {
+        const max = state.apostleBloodied ? 4 : 3;
+        html += `<div class="la-counter">
+          <span>Apostle LA this round:</span>
+          <button type="button" id="la-apostle-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+          <strong id="la-apostle-val">${state.laApostleUsed}</strong>/${max}
+          <button type="button" id="la-apostle-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+        </div>`;
+      }
+      if (info.la.sections) {
+        info.la.sections.forEach((sec) => {
+          html += `<p class="la-note" style="margin-top:8px"><strong>${sec.name}</strong></p><ul>`;
+          sec.options.forEach((o) => {
+            html += `<li>${o}</li>`;
+          });
+          html += '</ul>';
+        });
+      } else if (info.la.options) {
+        html += '<ul>';
+        info.la.options.forEach((o) => {
+          html += `<li>${o}</li>`;
+        });
+        html += '</ul>';
+      }
+      html += '</div>';
+    }
+
+    panel.innerHTML = html;
+  }
+
+  function renderLairQuickRef() {
+    const box = $('#lair-quick-ref');
+    if (!box) return;
+    box.innerHTML = R.LAIR.actions
+      .map(
+        (a) => `
+      <button type="button" class="lair-card${state.lairPick === a.name ? ' selected' : ''}" data-lair-ref="${a.name}" onclick="PaleTideApp.tap(this,event)">
+        <div class="lair-name">${a.name}</div>
+        <div class="lair-detail">${a.effect} · ${a.save}</div>
+      </button>`
+      )
+      .join('');
+  }
+
+  function renderInitiative() {
+    const order = G.resolveOrder(state);
+    const list = $('#init-list');
+    list.innerHTML = '';
+
+    if (state.round === 1) {
+      $('#shuffle-info').textContent = 'Round 1 — default order (shuffle from R2)';
+    } else if (state.shuffleRoll != null) {
+      $('#shuffle-info').textContent = `Shuffle d5 = ${state.shuffleRoll} · rotated ${state.shuffleRoll === 1 ? 0 : state.shuffleRoll - 1} steps`;
+    } else {
+      $('#shuffle-info').textContent = 'Tap “New Round” to shuffle';
+    }
+
+    order.forEach((row) => {
+      const isActive = state.turnHighlight === row.slot;
+      const hint = isActive ? shortHint(row) : '';
+      const div = el(
+        'div',
+        `init-row${row.slot === 'lair' ? ' lair' : ''}${isActive ? ' active' : ''}`,
+        `
+        <div class="init-count">${row.init}</div>
+        <div class="init-info">
+          <div class="name">${row.emoji} ${row.name}${row.batch ? ` <span style="color:var(--muted);font-weight:400">· Batch ${row.batch}</span>` : ''}</div>
+          <div class="units">${row.units}</div>
+        </div>
+        <button type="button" class="ghost mark-turn" data-slot="${row.slot}" style="min-height:40px;padding:0 12px;font-size:0.8rem" onclick="PaleTideApp.tap(this,event)">${isActive ? '✓' : 'Mark'}</button>
+        ${hint ? `<div class="reminder-hint">${hint}</div>` : ''}
+      `
+      );
+      list.appendChild(div);
+    });
+
+  }
+
+  function renderPylons() {
+    ['A', 'B'].forEach((id) => {
+      const key = `pylon${id}`;
+      const p = state[key];
+      const low = id.toLowerCase();
+      const card = $(`#pylon-${low}`);
+      if (!card) return;
+      card.classList.toggle('destroyed', p.destroyed);
+      setEl($(`#pylon-${low}-shield`), (el) => {
+        el.style.width = `${Math.max(0, (p.shield / 100) * 100)}%`;
+      });
+      setEl($(`#pylon-${low}-stone`), (el) => {
+        el.style.width = `${Math.max(0, (p.stone / 90) * 100)}%`;
+      });
+      setEl($(`#pylon-${low}-shield-val`), (el) => {
+        el.textContent = p.shield;
+      });
+      setEl($(`#pylon-${low}-stone-val`), (el) => {
+        el.textContent = p.stone;
+      });
+    });
+  }
+
+  function renderSanctum() {
+    setEl($('#woman-friendly'), (el) => {
+      el.checked = state.womanFriendly;
+    });
+    setEl($('#rim-rite'), (el) => {
+      el.checked = state.rimRiteKnown;
+    });
+    setEl($('#inner-buy'), (el) => {
+      el.textContent = state.innerBuydowns;
+    });
+
+    const wins = $('#win-dots');
+    if (wins) {
+      wins.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        wins.appendChild(el('span', `dot${i < state.innerWins ? ' win' : ''}`, i + 1));
+      }
+    }
+    const fails = $('#fail-dots');
+    if (fails) {
+      fails.innerHTML = '';
+      for (let i = 0; i < 2; i++) {
+        fails.appendChild(el('span', `dot${i < state.innerFails ? ' fail' : ''}`, i + 1));
+      }
+    }
+
+    setEl($('#grave-val'), (el) => {
+      el.textContent = state.graveChurn;
+    });
+    ['t25', 't50', 't75', 't100'].forEach((t) => {
+      setEl($(`#tier-${t}`), (el) => {
+        el.checked = state.graveTiers[t];
+      });
+    });
+
+    ['north', 'east', 'skull'].forEach((a) => {
+      setEl($(`#anchor-${a}-loc`), (el) => {
+        el.checked = state.anchors[a].located;
+      });
+      setEl($(`#anchor-${a}-bind`), (el) => {
+        el.checked = state.anchors[a].bound;
+      });
+    });
+  }
+
+  function renderApostle() {
+    setEl($('#apostle-hp'), (el) => {
+      el.value = state.apostleHp;
+    });
+    setEl($('#apostle-lr'), (el) => {
+      el.textContent = state.apostleLr;
+    });
+    setEl($('#apostle-bloodied'), (el) => {
+      el.checked = state.apostleBloodied;
+    });
+    setEl($('#apostle-on'), (el) => {
+      el.checked = state.apostleOnMat;
+    });
+    const wheel = Array.isArray(state.apostleWheel) ? state.apostleWheel : ['', '', ''];
+    wheel.forEach((v, i) => {
+      setEl($(`#wheel-${i}`), (el) => {
+        el.value = v;
+      });
+    });
+  }
+
+  function renderGate() {
+    setEl($('#gate-banner'), (el) => {
+      el.className = `gate-banner ${state.gateOpen ? 'open' : 'locked'}`;
+      el.textContent = state.gateOpen
+        ? 'GATE OPEN · pylons live · Inner accessible'
+        : 'GATE LOCKED · road spawns only';
+    });
+    setEl($('#gate-info'), (el) => {
+      if (state.gateOpen) {
+        el.textContent = `Gate opened R${state.gateRound} · switch to Phase 2 for G-track & pylons`;
+      } else {
+        el.textContent = 'Road spawns only · Gate + Lane fronts · Breach 6 = road lost';
+      }
+    });
+  }
+
+  function monsterSection(title, items, asActions) {
+    if (!items || !items.length) return '';
+    let html = `<div class="monster-section"><h4>${title}</h4>`;
+    if (asActions) {
+      html += items
+        .map(
+          (a) =>
+            `<div class="action-item"><strong>${a.name}</strong>${typeof a === 'string' ? a : a.text}</div>`
+        )
+        .join('');
+    } else {
+      html += `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderMonsterCard(m) {
+    const open = state.monsterOpen === m.id;
+    const batchLabel =
+      m.batch != null ? `Batch ${m.batch}` : m.id === 'pylon' ? 'Object' : 'NPC';
+    const statsHtml = m.stats
+      .map(([k, v]) => `<div class="stat-row"><dt>${k}</dt><dd>${v}</dd></div>`)
+      .join('');
+
+    let body = `<div class="stat-grid">${statsHtml}</div>`;
+    body += monsterSection('Traits', m.traits, false);
+    body += monsterSection('Actions & abilities', m.actions, true);
+    body += monsterSection('Reactions', m.reactions, false);
+    body += monsterSection('Legendary actions', m.legendary, false);
+    body += monsterSection('Variants', m.variants, false);
+    body += monsterSection('Special / encounter', m.special, false);
+    if (m.deploy) {
+      body += `<div class="monster-section"><h4>Deploy</h4><p style="margin:0;font-size:0.85rem">${m.deploy}</p></div>`;
+    }
+
+    const card = el('div', `monster-card${open ? ' open' : ''}`);
+    card.innerHTML = `
+      <button type="button" class="monster-head" data-monster-id="${m.id}" onclick="PaleTideApp.tap(this,event)">
+        <div>
+          <div class="title">${m.name}</div>
+          <div class="sub">${m.sub}</div>
+          <div class="meta-row">${batchLabel} · CR ${m.cr} · Qty ${m.qty}</div>
+        </div>
+        <span class="chevron">${open ? '▼' : '▶'}</span>
+      </button>
+      <div class="monster-body">${body}</div>
+    `;
+    return card;
+  }
+
+  function renderMonsters() {
+    const filters = $('#monster-filters');
+    const list = $('#monster-list');
+    if (!filters || !list) return;
+
+    filters.innerHTML = M.FILTERS.map(
+      (f) =>
+        `<button type="button" class="filter-chip${state.monsterFilter === f.id ? ' active' : ''}" data-filter="${f.id}" onclick="PaleTideApp.tap(this,event)">${f.label}</button>`
+    ).join('');
+
+    const monsters = M.filterMonsters(state.monsterFilter, null);
+
+    list.innerHTML = '';
+    if (!monsters.length) {
+      list.innerHTML = '<p style="color:var(--muted);text-align:center;padding:24px">No creatures in this filter</p>';
+      return;
+    }
+    monsters.forEach((m) => list.appendChild(renderMonsterCard(m)));
+  }
+
+  function renderTabs() {
+    const isCombat = state.activeTab === 'phase1' || state.activeTab === 'phase2' || state.activeTab === 'phase3';
+    setEl($('#combat-layout'), (el) => {
+      el.classList.toggle('hidden', !isCombat);
+    });
+    $$('.tab-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.tab === state.activeTab);
+    });
+    $$('.tab-panel').forEach((panel) => {
+      panel.classList.toggle('hidden', panel.dataset.tab !== state.activeTab);
+    });
+  }
+
+  function render() {
+    safe('header', renderHeader);
+    safe('clocks', renderClocks);
+    safe('init-ref', renderInitRefStrip);
+    safe('reminders', renderReminderPanel);
+    safe('initiative', renderInitiative);
+    safe('lair', renderLairQuickRef);
+    safe('pylons', renderPylons);
+    safe('sanctum', renderSanctum);
+    safe('apostle', renderApostle);
+    safe('gate', renderGate);
+    safe('monsters', renderMonsters);
+    safe('tabs', renderTabs);
+  }
+
+  function tapTarget(e) {
+    var t = e.target;
+    if (t && t.nodeType === 3) t = t.parentElement;
+    if (!t || !t.closest) return null;
+    return t.closest(
+      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn'
+    );
+  }
+
+  function handleTapOnNode(node) {
+    if (!node) return;
+    if (node.dataset.tab) {
+      setState({ activeTab: node.dataset.tab });
+      return;
+    }
+
+    if (node.dataset.phase) {
+      const ph = parseInt(node.dataset.phase, 10);
+      const tab = ph === 3 ? 'phase3' : ph === 2 ? 'phase2' : 'phase1';
+      setState({ phase: ph, activeTab: tab });
+      return;
+    }
+
+    if (node.classList.contains('mark-turn')) {
+      const slot = node.dataset.slot;
+      setState({ turnHighlight: state.turnHighlight === slot ? null : slot });
+      return;
+    }
+
+    if (node.classList.contains('filter-chip')) {
+      setState({ monsterFilter: node.dataset.filter, monsterOpen: null });
+      return;
+    }
+
+    if (node.dataset.lairRef) {
+      const name = node.dataset.lairRef;
+      setState({
+        turnHighlight: 'lair',
+        lairPick: state.lairPick === name ? null : name,
+      });
+      return;
+    }
+
+    if (node.dataset.lair) {
+      setState({ lairPick: state.lairPick === node.dataset.lair ? null : node.dataset.lair });
+      return;
+    }
+
+    if (node.classList.contains('monster-head')) {
+      const id = node.dataset.monsterId;
+      setState({ monsterOpen: state.monsterOpen === id ? null : id });
+      return;
+    }
+
+    switch (node.id) {
+      case 'btn-ritual-plus':
+        if (state.ritualStopped || state.ritual >= 20) return;
+        setState({ ritual: Math.min(20, state.ritual + 1) });
+        return;
+      case 'btn-ritual-minus':
+        setState({ ritual: Math.max(0, state.ritual - 1) });
+        return;
+      case 'btn-ritual-fed': {
+        if (state.ritualStopped || state.ritual >= 20) return;
+        const add = Math.min(2 - state.fedHordesThisRound, 1);
+        if (add <= 0) return;
+        setState({
+          ritual: Math.min(20, state.ritual + add),
+          fedHordesThisRound: state.fedHordesThisRound + add,
+        });
+        return;
+      }
+      case 'btn-breach-plus':
+        setState({ breach: Math.min(6, state.breach + 1) });
+        return;
+      case 'btn-breach-minus':
+        setState({ breach: Math.max(0, state.breach - 1) });
+        return;
+      case 'btn-buy-pylon':
+        setState({ ritual: Math.max(0, state.ritual - 2) });
+        return;
+      case 'btn-buy-anchor':
+        if (state.innerBuydowns >= 3) return;
+        setState({ ritual: Math.max(0, state.ritual - 1), innerBuydowns: state.innerBuydowns + 1 });
+        return;
+      case 'btn-buy-inner':
+        if (state.innerBuydowns >= 3) return;
+        setState({ ritual: Math.max(0, state.ritual - 1), innerBuydowns: state.innerBuydowns + 1 });
+        return;
+      case 'btn-buy-knight':
+        setState({ ritual: Math.max(0, state.ritual - 1) });
+        return;
+      case 'btn-inner-win': {
+        const w = state.innerWins + 1;
+        if (w >= 3 && state.innerFails < 2) {
+          setState({
+            innerWins: 0,
+            innerFails: 0,
+            innerBuydowns: Math.min(3, state.innerBuydowns + 1),
+            ritual: Math.max(0, state.ritual - 1),
+          });
+        } else {
+          setState({ innerWins: Math.min(3, w) });
+        }
+        return;
+      }
+      case 'btn-inner-fail': {
+        const f = state.innerFails + 1;
+        if (f >= 2 && state.innerWins < 3) {
+          setState({ innerWins: 0, innerFails: 0, ritual: Math.min(20, state.ritual + 1) });
+        } else {
+          setState({ innerFails: Math.min(2, f) });
+        }
+        return;
+      }
+      case 'btn-new-round': {
+        const d5 = Math.floor(Math.random() * 5) + 1;
+        const steps = d5 === 1 ? 0 : d5 - 1;
+        setState({
+          round: state.round + 1,
+          fedHordesThisRound: 0,
+          assignment: G.rotateAssignment(state.assignment, steps),
+          shuffleRoll: d5,
+          pulseOn: false,
+          turnHighlight: null,
+          lairPick: null,
+          laKnightsUsed: 0,
+          laApostleUsed: 0,
+        });
+        return;
+      }
+      case 'btn-shuffle-preview': {
+        const d5 = Math.floor(Math.random() * 5) + 1;
+        const steps = d5 === 1 ? 0 : d5 - 1;
+        setState({
+          assignment: G.rotateAssignment(
+            state.round === 1 ? { ...G.DEFAULT_ASSIGNMENT } : state.assignment,
+            steps
+          ),
+          shuffleRoll: d5,
+        });
+        return;
+      }
+      case 'btn-pulse-on':
+        setState({ pulseOn: true });
+        return;
+      case 'btn-pulse-off':
+        setState({ pulseOn: false });
+        return;
+      case 'btn-open-gate':
+        setState({
+          gateOpen: true,
+          gateRound: state.round,
+          pulseOn: true,
+          breach: Math.min(6, state.breach + 1),
+          phase: Math.max(state.phase, 2),
+          activeTab: 'phase2',
+        });
+        return;
+      case 'btn-phase-3':
+        setState({
+          phase: 3,
+          apostleOnMat: true,
+          ritualStopped: true,
+          ritual: Math.min(state.ritual, 20),
+          activeTab: 'phase3',
+        });
+        return;
+      case 'btn-apostle-arrives':
+        setState({
+          apostleOnMat: true,
+          ritualStopped: true,
+          phase: 3,
+          ritual: 20,
+          activeTab: 'phase3',
+        });
+        return;
+      case 'a-shield-minus':
+      case 'b-shield-minus': {
+        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
+        const p = { ...state[key], shield: Math.max(0, state[key].shield - 10) };
+        setState({ [key]: p });
+        return;
+      }
+      case 'a-shield-plus':
+      case 'b-shield-plus': {
+        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
+        const p = { ...state[key], shield: Math.min(100, state[key].shield + 10) };
+        setState({ [key]: p });
+        return;
+      }
+      case 'a-stone-minus':
+      case 'b-stone-minus': {
+        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
+        const p = { ...state[key], stone: Math.max(0, state[key].stone - 10) };
+        if (p.stone === 0) p.destroyed = true;
+        setState({ [key]: p });
+        return;
+      }
+      case 'a-regen':
+      case 'b-regen': {
+        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
+        const roll = Math.floor(Math.random() * 100) + 1;
+        const p = { ...state[key], shield: Math.min(100, state[key].shield + roll) };
+        setState({ [key]: p });
+        return;
+      }
+      case 'a-destroy':
+      case 'b-destroy': {
+        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
+        setState({
+          [key]: { shield: 0, stone: 0, destroyed: true },
+          ritual: Math.max(0, state.ritual - 2),
+        });
+        return;
+      }
+      case 'grave-plus': {
+        const v = state.graveChurn + 10;
+        const tiers = { ...state.graveTiers };
+        if (v >= 50) tiers.t50 = true;
+        if (v >= 75) tiers.t75 = true;
+        if (v >= 100) tiers.t100 = true;
+        setState({ graveChurn: v, graveTiers: tiers });
+        return;
+      }
+      case 'apostle-lr-use':
+        setState({ apostleLr: Math.max(0, state.apostleLr - 1) });
+        return;
+      case 'la-knights-minus':
+        setState({ laKnightsUsed: Math.max(0, state.laKnightsUsed - 1) });
+        return;
+      case 'la-knights-plus':
+        setState({ laKnightsUsed: Math.min(3, state.laKnightsUsed + 1) });
+        return;
+      case 'la-apostle-minus':
+        setState({ laApostleUsed: Math.max(0, state.laApostleUsed - 1) });
+        return;
+      case 'la-apostle-plus':
+        setState({
+          laApostleUsed: Math.min(state.apostleBloodied ? 4 : 3, state.laApostleUsed + 1),
+        });
+        return;
+      case 'btn-reset':
+        if (confirm('Reset all encounter state? This cannot be undone.')) {
+          state = G.reset();
+          commit();
+        }
+        return;
+      case 'btn-break':
+        setState({ breakTaken: true });
+        return;
+      default:
+        break;
+    }
+  }
+
+  function handleTap(e) {
+    var node = tapTarget(e);
+    if (!node) return;
+    handleTapOnNode(node);
+  }
+
+  function publicTap(el, e) {
+    e = e || window.event;
+    if (e && e.preventDefault) e.preventDefault();
+    var node = el;
+    if (typeof el === 'string') node = document.getElementById(el);
+    if (node && node.nodeType === 3) node = node.parentElement;
+    handleTapOnNode(node);
+  }
+
+  function handleChange(e) {
+    const t = e.target;
+    if (!t || !t.id) return;
+
+    if (t.id === 'woman-friendly') {
+      setState({ womanFriendly: t.checked });
+      return;
+    }
+    if (t.id === 'rim-rite') {
+      setState({ rimRiteKnown: t.checked });
+      return;
+    }
+    if (t.id === 'apostle-on') {
+      setState({ apostleOnMat: t.checked, ritualStopped: t.checked });
+      return;
+    }
+    if (t.id === 'apostle-bloodied') {
+      setState({ apostleBloodied: t.checked });
+      return;
+    }
+    if (t.id === 'apostle-hp') {
+      const hp = parseInt(t.value, 10) || 0;
+      setState({ apostleHp: hp, apostleBloodied: hp <= 290 });
+      return;
+    }
+
+    const anchorLoc = t.id.match(/^anchor-(north|east|skull)-loc$/);
+    if (anchorLoc) {
+      const a = anchorLoc[1];
+      const anchors = { ...state.anchors, [a]: { ...state.anchors[a], located: t.checked } };
+      setState({ anchors });
+      return;
+    }
+
+    const anchorBind = t.id.match(/^anchor-(north|east|skull)-bind$/);
+    if (anchorBind) {
+      const a = anchorBind[1];
+      const anchors = { ...state.anchors, [a]: { ...state.anchors[a], bound: t.checked } };
+      const bound = t.checked;
+      setState({
+        anchors,
+        ritual: bound ? Math.max(0, state.ritual - 1) : state.ritual,
+        innerBuydowns: bound ? Math.min(3, state.innerBuydowns + 1) : state.innerBuydowns,
+      });
+      return;
+    }
+
+    const wheel = t.id.match(/^wheel-([0-2])$/);
+    if (wheel) {
+      const i = parseInt(wheel[1], 10);
+      const next = state.apostleWheel.slice();
+      next[i] = t.value;
+      setState({ apostleWheel: next });
+    }
+  }
+
+  function bindActions() {
+    window.PaleTideApp._go = publicTap;
+    window.PaleTideApp.tap = publicTap;
+    var q = window.PaleTideApp._q || [];
+    window.PaleTideApp._q = [];
+    for (var i = 0; i < q.length; i++) {
+      publicTap(q[i][0], q[i][1]);
+    }
+    document.addEventListener('click', handleTap, true);
+    document.addEventListener('change', handleChange, false);
+    document.addEventListener('input', handleChange, false);
+  }
+
+  function boot() {
+    try {
+      bindActions();
+      render();
+      document.documentElement.setAttribute('data-app', APP_OK);
+      var warn = document.getElementById('boot-warn');
+      if (warn) warn.style.display = 'none';
+      setInterval(function () {
+        safe('header', renderHeader);
+      }, 30000);
+    } catch (err) {
+      var msg = 'Startup failed: ' + (err && err.message ? err.message : String(err));
+      bootError(msg);
+      try {
+        alert('Pale Tide: ' + msg);
+      } catch (_) {}
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+    </script>
+  </body>
+</html>
