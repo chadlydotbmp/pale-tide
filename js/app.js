@@ -734,17 +734,42 @@
   }
 
   function renderApostle() {
+    const maxHp = state.apostleMaxHp || G.APOSTLE_HP_BASE;
+    const bloodiedAt = G.apostleBloodiedThreshold(maxHp);
+    const scalePct = maxHp >= G.APOSTLE_HP_RITUAL_COMPLETE ? 125 : 100;
+
     setEl($('#apostle-hp'), (el) => {
       el.value = state.apostleHp;
+      el.max = maxHp;
     });
-    setEl($('#apostle-lr'), (el) => {
-      el.textContent = state.apostleLr;
+    setEl($('#apostle-hp-max'), (el) => {
+      el.textContent = maxHp;
+    });
+    setEl($('#apostle-scale-note'), (el) => {
+      if (!state.apostleOnMat) {
+        el.textContent =
+          'Ritual 20 → physical forever (725 HP) · rim rite / early stop → temporary form claws up (580 HP)';
+        return;
+      }
+      const manifestation =
+        state.apostleManifestation ||
+        (scalePct === 125 ? 'permanent' : 'premature');
+      el.textContent =
+        manifestation === 'permanent'
+          ? 'Physical forever · ritual completed · 725 HP'
+          : 'Temporary form · ritual stopped early · claws up from the abyss · 580 HP';
     });
     setEl($('#apostle-bloodied'), (el) => {
       el.checked = state.apostleBloodied;
     });
+    setEl($('#apostle-bloodied-at'), (el) => {
+      el.textContent = `(≤${bloodiedAt})`;
+    });
     setEl($('#apostle-on'), (el) => {
       el.checked = state.apostleOnMat;
+    });
+    setEl($('#apostle-lr'), (el) => {
+      el.textContent = state.apostleLr;
     });
     const wheel = G.normalizeApostleWheel(state.apostleWheel);
     G.WHEEL_TYPES.forEach(({ id }) => {
@@ -1288,21 +1313,12 @@
         addSmashSuccess();
         return;
       case 'btn-phase-3':
-        setState({
-          phase: 3,
-          apostleOnMat: true,
-          ritualStopped: true,
-          ritual: Math.min(state.ritual, 20),
-          activeTab: 'phase3',
-        });
+        setState({ apostleOnMat: true });
         return;
       case 'btn-apostle-arrives':
         setState({
           apostleOnMat: true,
-          ritualStopped: true,
-          phase: 3,
           ritual: 20,
-          activeTab: 'phase3',
         });
         return;
       case 'a-shield-minus':
@@ -1501,7 +1517,7 @@
     }
     if (t.id === 'apostle-hp') {
       const hp = parseInt(t.value, 10) || 0;
-      setState({ apostleHp: hp, apostleBloodied: hp <= 290 });
+      setState({ apostleHp: hp, apostleBloodied: hp <= G.apostleBloodiedThreshold(state.apostleMaxHp || G.APOSTLE_HP_BASE) });
       return;
     }
 
@@ -1520,13 +1536,7 @@
       const prevBound = state.anchors[a].bound;
       if (bound === prevBound) return;
       const anchors = { ...state.anchors, [a]: { ...state.anchors[a], bound } };
-      let ritual = state.ritual;
-      if (bound && !prevBound && G.countAnchorBinds(state.anchors) < 3) {
-        ritual = Math.max(0, ritual - 1);
-      } else if (!bound && prevBound) {
-        ritual = Math.min(20, ritual + 1);
-      }
-      setState({ anchors, ritual });
+      setState({ anchors });
       return;
     }
 

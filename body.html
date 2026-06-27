@@ -375,7 +375,7 @@
             <p id="skull-targets-hint" class="skull-targets-hint hidden"></p>
             <div class="skull-pile-grid" id="skull-pile-grid"></div>
             <h3 class="consecration-sites-title">Sanctify on the map</h3>
-            <p class="consecration-sites-note">3 fixed rim locations · −1 Ritual each *(max 3)*</p>
+            <p class="consecration-sites-note">3 fixed rim locations · all 3 consecrated → <strong>−5 Ritual</strong> · count <strong>stops</strong> · Apostle <strong>claws up</strong> *(temporary form · 580 HP)*</p>
             <div class="consecration-sites">
               <div class="consecration-site" data-site="north">
                 <div class="consecration-site-head">
@@ -383,7 +383,7 @@
                   <span class="consecration-directed" id="directed-north"></span>
                 </div>
                 <label class="check-item"><input type="checkbox" id="anchor-north-loc" /> At site · ready to sanctify</label>
-                <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> Consecrated (−1 Ritual)</label>
+                <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> Consecrated</label>
               </div>
               <div class="consecration-site" data-site="east">
                 <div class="consecration-site-head">
@@ -391,7 +391,7 @@
                   <span class="consecration-directed" id="directed-east"></span>
                 </div>
                 <label class="check-item"><input type="checkbox" id="anchor-east-loc" /> At site · ready to sanctify</label>
-                <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> Consecrated (−1 Ritual)</label>
+                <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> Consecrated</label>
               </div>
               <div class="consecration-site" data-site="skull">
                 <div class="consecration-site-head">
@@ -399,7 +399,7 @@
                   <span class="consecration-directed" id="directed-skull"></span>
                 </div>
                 <label class="check-item"><input type="checkbox" id="anchor-skull-loc" /> At site · ready to sanctify</label>
-                <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Consecrated (−1 Ritual)</label>
+                <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Consecrated</label>
               </div>
             </div>
           </div>
@@ -449,22 +449,6 @@
           <span>2:15–3:45 · Dismissal at vortex threshold</span>
         </div>
 
-        <div class="panel phase-section" data-phase3-section="timeCollapse">
-          <button type="button" class="phase-section-toggle" data-phase3-section="timeCollapse" onclick="PaleTideApp.tap(this,event)">
-            <span class="phase-section-chevron" aria-hidden="true">▾</span>
-            <h2>Time Collapse</h2>
-          </button>
-          <div class="phase-section-body">
-          <ul class="phase-list muted">
-            <li>Leader + Keeper → liches · woman → banshee (attacks if neutral or worse)</li>
-            <li>Inner fence OFF · Apostle from vortex · Ritual ticks stop on mat</li>
-          </ul>
-          <div class="btn-row" style="margin-top:12px">
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
-          </div>
-          </div>
-        </div>
-
         <div class="panel phase-section" data-phase3-section="apostle">
           <button type="button" class="phase-section-toggle" data-phase3-section="apostle" onclick="PaleTideApp.tap(this,event)">
             <span class="phase-section-chevron" aria-hidden="true">▾</span>
@@ -472,11 +456,12 @@
           </button>
           <div class="phase-section-body">
           <label class="check-item"><input type="checkbox" id="apostle-on" /> On mat · Ritual ticks stop</label>
-          <label class="check-item"><input type="checkbox" id="apostle-bloodied" /> Bloodied (≤290)</label>
+          <p id="apostle-scale-note" class="apostle-scale-note">Ritual 20 → physical forever (725 HP) · rim rite / early stop → temporary form claws up (580 HP)</p>
+          <label class="check-item"><input type="checkbox" id="apostle-bloodied" /> Bloodied <span id="apostle-bloodied-at">(≤290)</span></label>
           <div class="stepper" style="margin-top:12px;justify-content:center">
             <span style="color:var(--muted);margin-right:8px">HP</span>
-            <input type="number" id="apostle-hp" min="0" max="580" value="580" />
-            <span style="color:var(--muted);margin-left:8px">/ 580</span>
+            <input type="number" id="apostle-hp" min="0" max="725" value="580" />
+            <span style="color:var(--muted);margin-left:8px">/ <span id="apostle-hp-max">580</span></span>
           </div>
           <div class="btn-row">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="apostle-lr-use">LR used (<span id="apostle-lr">3</span> left)</button>
@@ -505,6 +490,8 @@
           <div class="phase-section-body">
           <ul class="phase-list">
             <li>Apostle out + (bloodied OR both pylons down) at vortex threshold</li>
+            <li><strong>Premature</strong> *(rim rite / early stop)* — temporary form · still assails the party</li>
+            <li><strong>Permanent</strong> *(ritual 20)* — physical forever unless dismissed or slain</li>
             <li>Brussel adjacent for step 2 · Religion/Arcana DC 22 each step</li>
             <li><strong>Win:</strong> Dismissal · 0 HP</li>
             <li><strong>Loss:</strong> 2 PCs dead OR Breach 6 + Apostle at 3:45</li>
@@ -523,6 +510,24 @@
             <li>Apex: liches · Apostle · LA 3/4 bloodied</li>
             <li>Apostle +30 HP init 20 if any pylon intact</li>
           </ul>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase3-section="timeCollapse">
+          <button type="button" class="phase-section-toggle" data-phase3-section="timeCollapse" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Time Collapse</h2>
+          </button>
+          <div class="phase-section-body">
+          <ul class="phase-list muted">
+            <li>Leader + Keeper → liches · woman → banshee (attacks if neutral or worse)</li>
+            <li>Inner fence OFF · Apostle from vortex · Ritual ticks stop on mat</li>
+            <li><strong>Rim rite complete</strong> — ritual stops early · premature Apostle *(temporary · 580 HP)*</li>
+            <li><strong>Ritual 20</strong> — Apostle <strong>physical forever</strong> *(725 HP)*</li>
+          </ul>
+          <div class="btn-row" style="margin-top:12px">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
+          </div>
           </div>
         </div>
 

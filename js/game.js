@@ -98,6 +98,58 @@
     return CONSECRATION_SITES.filter((s) => anchors[s.id].bound).length;
   }
 
+  const APOSTLE_HP_BASE = 580;
+  const APOSTLE_HP_RITUAL_COMPLETE = 725;
+  const RIM_ALL_SITES_RITUAL_DROP = 5;
+
+  function apostleMaxHp(ritualAtArrival) {
+    return ritualAtArrival >= 20 ? APOSTLE_HP_RITUAL_COMPLETE : APOSTLE_HP_BASE;
+  }
+
+  function apostleBloodiedThreshold(maxHp) {
+    return Math.floor(maxHp / 2);
+  }
+
+  function applyAllSitesConsecrationBonus(before, after) {
+    const wasComplete = !!before.allSitesConsecrated;
+    const nowComplete = countAnchorBinds(after.anchors) === ANCESTOR_COUNT;
+    let ritual = after.ritual;
+    let allSitesConsecrated = wasComplete;
+    let ritualStopped = after.ritualStopped ?? before.ritualStopped;
+
+    if (nowComplete && !wasComplete) {
+      ritual = Math.max(0, ritual - RIM_ALL_SITES_RITUAL_DROP);
+      allSitesConsecrated = true;
+      ritualStopped = true;
+    } else if (!nowComplete && wasComplete) {
+      ritual = Math.min(20, ritual + RIM_ALL_SITES_RITUAL_DROP);
+      allSitesConsecrated = false;
+      if (!before.apostleOnMat) {
+        ritualStopped = false;
+      }
+    }
+
+    return { ritual, allSitesConsecrated, ritualStopped };
+  }
+
+  function apostleArrivalPatch(next) {
+    const ritualAtArrival = next.ritual;
+    const permanent = ritualAtArrival >= 20;
+    const maxHp = apostleMaxHp(ritualAtArrival);
+    return {
+      ...next,
+      phase: 3,
+      apostleOnMat: true,
+      ritualStopped: true,
+      ritual: permanent ? 20 : next.ritual,
+      apostleManifestation: permanent ? 'permanent' : 'premature',
+      apostleMaxHp: maxHp,
+      apostleHp: maxHp,
+      apostleBloodied: false,
+      activeTab: 'phase3',
+    };
+  }
+
   function skullAncestorsFound(skullPiles) {
     return ANCESTOR_PILE_NUMBERS.filter((n) => {
       const p = skullPiles.find((x) => x.num === n);
@@ -293,8 +345,11 @@
         east: { located: false, bound: false },
         skull: { located: false, bound: false },
       },
+      allSitesConsecrated: false,
       apostleOnMat: false,
-      apostleHp: 580,
+      apostleManifestation: null,
+      apostleHp: APOSTLE_HP_BASE,
+      apostleMaxHp: APOSTLE_HP_BASE,
       apostleLr: 3,
       apostleBloodied: false,
       apostleWheel: [],
@@ -421,20 +476,26 @@
     return 0;
   }
 
-  /** Ritual 20 or Breach 6 → Time Collapse · Apostle on mat */
+  /** Ritual 20 · Breach 6 · all rim sites consecrated → Time Collapse · Apostle on mat */
   function mergeStatePatch(current, patch) {
-    const next = { ...current, ...patch };
-    if (next.apostleOnMat && next.phase >= 3) return next;
-    if (next.ritual >= 20 || next.breach >= 6) {
-      return {
-        ...next,
-        phase: 3,
-        apostleOnMat: true,
-        ritualStopped: true,
-        ritual: Math.min(next.ritual, 20),
-        activeTab: 'phase3',
-      };
+    let next = { ...current, ...patch };
+    let rimRiteJustCompleted = false;
+
+    if (patch.anchors) {
+      const bonus = applyAllSitesConsecrationBonus(current, next);
+      rimRiteJustCompleted = bonus.allSitesConsecrated && !current.allSitesConsecrated;
+      next = { ...next, ...bonus };
     }
+
+    const wasOnMat = current.apostleOnMat;
+    const autoArrival =
+      !wasOnMat && (next.ritual >= 20 || next.breach >= 6 || rimRiteJustCompleted);
+    const manualArrival = !wasOnMat && patch.apostleOnMat;
+
+    if (autoArrival || manualArrival) {
+      return apostleArrivalPatch(next);
+    }
+
     return next;
   }
 
@@ -499,6 +560,17 @@
         pileSiteMap: normalizePileSiteMap(saved.pileSiteMap),
         skullPiles: normalizeSkullPiles(saved.skullPiles),
         skullTargetsRevealed: saved.skullTargetsRevealed ?? false,
+        allSitesConsecrated:
+          saved.allSitesConsecrated ??
+          countAnchorBinds({ ...base.anchors, ...(saved.anchors || {}) }) === ANCESTOR_COUNT,
+        apostleMaxHp: saved.apostleMaxHp ?? saved.apostleHp ?? APOSTLE_HP_BASE,
+        apostleManifestation:
+          saved.apostleManifestation ??
+          (saved.apostleOnMat
+            ? (saved.apostleMaxHp ?? saved.apostleHp ?? APOSTLE_HP_BASE) >= APOSTLE_HP_RITUAL_COMPLETE
+              ? 'permanent'
+              : 'premature'
+            : null),
       };
     } catch (e) {
       return defaultState();
@@ -604,6 +676,12 @@
     defaultSkullPiles,
     pileConsecrationSite,
     pileForSite,
+    APOSTLE_HP_BASE,
+    APOSTLE_HP_RITUAL_COMPLETE,
+    apostleMaxHp,
+    apostleBloodiedThreshold,
+    applyAllSitesConsecrationBonus,
+    apostleArrivalPatch,
     countAnchorBinds,
     skullAncestorsFound,
     advanceSkullPile,

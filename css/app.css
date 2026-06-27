@@ -1457,6 +1457,12 @@ main {
   color: var(--muted);
 }
 
+.apostle-scale-note {
+  margin: 6px 0 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 .consecration-sites {
   display: flex;
   flex-direction: column;
