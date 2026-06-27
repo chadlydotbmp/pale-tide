@@ -2967,13 +2967,14 @@ main {
     };
   }
 
+  /** Horde (batch 1) is fixed at dead1 / init 10; shuffle rotates batches 2–5 only */
   function rotateAssignment(assignment, steps) {
-    const keys = ['dead1', 'dead2', 'dead3', 'dead4', 'dead5'];
+    const keys = ['dead2', 'dead3', 'dead4', 'dead5'];
     const batches = keys.map((k) => assignment[k]);
     const n = batches.length;
     const s = steps % n;
     const rotated = [...batches.slice(n - s), ...batches.slice(0, n - s)];
-    const next = {};
+    const next = { dead1: 1 };
     keys.forEach((k, i) => {
       next[k] = rotated[i];
     });
@@ -3078,7 +3079,7 @@ main {
       return {
         ...base,
         ...saved,
-        assignment: { ...base.assignment, ...(saved.assignment || {}) },
+        assignment: { ...base.assignment, ...(saved.assignment || {}), dead1: 1 },
         pylonA: { ...base.pylonA, ...(saved.pylonA || {}) },
         pylonB: { ...base.pylonB, ...(saved.pylonB || {}) },
         graveTiers: { ...base.graveTiers, ...(saved.graveTiers || {}) },
