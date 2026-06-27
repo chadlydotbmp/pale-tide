@@ -112,7 +112,7 @@
       name: 'Ghost',
       sub: 'Wraith dial',
       batch: 3,
-      phases: [1, 2, 3],
+      phases: [2, 3],
       qty: '7',
       cr: '~10',
       stats: [
@@ -133,7 +133,7 @@
           text: 'Crit or 4 wraiths on one target in a round · Raging: Con DC 23 or Rage ends + expend 1 use',
         },
       ],
-      deploy: 'R4: 2 skull pits · Ph3: +3–5 rim · peel Theokoles or Acerian on Tile G',
+      deploy: 'Phase 2+: Batch 3 init · R4: 2 skull pits · Ph3: +3–5 rim + banshee',
     },
     {
       id: 'death-knight',

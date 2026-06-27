@@ -428,12 +428,31 @@
     return g != null && g >= 4 && (g - 4) % 2 === 0;
   }
 
+  function batchActiveInPhase(batch, phase) {
+    if (batch === 3) return phase >= 2;
+    if (batch === 5) return phase >= 3;
+    return true;
+  }
+
+  function batchUnitsLabel(batch, phase) {
+    const b = BATCHES[batch];
+    if (!b) return '';
+    if (!batchActiveInPhase(batch, phase)) {
+      if (batch === 3) return 'Not in init until Ph 2 · ghosts · banshee Ph 3';
+      if (batch === 5) return 'Not in init until Ph 3 · liches · Apostle';
+    }
+    return b.units;
+  }
+
   function resolveOrder(state) {
+    const phase = state.phase || 1;
     const rows = SLOT_ORDER.map((slot) => ({
       slot,
       init: SLOT_INIT[slot],
       batch: state.assignment[slot],
       ...BATCHES[state.assignment[slot]],
+      units: batchUnitsLabel(state.assignment[slot], phase),
+      active: batchActiveInPhase(state.assignment[slot], phase),
     }));
     rows.splice(2, 0, {
       slot: 'lair',
@@ -442,6 +461,7 @@
       name: 'Lair',
       emoji: '🌑',
       units: 'One lair · pylon regen',
+      active: true,
     });
     const pcRows = (state.pcs || [])
       .filter((pc) => pc.inTracker && pc.init != null)
@@ -453,6 +473,7 @@
         emoji: '🎲',
         units: 'Player',
         isPc: true,
+        active: true,
       }));
     const summonRows = (state.summons || [])
       .filter((s) => s.inTracker && s.init != null)
@@ -464,6 +485,7 @@
         emoji: '✨',
         units: 'Summoned',
         isSummon: true,
+        active: true,
       }));
     return [...rows, ...pcRows, ...summonRows].sort((a, b) => b.init - a.init);
   }
@@ -668,6 +690,8 @@
     nextConeG,
     isConeRound,
     resolveOrder,
+    batchActiveInPhase,
+    batchUnitsLabel,
     pylonAcBonus,
     mergeStatePatch,
     SKULL_PILE_COUNT,

@@ -875,6 +875,19 @@ main {
   background: var(--accent-dim);
 }
 
+.init-row.inactive {
+  opacity: 0.5;
+}
+
+.init-row.inactive .init-count {
+  color: var(--muted);
+}
+
+.init-row.inactive .units {
+  color: var(--warn);
+  font-size: 0.72rem;
+}
+
 .init-row.lair {
   border-style: dashed;
 }

@@ -908,6 +908,19 @@ main {
   background: var(--accent-dim);
 }
 
+.init-row.inactive {
+  opacity: 0.5;
+}
+
+.init-row.inactive .init-count {
+  color: var(--muted);
+}
+
+.init-row.inactive .units {
+  color: var(--warn);
+  font-size: 0.72rem;
+}
+
 .init-row.lair {
   border-style: dashed;
 }
@@ -2700,6 +2713,7 @@ main {
           <ul class="phase-list muted">
             <li>Ritual +1 (+ fed hordes max +2 after R2)</li>
             <li>Knights R2 · Hood reveal ≤2 bodies · end Horde slot</li>
+            <li><strong>Batch 3</strong> (ghosts) not in init until <strong>Phase 2</strong></li>
             <li>Buy-down: knight kill −1 Ritual</li>
           </ul>
           </div>
@@ -2710,7 +2724,7 @@ main {
       <section class="tab-panel hidden" data-tab="phase2">
         <div class="phase-banner phase-2">
           <strong>Phase 2 · The Ledger</strong>
-          <span>0:50–2:00 · Gate OPEN · 3 fronts</span>
+          <span>0:50–2:00 · Gate OPEN · 3 fronts · ghosts in init</span>
         </div>
 
         <div class="panel phase-section pylon-panel" data-phase2-section="pylons">
@@ -2952,7 +2966,7 @@ main {
       <section class="tab-panel hidden" data-tab="phase3">
         <div class="phase-banner phase-3">
           <strong>Phase 3 · The Apostle</strong>
-          <span>2:15–3:45 · Dismissal at vortex threshold</span>
+          <span>2:15–3:45 · Dismissal at vortex threshold · Apex in init</span>
         </div>
 
         <div class="panel phase-section" data-phase3-section="apostle">
@@ -3012,6 +3026,7 @@ main {
           </button>
           <div class="phase-section-body">
           <ul class="phase-list muted">
+            <li><strong>Batch 5</strong> (Apex) in init — liches · Apostle</li>
             <li>Wraiths: ghosts · banshee (friendly only stays neutral)</li>
             <li>Apex: liches · Apostle · LA 3/4 bloodied</li>
             <li>Apostle +30 HP init 20 if any pylon intact</li>
@@ -3491,12 +3506,31 @@ main {
     return g != null && g >= 4 && (g - 4) % 2 === 0;
   }
 
+  function batchActiveInPhase(batch, phase) {
+    if (batch === 3) return phase >= 2;
+    if (batch === 5) return phase >= 3;
+    return true;
+  }
+
+  function batchUnitsLabel(batch, phase) {
+    const b = BATCHES[batch];
+    if (!b) return '';
+    if (!batchActiveInPhase(batch, phase)) {
+      if (batch === 3) return 'Not in init until Ph 2 · ghosts · banshee Ph 3';
+      if (batch === 5) return 'Not in init until Ph 3 · liches · Apostle';
+    }
+    return b.units;
+  }
+
   function resolveOrder(state) {
+    const phase = state.phase || 1;
     const rows = SLOT_ORDER.map((slot) => ({
       slot,
       init: SLOT_INIT[slot],
       batch: state.assignment[slot],
       ...BATCHES[state.assignment[slot]],
+      units: batchUnitsLabel(state.assignment[slot], phase),
+      active: batchActiveInPhase(state.assignment[slot], phase),
     }));
     rows.splice(2, 0, {
       slot: 'lair',
@@ -3505,6 +3539,7 @@ main {
       name: 'Lair',
       emoji: '🌑',
       units: 'One lair · pylon regen',
+      active: true,
     });
     const pcRows = (state.pcs || [])
       .filter((pc) => pc.inTracker && pc.init != null)
@@ -3516,6 +3551,7 @@ main {
         emoji: '🎲',
         units: 'Player',
         isPc: true,
+        active: true,
       }));
     const summonRows = (state.summons || [])
       .filter((s) => s.inTracker && s.init != null)
@@ -3527,6 +3563,7 @@ main {
         emoji: '✨',
         units: 'Summoned',
         isSummon: true,
+        active: true,
       }));
     return [...rows, ...pcRows, ...summonRows].sort((a, b) => b.init - a.init);
   }
@@ -3731,6 +3768,8 @@ main {
     nextConeG,
     isConeRound,
     resolveOrder,
+    batchActiveInPhase,
+    batchUnitsLabel,
     pylonAcBonus,
     mergeStatePatch,
     SKULL_PILE_COUNT,
@@ -3798,8 +3837,8 @@ main {
     3: {
       title: 'Wraiths',
       lines: [
-        'Ghosts N→S · then banshee if Phase 3',
-        'Life Drain +10 · 5d8+6 nec · max HP − damage',
+        'Phase 2+: ghosts in initiative (Batch 3) · Phase 3: banshee joins slot',
+        'Ghosts N→S · Life Drain +10 · 5d8+6 nec · max HP − damage',
         'Soul Grit: 4 wraiths on one target or crit → Con 23 or Rage ends',
         'Banshee friendly only → neutral · attacks if neutral or worse',
         'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',
@@ -3826,7 +3865,7 @@ main {
     5: {
       title: 'Apex',
       lines: [
-        'Leader Lich → Keeper Lich → Apostle last',
+        'Phase 3+: Apex in initiative (Batch 5) · liches then Apostle last',
         'Lichens: 2 LA/round each · LR 2/day',
         'Apostle: 3 LA/round · 4 when bloodied (≤ half max HP)',
         'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',
@@ -4062,7 +4101,7 @@ main {
       name: 'Ghost',
       sub: 'Wraith dial',
       batch: 3,
-      phases: [1, 2, 3],
+      phases: [2, 3],
       qty: '7',
       cr: '~10',
       stats: [
@@ -4083,7 +4122,7 @@ main {
           text: 'Crit or 4 wraiths on one target in a round · Raging: Con DC 23 or Rage ends + expend 1 use',
         },
       ],
-      deploy: 'R4: 2 skull pits · Ph3: +3–5 rim · peel Theokoles or Acerian on Tile G',
+      deploy: 'Phase 2+: Batch 3 init · R4: 2 skull pits · Ph3: +3–5 rim + banshee',
     },
     {
       id: 'death-knight',
@@ -4737,6 +4776,16 @@ main {
       return;
     }
 
+    if (info.type === 'batch') {
+      const batchNum = state.assignment[slot];
+      if (batchNum && !G.batchActiveInPhase(batchNum, state.phase)) {
+        const when = batchNum === 3 ? 'Phase 2' : 'Phase 3';
+        panel.innerHTML = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3><p class="la-note" style="margin:0">Not in initiative until <strong>${when}</strong> — skip this slot.</p>`;
+        scheduleReminderPopupPosition();
+        return;
+      }
+    }
+
     let html = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3>`;
     if (info.batch != null) {
       html += M.formatBatchCombatHtml(info.batch, state.phase);
@@ -4889,7 +4938,7 @@ main {
       const isActive = state.turnHighlight === row.slot;
       const div = el(
         'div',
-        `init-row${row.slot === 'lair' ? ' lair' : ''}${row.isPc ? ' pc' : ''}${row.isSummon ? ' summon' : ''}${isActive ? ' active' : ''}`,
+        `init-row${row.slot === 'lair' ? ' lair' : ''}${row.isPc ? ' pc' : ''}${row.isSummon ? ' summon' : ''}${row.active === false ? ' inactive' : ''}${isActive ? ' active' : ''}`,
         `
         <div class="init-count">${row.init}</div>
         <div class="init-info">

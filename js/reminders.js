@@ -40,8 +40,8 @@
     3: {
       title: 'Wraiths',
       lines: [
-        'Ghosts N→S · then banshee if Phase 3',
-        'Life Drain +10 · 5d8+6 nec · max HP − damage',
+        'Phase 2+: ghosts in initiative (Batch 3) · Phase 3: banshee joins slot',
+        'Ghosts N→S · Life Drain +10 · 5d8+6 nec · max HP − damage',
         'Soul Grit: 4 wraiths on one target or crit → Con 23 or Rage ends',
         'Banshee friendly only → neutral · attacks if neutral or worse',
         'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',
@@ -68,7 +68,7 @@
     5: {
       title: 'Apex',
       lines: [
-        'Leader Lich → Keeper Lich → Apostle last',
+        'Phase 3+: Apex in initiative (Batch 5) · liches then Apostle last',
         'Lichens: 2 LA/round each · LR 2/day',
         'Apostle: 3 LA/round · 4 when bloodied (≤ half max HP)',
         'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',

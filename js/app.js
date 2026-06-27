@@ -282,6 +282,16 @@
       return;
     }
 
+    if (info.type === 'batch') {
+      const batchNum = state.assignment[slot];
+      if (batchNum && !G.batchActiveInPhase(batchNum, state.phase)) {
+        const when = batchNum === 3 ? 'Phase 2' : 'Phase 3';
+        panel.innerHTML = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3><p class="la-note" style="margin:0">Not in initiative until <strong>${when}</strong> — skip this slot.</p>`;
+        scheduleReminderPopupPosition();
+        return;
+      }
+    }
+
     let html = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3>`;
     if (info.batch != null) {
       html += M.formatBatchCombatHtml(info.batch, state.phase);
@@ -434,7 +444,7 @@
       const isActive = state.turnHighlight === row.slot;
       const div = el(
         'div',
-        `init-row${row.slot === 'lair' ? ' lair' : ''}${row.isPc ? ' pc' : ''}${row.isSummon ? ' summon' : ''}${isActive ? ' active' : ''}`,
+        `init-row${row.slot === 'lair' ? ' lair' : ''}${row.isPc ? ' pc' : ''}${row.isSummon ? ' summon' : ''}${row.active === false ? ' inactive' : ''}${isActive ? ' active' : ''}`,
         `
         <div class="init-count">${row.init}</div>
         <div class="init-info">
