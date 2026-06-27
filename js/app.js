@@ -45,7 +45,7 @@
   }
 
   function setState(patch) {
-    state = { ...state, ...patch };
+    state = G.mergeStatePatch(state, patch);
     commit();
   }
 
@@ -134,35 +134,17 @@
   }
 
   function renderHeader() {
-    const g = G.gTrack(state);
     setEl($('#header-round'), (el) => {
       el.textContent = `R${state.round}`;
     });
-    const appLive =
-      document.documentElement.getAttribute('data-app') === APP_OK
-        ? '<span class="chip chip-live">live</span>'
-        : '';
-    $('#meta-chips').innerHTML = [
-      appLive,
-      g != null ? `<span class="chip">G+${g - 1}${g === 1 ? ' (open)' : ''}</span>` : '',
-      state.gateOpen && state.gateHeld
-        ? '<span class="chip">Gate HELD</span>'
-        : state.gateOpen
-          ? '<span class="chip">Gate OPEN</span>'
-          : '<span class="chip">Gate LOCKED</span>',
-      state.phase >= 3 ? '<span class="chip phase-3">Phase 3</span>' : `<span class="chip">Phase ${state.phase}</span>`,
-      state.pulseOn ? '<span class="chip pulse-on">PULSE</span>' : '',
-      state.innerBustChoice
-        ? (() => {
-            const opt = G.INNER_BUST_OPTIONS.find((o) => o.id === state.innerBustChoice);
-            return opt ? `<span class="chip inner-bust">${opt.title}</span>` : '';
-          })()
-        : '',
-      state.gateOpen && state.gateSmashed ? '<span class="chip">Gate wrecked</span>' : '',
-      state.timerPaused ? '<span class="chip">Timer paused</span>' : '',
-    ]
-      .filter(Boolean)
-      .join('');
+    setEl($('#header-phase'), (el) => {
+      const ph = Math.min(3, Math.max(1, state.phase));
+      el.textContent = `Ph ${ph}`;
+      el.className = `header-phase phase-${ph}`;
+    });
+    setEl($('#header-live'), (el) => {
+      el.hidden = document.documentElement.getAttribute('data-app') !== APP_OK;
+    });
     renderTimer();
   }
 
@@ -173,7 +155,6 @@
     setEl($('#breach-compact'), (n) => {
       n.textContent = state.breach;
     });
-    $('#ritual-stop').classList.toggle('hidden', !state.ritualStopped);
 
     const pips = $('#breach-pips');
     pips.innerHTML = '';
@@ -186,27 +167,6 @@
       bar.classList.toggle('ritual-high', state.ritual >= 10);
       bar.classList.toggle('breach-high', state.breach >= 4);
     });
-
-    const g = G.gTrack(state);
-    const cone = G.nextConeG(state);
-    const gEl = $('#g-info');
-    const pylonEl = $('#pylon-ac');
-    if (gEl) {
-      if (g == null) {
-        gEl.classList.add('hidden');
-      } else {
-        gEl.classList.remove('hidden');
-        gEl.textContent = `G = R${state.gateRound} · next cone G+${cone}${G.isConeRound(state) ? ' ← THIS ROUND' : ''}`;
-      }
-    }
-    if (pylonEl) {
-      if (!state.gateOpen) {
-        pylonEl.classList.add('hidden');
-      } else {
-        pylonEl.classList.remove('hidden');
-        pylonEl.textContent = `Pale Ward +${G.pylonAcBonus(state)} AC on Outer undead`;
-      }
-    }
   }
 
   function clearReminderPopupPosition(panel) {
@@ -322,7 +282,11 @@
       return;
     }
 
-    let html = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3><ul>`;
+    let html = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3>`;
+    if (info.batch != null) {
+      html += M.formatBatchCombatHtml(info.batch, state.phase);
+    }
+    html += '<ul class="reminder-tactics">';
     info.lines.forEach((line) => {
       html += `<li>${line}</li>`;
     });

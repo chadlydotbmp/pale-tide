@@ -313,6 +313,23 @@
     return 0;
   }
 
+  /** Ritual 20 or Breach 6 → Time Collapse · Apostle on mat */
+  function mergeStatePatch(current, patch) {
+    const next = { ...current, ...patch };
+    if (next.apostleOnMat && next.phase >= 3) return next;
+    if (next.ritual >= 20 || next.breach >= 6) {
+      return {
+        ...next,
+        phase: 3,
+        apostleOnMat: true,
+        ritualStopped: true,
+        ritual: Math.min(next.ritual, 20),
+        activeTab: 'phase3',
+      };
+    }
+    return next;
+  }
+
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -467,6 +484,7 @@
     isConeRound,
     resolveOrder,
     pylonAcBonus,
+    mergeStatePatch,
     INNER_BUST_OPTIONS,
     load,
     save,

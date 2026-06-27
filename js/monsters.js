@@ -432,5 +432,74 @@
     });
   }
 
-  global.PaleTideMonsters = { MONSTERS, FILTERS, filterMonsters };
+  function monsterVitals(m) {
+    const parts = [];
+    m.stats.forEach(([k, v]) => {
+      if (k === 'AC' || k === 'HP') parts.push(`${k} ${v}`);
+    });
+    const speed = m.stats.find(([k]) => k === 'Speed');
+    if (speed && /init/i.test(speed[1])) parts.push(speed[1]);
+    return parts.join(' · ');
+  }
+
+  function monsterAttacks(m) {
+    const out = [];
+    m.stats.forEach(([k, v]) => {
+      if (k === 'Attack' || k === 'Marshal') out.push({ name: k, text: v });
+    });
+    (m.actions || []).forEach((a) => {
+      if (typeof a === 'string') out.push({ name: 'Action', text: a });
+      else out.push({ name: a.name, text: a.text });
+    });
+    (m.reactions || []).forEach((r) => {
+      const text = typeof r === 'string' ? r : r.text || String(r);
+      out.push({ name: 'Reaction', text });
+    });
+    (m.legendary || []).forEach((l) => {
+      const text = typeof l === 'string' ? l : l.text || String(l);
+      if (/\d+d\d|\+\d{1,2}\b|DC \d+/i.test(text)) {
+        out.push({ name: 'Legendary', text });
+      }
+    });
+    return out;
+  }
+
+  function batchCombatUnits(batch, phase) {
+    return MONSTERS.filter((m) => {
+      if (m.batch !== batch) return false;
+      if (phase && !m.phases.includes(phase)) return false;
+      if (m.id.endsWith('-npc') || m.id === 'pylon') return false;
+      return monsterAttacks(m).length > 0 || m.stats.some(([k]) => k === 'AC');
+    });
+  }
+
+  function formatBatchCombatHtml(batch, phase) {
+    const units = batchCombatUnits(batch, phase);
+    if (!units.length) return '';
+    let html = '<div class="reminder-combat">';
+    units.forEach((m) => {
+      const vitals = monsterVitals(m);
+      const attacks = monsterAttacks(m);
+      html += `<div class="reminder-unit"><div class="reminder-unit-name">${m.name}</div>`;
+      if (vitals) html += `<div class="reminder-vitals">${vitals}</div>`;
+      if (attacks.length) {
+        html += '<ul class="reminder-attacks">';
+        attacks.forEach((a) => {
+          html += `<li><strong>${a.name}</strong> · ${a.text}</li>`;
+        });
+        html += '</ul>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  global.PaleTideMonsters = {
+    MONSTERS,
+    FILTERS,
+    filterMonsters,
+    batchCombatUnits,
+    formatBatchCombatHtml,
+  };
 })(window);

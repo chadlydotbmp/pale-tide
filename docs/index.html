@@ -168,6 +168,13 @@ header.app-header {
   min-width: 0;
 }
 
+.header-round-group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .header-round {
   font-size: 1.25rem;
   font-weight: 800;
@@ -177,6 +184,52 @@ header.app-header {
   letter-spacing: -0.02em;
   flex-shrink: 0;
   padding: 0 2px;
+}
+
+.header-phase {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.header-phase.phase-1 {
+  color: var(--accent);
+}
+
+.header-phase.phase-2 {
+  color: var(--warn);
+}
+
+.header-phase.phase-3 {
+  color: var(--danger);
+}
+
+.header-next-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-live {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  color: var(--ok);
+  padding: 4px 8px;
+  border: 1px solid var(--ok);
+  border-radius: 999px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.header-live[hidden] {
+  display: none;
 }
 
 .header-next-round {
@@ -1943,6 +1996,54 @@ main {
   color: var(--accent);
 }
 
+.reminder-combat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.reminder-unit-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.reminder-vitals {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.reminder-attacks {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.reminder-attacks li {
+  margin-bottom: 4px;
+}
+
+.reminder-attacks li strong {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.reminder-tactics {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .reminder-popup ul,
 .reminder-panel ul {
   margin: 0;
@@ -2266,8 +2367,14 @@ main {
             </div>
           </div>
         </div>
-        <div class="header-round" id="header-round" aria-label="Round">R1</div>
-        <button type="button" class="header-btn primary header-next-round" id="btn-new-round" onclick="PaleTideApp.tap(this,event)">Next Round</button>
+        <div class="header-round-group">
+          <div class="header-round" id="header-round" aria-label="Round">R1</div>
+          <div class="header-phase phase-1" id="header-phase" aria-label="Phase">Ph 1</div>
+        </div>
+        <div class="header-next-group">
+          <span id="header-live" class="header-live" hidden>live</span>
+          <button type="button" class="header-btn primary header-next-round" id="btn-new-round" onclick="PaleTideApp.tap(this,event)">Next Round</button>
+        </div>
         <div class="header-timer">
           <div class="timer-alert hidden" id="timer-alert">
             <span id="timer-alert-text"></span>
@@ -2282,12 +2389,6 @@ main {
           </div>
         </div>
         <button type="button" class="header-btn header-reset danger" id="btn-reset" onclick="PaleTideApp.tap(this,event)" title="Reset all encounter state">Reset</button>
-      </div>
-      <div class="header-status">
-        <div class="meta" id="meta-chips"></div>
-        <p id="ritual-stop" class="header-clock-note hidden">Ticks stopped</p>
-        <p id="g-info" class="header-clock-note hidden"></p>
-        <p id="pylon-ac" class="header-clock-note hidden"></p>
       </div>
     </header>
 
@@ -3067,6 +3168,23 @@ main {
     return 0;
   }
 
+  /** Ritual 20 or Breach 6 → Time Collapse · Apostle on mat */
+  function mergeStatePatch(current, patch) {
+    const next = { ...current, ...patch };
+    if (next.apostleOnMat && next.phase >= 3) return next;
+    if (next.ritual >= 20 || next.breach >= 6) {
+      return {
+        ...next,
+        phase: 3,
+        apostleOnMat: true,
+        ritualStopped: true,
+        ritual: Math.min(next.ritual, 20),
+        activeTab: 'phase3',
+      };
+    }
+    return next;
+  }
+
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -3221,6 +3339,7 @@ main {
     isConeRound,
     resolveOrder,
     pylonAcBonus,
+    mergeStatePatch,
     INNER_BUST_OPTIONS,
     load,
     save,
@@ -3851,7 +3970,76 @@ main {
     });
   }
 
-  global.PaleTideMonsters = { MONSTERS, FILTERS, filterMonsters };
+  function monsterVitals(m) {
+    const parts = [];
+    m.stats.forEach(([k, v]) => {
+      if (k === 'AC' || k === 'HP') parts.push(`${k} ${v}`);
+    });
+    const speed = m.stats.find(([k]) => k === 'Speed');
+    if (speed && /init/i.test(speed[1])) parts.push(speed[1]);
+    return parts.join(' · ');
+  }
+
+  function monsterAttacks(m) {
+    const out = [];
+    m.stats.forEach(([k, v]) => {
+      if (k === 'Attack' || k === 'Marshal') out.push({ name: k, text: v });
+    });
+    (m.actions || []).forEach((a) => {
+      if (typeof a === 'string') out.push({ name: 'Action', text: a });
+      else out.push({ name: a.name, text: a.text });
+    });
+    (m.reactions || []).forEach((r) => {
+      const text = typeof r === 'string' ? r : r.text || String(r);
+      out.push({ name: 'Reaction', text });
+    });
+    (m.legendary || []).forEach((l) => {
+      const text = typeof l === 'string' ? l : l.text || String(l);
+      if (/\d+d\d|\+\d{1,2}\b|DC \d+/i.test(text)) {
+        out.push({ name: 'Legendary', text });
+      }
+    });
+    return out;
+  }
+
+  function batchCombatUnits(batch, phase) {
+    return MONSTERS.filter((m) => {
+      if (m.batch !== batch) return false;
+      if (phase && !m.phases.includes(phase)) return false;
+      if (m.id.endsWith('-npc') || m.id === 'pylon') return false;
+      return monsterAttacks(m).length > 0 || m.stats.some(([k]) => k === 'AC');
+    });
+  }
+
+  function formatBatchCombatHtml(batch, phase) {
+    const units = batchCombatUnits(batch, phase);
+    if (!units.length) return '';
+    let html = '<div class="reminder-combat">';
+    units.forEach((m) => {
+      const vitals = monsterVitals(m);
+      const attacks = monsterAttacks(m);
+      html += `<div class="reminder-unit"><div class="reminder-unit-name">${m.name}</div>`;
+      if (vitals) html += `<div class="reminder-vitals">${vitals}</div>`;
+      if (attacks.length) {
+        html += '<ul class="reminder-attacks">';
+        attacks.forEach((a) => {
+          html += `<li><strong>${a.name}</strong> · ${a.text}</li>`;
+        });
+        html += '</ul>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  global.PaleTideMonsters = {
+    MONSTERS,
+    FILTERS,
+    filterMonsters,
+    batchCombatUnits,
+    formatBatchCombatHtml,
+  };
 })(window);
 /* The Pale Tide — UI (iPad Safari) */
 (function () {
@@ -3900,7 +4088,7 @@ main {
   }
 
   function setState(patch) {
-    state = { ...state, ...patch };
+    state = G.mergeStatePatch(state, patch);
     commit();
   }
 
@@ -3989,35 +4177,17 @@ main {
   }
 
   function renderHeader() {
-    const g = G.gTrack(state);
     setEl($('#header-round'), (el) => {
       el.textContent = `R${state.round}`;
     });
-    const appLive =
-      document.documentElement.getAttribute('data-app') === APP_OK
-        ? '<span class="chip chip-live">live</span>'
-        : '';
-    $('#meta-chips').innerHTML = [
-      appLive,
-      g != null ? `<span class="chip">G+${g - 1}${g === 1 ? ' (open)' : ''}</span>` : '',
-      state.gateOpen && state.gateHeld
-        ? '<span class="chip">Gate HELD</span>'
-        : state.gateOpen
-          ? '<span class="chip">Gate OPEN</span>'
-          : '<span class="chip">Gate LOCKED</span>',
-      state.phase >= 3 ? '<span class="chip phase-3">Phase 3</span>' : `<span class="chip">Phase ${state.phase}</span>`,
-      state.pulseOn ? '<span class="chip pulse-on">PULSE</span>' : '',
-      state.innerBustChoice
-        ? (() => {
-            const opt = G.INNER_BUST_OPTIONS.find((o) => o.id === state.innerBustChoice);
-            return opt ? `<span class="chip inner-bust">${opt.title}</span>` : '';
-          })()
-        : '',
-      state.gateOpen && state.gateSmashed ? '<span class="chip">Gate wrecked</span>' : '',
-      state.timerPaused ? '<span class="chip">Timer paused</span>' : '',
-    ]
-      .filter(Boolean)
-      .join('');
+    setEl($('#header-phase'), (el) => {
+      const ph = Math.min(3, Math.max(1, state.phase));
+      el.textContent = `Ph ${ph}`;
+      el.className = `header-phase phase-${ph}`;
+    });
+    setEl($('#header-live'), (el) => {
+      el.hidden = document.documentElement.getAttribute('data-app') !== APP_OK;
+    });
     renderTimer();
   }
 
@@ -4028,7 +4198,6 @@ main {
     setEl($('#breach-compact'), (n) => {
       n.textContent = state.breach;
     });
-    $('#ritual-stop').classList.toggle('hidden', !state.ritualStopped);
 
     const pips = $('#breach-pips');
     pips.innerHTML = '';
@@ -4041,27 +4210,6 @@ main {
       bar.classList.toggle('ritual-high', state.ritual >= 10);
       bar.classList.toggle('breach-high', state.breach >= 4);
     });
-
-    const g = G.gTrack(state);
-    const cone = G.nextConeG(state);
-    const gEl = $('#g-info');
-    const pylonEl = $('#pylon-ac');
-    if (gEl) {
-      if (g == null) {
-        gEl.classList.add('hidden');
-      } else {
-        gEl.classList.remove('hidden');
-        gEl.textContent = `G = R${state.gateRound} · next cone G+${cone}${G.isConeRound(state) ? ' ← THIS ROUND' : ''}`;
-      }
-    }
-    if (pylonEl) {
-      if (!state.gateOpen) {
-        pylonEl.classList.add('hidden');
-      } else {
-        pylonEl.classList.remove('hidden');
-        pylonEl.textContent = `Pale Ward +${G.pylonAcBonus(state)} AC on Outer undead`;
-      }
-    }
   }
 
   function clearReminderPopupPosition(panel) {
@@ -4177,7 +4325,11 @@ main {
       return;
     }
 
-    let html = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3><ul>`;
+    let html = `<h3>${info.title} · init ${G.SLOT_INIT[slot]}</h3>`;
+    if (info.batch != null) {
+      html += M.formatBatchCombatHtml(info.batch, state.phase);
+    }
+    html += '<ul class="reminder-tactics">';
     info.lines.forEach((line) => {
       html += `<li>${line}</li>`;
     });

@@ -31,8 +31,14 @@
             </div>
           </div>
         </div>
-        <div class="header-round" id="header-round" aria-label="Round">R1</div>
-        <button type="button" class="header-btn primary header-next-round" id="btn-new-round" onclick="PaleTideApp.tap(this,event)">Next Round</button>
+        <div class="header-round-group">
+          <div class="header-round" id="header-round" aria-label="Round">R1</div>
+          <div class="header-phase phase-1" id="header-phase" aria-label="Phase">Ph 1</div>
+        </div>
+        <div class="header-next-group">
+          <span id="header-live" class="header-live" hidden>live</span>
+          <button type="button" class="header-btn primary header-next-round" id="btn-new-round" onclick="PaleTideApp.tap(this,event)">Next Round</button>
+        </div>
         <div class="header-timer">
           <div class="timer-alert hidden" id="timer-alert">
             <span id="timer-alert-text"></span>
@@ -47,12 +53,6 @@
           </div>
         </div>
         <button type="button" class="header-btn header-reset danger" id="btn-reset" onclick="PaleTideApp.tap(this,event)" title="Reset all encounter state">Reset</button>
-      </div>
-      <div class="header-status">
-        <div class="meta" id="meta-chips"></div>
-        <p id="ritual-stop" class="header-clock-note hidden">Ticks stopped</p>
-        <p id="g-info" class="header-clock-note hidden"></p>
-        <p id="pylon-ac" class="header-clock-note hidden"></p>
       </div>
     </header>
 

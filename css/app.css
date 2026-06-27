@@ -135,6 +135,13 @@ header.app-header {
   min-width: 0;
 }
 
+.header-round-group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .header-round {
   font-size: 1.25rem;
   font-weight: 800;
@@ -144,6 +151,52 @@ header.app-header {
   letter-spacing: -0.02em;
   flex-shrink: 0;
   padding: 0 2px;
+}
+
+.header-phase {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.header-phase.phase-1 {
+  color: var(--accent);
+}
+
+.header-phase.phase-2 {
+  color: var(--warn);
+}
+
+.header-phase.phase-3 {
+  color: var(--danger);
+}
+
+.header-next-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-live {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  color: var(--ok);
+  padding: 4px 8px;
+  border: 1px solid var(--ok);
+  border-radius: 999px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.header-live[hidden] {
+  display: none;
 }
 
 .header-next-round {
@@ -1908,6 +1961,54 @@ main {
   margin: 0 0 8px;
   font-size: 1rem;
   color: var(--accent);
+}
+
+.reminder-combat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.reminder-unit-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.reminder-vitals {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.reminder-attacks {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.reminder-attacks li {
+  margin-bottom: 4px;
+}
+
+.reminder-attacks li strong {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.reminder-tactics {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 .reminder-popup ul,
