@@ -699,6 +699,102 @@ main {
 
 .clocks-panel {
   margin-bottom: 12px;
+  padding: 12px 14px;
+}
+
+.clocks-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.clock-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.clock-group .clock-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.clock-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clock-step {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  line-height: 1;
+  font-weight: 600;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.clock-step:active {
+  background: var(--border);
+}
+
+.clock-value {
+  flex: 1;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2rem;
+}
+
+.clock-value .max {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.clock-group.ritual .clock-value strong {
+  color: var(--ritual);
+}
+
+.clock-group.breach .clock-value strong {
+  color: var(--danger);
+}
+
+.clock-group.breach .breach-pips {
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.clock-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 10px 0 0;
+  line-height: 1.35;
+}
+
+#ritual-stop.clock-note {
+  color: var(--warn);
+}
+
+.clocks-bar.ritual-stopped {
+  border-color: var(--warn);
+}
+
+.clocks-bar.ritual-high .clock-group.ritual .clock-value strong {
+  color: var(--warn);
+}
+
+.clocks-bar.breach-high {
+  border-color: var(--danger);
 }
 
 .modal-overlay {

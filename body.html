@@ -52,31 +52,29 @@
         </aside>
 
         <div id="phase-rail" class="phase-rail">
-          <div class="panel clocks-panel">
-            <h2>Clocks</h2>
-            <div class="clock-row">
-              <div class="clock ritual">
-                <div class="label">Ritual</div>
-                <div class="value"><span id="ritual-val">0</span><span class="max">/20</span></div>
-                <p id="ritual-stop" class="hidden" style="font-size:0.75rem;color:var(--warn);margin:8px 0 0">Ticks stopped</p>
+          <div class="clocks-bar panel clocks-panel">
+            <div class="clocks-row">
+              <div class="clock-group ritual">
+                <span class="clock-label">Ritual</span>
+                <div class="clock-stepper">
+                  <button type="button" class="clock-step" id="btn-ritual-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                  <span class="clock-value"><strong id="ritual-compact">0</strong><span class="max">/20</span></span>
+                  <button type="button" class="clock-step" id="btn-ritual-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+                </div>
               </div>
-              <div class="clock breach">
-                <div class="label">Breach</div>
-                <div class="value"><span id="breach-val">0</span><span class="max">/6</span></div>
+              <div class="clock-group breach">
+                <span class="clock-label">Breach</span>
+                <div class="clock-stepper">
+                  <button type="button" class="clock-step" id="btn-breach-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                  <span class="clock-value"><strong id="breach-compact">0</strong><span class="max">/6</span></span>
+                  <button type="button" class="clock-step" id="btn-breach-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+                </div>
                 <div class="breach-pips" id="breach-pips"></div>
               </div>
             </div>
-            <p id="g-info" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:12px 0 0"></p>
-            <p id="pylon-ac" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:4px 0 0"></p>
-            <div class="btn-row">
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-plus">Ritual +1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-fed">Fed horde +1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-minus">Ritual −1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-plus">Breach +1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-minus">Breach −1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-pylon">Pylon down −2</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-knight">Knight kill −1</button>
-            </div>
+            <p id="ritual-stop" class="hidden clock-note">Ticks stopped</p>
+            <p id="g-info" class="hidden clock-note"></p>
+            <p id="pylon-ac" class="hidden clock-note"></p>
           </div>
 
       <!-- PHASE 1 — The Tide (~0:05–0:50) -->

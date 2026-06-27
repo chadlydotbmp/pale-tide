@@ -732,6 +732,102 @@ main {
 
 .clocks-panel {
   margin-bottom: 12px;
+  padding: 12px 14px;
+}
+
+.clocks-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.clock-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.clock-group .clock-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.clock-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clock-step {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  line-height: 1;
+  font-weight: 600;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.clock-step:active {
+  background: var(--border);
+}
+
+.clock-value {
+  flex: 1;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2rem;
+}
+
+.clock-value .max {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.clock-group.ritual .clock-value strong {
+  color: var(--ritual);
+}
+
+.clock-group.breach .clock-value strong {
+  color: var(--danger);
+}
+
+.clock-group.breach .breach-pips {
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.clock-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 10px 0 0;
+  line-height: 1.35;
+}
+
+#ritual-stop.clock-note {
+  color: var(--warn);
+}
+
+.clocks-bar.ritual-stopped {
+  border-color: var(--warn);
+}
+
+.clocks-bar.ritual-high .clock-group.ritual .clock-value strong {
+  color: var(--warn);
+}
+
+.clocks-bar.breach-high {
+  border-color: var(--danger);
 }
 
 .modal-overlay {
@@ -1178,31 +1274,29 @@ main {
         </aside>
 
         <div id="phase-rail" class="phase-rail">
-          <div class="panel clocks-panel">
-            <h2>Clocks</h2>
-            <div class="clock-row">
-              <div class="clock ritual">
-                <div class="label">Ritual</div>
-                <div class="value"><span id="ritual-val">0</span><span class="max">/20</span></div>
-                <p id="ritual-stop" class="hidden" style="font-size:0.75rem;color:var(--warn);margin:8px 0 0">Ticks stopped</p>
+          <div class="clocks-bar panel clocks-panel">
+            <div class="clocks-row">
+              <div class="clock-group ritual">
+                <span class="clock-label">Ritual</span>
+                <div class="clock-stepper">
+                  <button type="button" class="clock-step" id="btn-ritual-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                  <span class="clock-value"><strong id="ritual-compact">0</strong><span class="max">/20</span></span>
+                  <button type="button" class="clock-step" id="btn-ritual-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+                </div>
               </div>
-              <div class="clock breach">
-                <div class="label">Breach</div>
-                <div class="value"><span id="breach-val">0</span><span class="max">/6</span></div>
+              <div class="clock-group breach">
+                <span class="clock-label">Breach</span>
+                <div class="clock-stepper">
+                  <button type="button" class="clock-step" id="btn-breach-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                  <span class="clock-value"><strong id="breach-compact">0</strong><span class="max">/6</span></span>
+                  <button type="button" class="clock-step" id="btn-breach-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+                </div>
                 <div class="breach-pips" id="breach-pips"></div>
               </div>
             </div>
-            <p id="g-info" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:12px 0 0"></p>
-            <p id="pylon-ac" class="hidden" style="font-size:0.85rem;color:var(--muted);margin:4px 0 0"></p>
-            <div class="btn-row">
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-plus">Ritual +1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-fed">Fed horde +1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-ritual-minus">Ritual −1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-plus">Breach +1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-breach-minus">Breach −1</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-pylon">Pylon down −2</button>
-              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-knight">Knight kill −1</button>
-            </div>
+            <p id="ritual-stop" class="hidden clock-note">Ticks stopped</p>
+            <p id="g-info" class="hidden clock-note"></p>
+            <p id="pylon-ac" class="hidden clock-note"></p>
           </div>
 
       <!-- PHASE 1 — The Tide (~0:05–0:50) -->
@@ -2445,8 +2539,12 @@ main {
   }
 
   function renderClocks() {
-    $('#ritual-val').textContent = state.ritual;
-    $('#breach-val').textContent = state.breach;
+    setEl($('#ritual-compact'), (n) => {
+      n.textContent = state.ritual;
+    });
+    setEl($('#breach-compact'), (n) => {
+      n.textContent = state.breach;
+    });
     $('#ritual-stop').classList.toggle('hidden', !state.ritualStopped);
 
     const pips = $('#breach-pips');
@@ -2454,6 +2552,12 @@ main {
     for (let i = 0; i < 6; i++) {
       pips.appendChild(el('span', `breach-pip${i < state.breach ? ' filled' : ''}`));
     }
+
+    setEl($('.clocks-bar'), (bar) => {
+      bar.classList.toggle('ritual-stopped', state.ritualStopped);
+      bar.classList.toggle('ritual-high', state.ritual >= 10);
+      bar.classList.toggle('breach-high', state.breach >= 4);
+    });
 
     const g = G.gTrack(state);
     const cone = G.nextConeG(state);

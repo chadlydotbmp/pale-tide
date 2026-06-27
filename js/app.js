@@ -152,8 +152,12 @@
   }
 
   function renderClocks() {
-    $('#ritual-val').textContent = state.ritual;
-    $('#breach-val').textContent = state.breach;
+    setEl($('#ritual-compact'), (n) => {
+      n.textContent = state.ritual;
+    });
+    setEl($('#breach-compact'), (n) => {
+      n.textContent = state.breach;
+    });
     $('#ritual-stop').classList.toggle('hidden', !state.ritualStopped);
 
     const pips = $('#breach-pips');
@@ -161,6 +165,12 @@
     for (let i = 0; i < 6; i++) {
       pips.appendChild(el('span', `breach-pip${i < state.breach ? ' filled' : ''}`));
     }
+
+    setEl($('.clocks-bar'), (bar) => {
+      bar.classList.toggle('ritual-stopped', state.ritualStopped);
+      bar.classList.toggle('ritual-high', state.ritual >= 10);
+      bar.classList.toggle('breach-high', state.breach >= 4);
+    });
 
     const g = G.gTrack(state);
     const cone = G.nextConeG(state);
