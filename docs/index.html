@@ -3028,6 +3028,7 @@ main {
           <ul class="phase-list muted">
             <li>Leader + Keeper → liches · woman → banshee (attacks if neutral or worse)</li>
             <li>Inner fence OFF · Apostle from vortex · Ritual ticks stop on mat</li>
+            <li><strong>Breach 6</strong> — circle closed · Time Collapse · Apostle claws up *(580 HP if ritual &lt; 20)*</li>
             <li><strong>Rim rite complete</strong> — ritual stops early · premature Apostle *(temporary · 580 HP)*</li>
             <li><strong>Ritual 20</strong> — Apostle <strong>physical forever</strong> *(725 HP)*</li>
           </ul>
@@ -3538,7 +3539,7 @@ main {
     return 0;
   }
 
-  /** Ritual 20 · both pylons down · all rim sites consecrated → Time Collapse · Apostle on mat */
+  /** Ritual 20 · Breach 6 · both pylons down · all rim sites consecrated → Time Collapse · Apostle on mat */
   function mergeStatePatch(current, patch) {
     let next = { ...current, ...patch };
     let rimRiteJustCompleted = false;
@@ -3552,7 +3553,8 @@ main {
     const wasOnMat = current.apostleOnMat;
     const bothPylonsDown = next.pylonA.destroyed && next.pylonB.destroyed;
     const autoArrival =
-      !wasOnMat && (next.ritual >= 20 || rimRiteJustCompleted || bothPylonsDown);
+      !wasOnMat &&
+      (next.ritual >= 20 || next.breach >= 6 || rimRiteJustCompleted || bothPylonsDown);
     const manualArrival = !wasOnMat && patch.apostleOnMat;
 
     if (autoArrival || manualArrival) {
@@ -4297,7 +4299,7 @@ main {
       ],
       special: [
         'Wheel: acid, fire, force, lightning, physical, psychic, radiant, thunder — FIFO on 4th type',
-        'Arrives: Ritual 20 (725 HP) · all 3 rim sites consecrated (580 HP) · both pylons down · clock ≥ 2:15',
+        'Arrives: Ritual 20 (725 HP) · Breach 6 · all 3 rim sites consecrated (580 HP) · both pylons down · clock ≥ 2:15',
       ],
     },
     {

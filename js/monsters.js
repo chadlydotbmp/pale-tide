@@ -349,7 +349,7 @@
       ],
       special: [
         'Wheel: acid, fire, force, lightning, physical, psychic, radiant, thunder — FIFO on 4th type',
-        'Arrives: Ritual 20 (725 HP) · all 3 rim sites consecrated (580 HP) · both pylons down · clock ≥ 2:15',
+        'Arrives: Ritual 20 (725 HP) · Breach 6 · all 3 rim sites consecrated (580 HP) · both pylons down · clock ≥ 2:15',
       ],
     },
     {

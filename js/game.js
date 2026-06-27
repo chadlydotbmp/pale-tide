@@ -476,7 +476,7 @@
     return 0;
   }
 
-  /** Ritual 20 · both pylons down · all rim sites consecrated → Time Collapse · Apostle on mat */
+  /** Ritual 20 · Breach 6 · both pylons down · all rim sites consecrated → Time Collapse · Apostle on mat */
   function mergeStatePatch(current, patch) {
     let next = { ...current, ...patch };
     let rimRiteJustCompleted = false;
@@ -490,7 +490,8 @@
     const wasOnMat = current.apostleOnMat;
     const bothPylonsDown = next.pylonA.destroyed && next.pylonB.destroyed;
     const autoArrival =
-      !wasOnMat && (next.ritual >= 20 || rimRiteJustCompleted || bothPylonsDown);
+      !wasOnMat &&
+      (next.ritual >= 20 || next.breach >= 6 || rimRiteJustCompleted || bothPylonsDown);
     const manualArrival = !wasOnMat && patch.apostleOnMat;
 
     if (autoArrival || manualArrival) {
