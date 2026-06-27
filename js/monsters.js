@@ -98,7 +98,7 @@
         { name: 'Bite ×2', text: '+11 · 2d8+6 necrotic' },
         {
           name: 'Cold Howl (Bonus)',
-          text: '30 ft · Wis DC 19 or Frightened until end of next turn · disadv if saw PC drop to 0 HP',
+          text: '30 ft · Wis DC 19 or Frightened until end of next turn · pierces Rage · disadv if saw PC drop to 0 HP',
         },
         {
           name: 'Pack Takedown',
@@ -173,14 +173,14 @@
         },
       ],
       legendary: [
-        'Move · half speed no OA',
-        'Strike · +12 longsword 2d8+6 + 2d6 nec',
+        'Move · half speed, no OA',
+        'Strike · +12 longsword · 2d8+6 slash + 2d6 nec',
         'Command · one cluster half speed',
-        'Chill Command · Wis 21 or Charmed (non-Raging)',
-        'Bone Litany · Wis 21 or can’t extend Rage',
-        'Crown’s Weight · Wis 21 or auras off (Anax)',
-        'Skull Weight · Wis 21 or no psychic (Theokoles)',
-        'Blade Burst (Blade Singer LA) · 30-ft line 8d8 force Dex 18 half',
+        'Chill Command · Wis DC 21 or Charmed until end of next turn (non-Raging)',
+        'Bone Litany · Wis DC 21 or can’t extend Rage next turn (Raging)',
+        'Crown’s Weight · Wis DC 21 or auras off until end of next turn (Anax)',
+        'Skull Weight · Wis DC 21 or no psychic until end of next turn (Theokoles)',
+        'Blade Burst (Blade Singer LA) · 30-ft line · 8d8 force · Dex DC 18 half',
       ],
       variants: [
         'Marshal R2 gate · Marshal of the Dead · hordes +10 · 2 LA/round',
@@ -220,10 +220,10 @@
         },
       ],
       legendary: [
-        'Cantrip · Ray of Frost',
-        'Frightening Gaze · Wis DC 20',
-        'Teleport 60 ft',
-        'Bone Litany · Wis DC 21 vs Raging',
+        'Cantrip · Ray of Frost +12 · 2d8 cold',
+        'Frightening Gaze · Wis DC 20 or Frightened until end of next turn · pierces Rage',
+        'Teleport · 60 ft to seen space',
+        'Bone Litany · Wis DC 21 or can’t extend Rage next turn (Raging)',
       ],
     },
     {
@@ -252,9 +252,9 @@
         },
       ],
       legendary: [
-        'Cantrip · Chill Touch',
-        'Frightening Gaze · Wis DC 21',
-        'Teleport 60 ft',
+        'Cantrip · Chill Touch +13 · 2d8 necrotic',
+        'Frightening Gaze · Wis DC 21 or Frightened until end of next turn · pierces Rage',
+        'Teleport · 60 ft to seen space',
         'Ledger’s Tally · Con DC 21 or concentration save at disadv',
       ],
     },
@@ -285,7 +285,7 @@
         { name: 'Corrupting Touch', text: '+10 · 3d8+6 necrotic' },
         {
           name: 'Horrify',
-          text: 'Wis DC 20 · 60 ft · Frightened until her next turn · success immune 24 hr',
+          text: 'Wis DC 20 · 60 ft · Frightened until her next turn · pierces Rage · success immune 24 hr',
         },
         {
           name: 'Deathly Wail (Recharge 5–6)',
@@ -293,10 +293,10 @@
         },
       ],
       legendary: [
-        'Drift · fly half speed',
-        'Touch · Corrupting Touch',
-        'Keening · Wis DC 20 Frightened',
-        'Still Counting · Wis DC 21 or no healing until her next turn',
+        'Drift · fly half speed, no OA',
+        'Touch · Corrupting Touch +10 · 3d8+6 necrotic',
+        'Keening · Wis DC 20 or Frightened until end of her next turn · pierces Rage',
+        'Still Counting · Wis DC 21 or no healing until end of her next turn',
       ],
       special: [
         'Friendly → neutral · no LA unless provoked',
@@ -313,7 +313,7 @@
       cr: 'apex',
       stats: [
         ['AC', '19'],
-        ['HP', '580 (bloodied 290)'],
+        ['HP', '580 premature · 725 if Ritual 20 (bloodied ≤ half max)'],
         ['Speed', 'fly 30 hover · Init +8'],
         ['Saves', 'Str +10 · Con +10 · Wis +9 · Cha +11'],
         ['Immune', 'Cold, Necrotic, Poison + 3 rotating wheel'],
@@ -334,7 +334,7 @@
         },
         {
           name: 'Gaze of the Dead (Bonus)',
-          text: '60 ft below max HP · Wis DC 20 or Frightened',
+          text: '60 ft below max HP · Wis DC 20 or Frightened · pierces Rage',
         },
       ],
       reactions: [
@@ -342,14 +342,14 @@
         'Dead Thoughts: on psychic damage · attacker Wis DC 23 or no psychic next turn',
       ],
       legendary: [
-        '1 · Swipe · Scythe',
-        '2 · Finger of Death (Empowered only) · DC 21 · 7d8+30 nec',
+        '1 · Swipe · Scythe +12 · 2d8+6 slash + 3d8 nec · Con DC 21 or max HP − nec',
+        '2 · Finger of Death (Empowered only) · Con DC 21 · 7d8+30 nec (half on success)',
         '3 · Stare of Mortality · Con DC 20 or +1 Exhaustion',
-        '3/round · 4 when bloodied',
+        'Budget · 3/round · 4 when bloodied',
       ],
       special: [
         'Wheel: acid, fire, force, lightning, physical, psychic, radiant, thunder — FIFO on 4th type',
-        'Arrives: Ritual 20 · both pylons down · clock ≥ 2:15',
+        'Arrives: Ritual 20 (725 HP) · all 3 rim sites consecrated (580 HP) · both pylons down · clock ≥ 2:15',
       ],
     },
     {
@@ -403,7 +403,8 @@
       ],
       traits: [
         'Ward: no teleport/flight · Misty Step/Dimension Door blocked',
-        'G+0 Wail Wis 21 · G+4+ cone 12d6 + Stillness Con 23',
+        'G+0 Wail Wis DC 21 (disadv if Raging) · Frightened pierces Rage · can’t extend Rage · no psychic until next turn',
+        'G+4+ cone 12d6 necrotic + Stillness Con DC 23',
         'Null Pulse: no auras · no psychic · radiant healing halved 60 ft',
       ],
       actions: [],
@@ -457,9 +458,8 @@
     });
     (m.legendary || []).forEach((l) => {
       const text = typeof l === 'string' ? l : l.text || String(l);
-      if (/\d+d\d|\+\d{1,2}\b|DC \d+/i.test(text)) {
-        out.push({ name: 'Legendary', text });
-      }
+      if (/^Budget ·/i.test(text)) return;
+      out.push({ name: 'Legendary', text });
     });
     return out;
   }

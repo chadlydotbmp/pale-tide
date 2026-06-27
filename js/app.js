@@ -1058,7 +1058,7 @@
     if (t && t.nodeType === 3) t = t.parentElement;
     if (!t || !t.closest) return null;
     return t.closest(
-      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn, .phase-section-toggle, .inner-bust-option'
+      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn, .phase-section-toggle, .inner-bust-option, [data-skull-pile]'
     );
   }
 
@@ -1071,6 +1071,27 @@
 
     if (node.dataset.innerBust) {
       applyInnerBustChoice(node.dataset.innerBust);
+      return;
+    }
+
+    if (node.dataset.skullPile) {
+      const pileNum = Number(node.dataset.skullPile);
+      const { piles, newlyFoundSite } = G.advanceSkullPile(
+        state.skullPiles,
+        pileNum,
+        state.pileSiteMap
+      );
+      const patch = { skullPiles: piles };
+      if (newlyFoundSite) {
+        patch.anchors = {
+          ...state.anchors,
+          [newlyFoundSite.id]: {
+            ...state.anchors[newlyFoundSite.id],
+            located: true,
+          },
+        };
+      }
+      setState(patch);
       return;
     }
 
@@ -1182,10 +1203,6 @@
           skullPiles: G.defaultSkullPiles(),
           skullTargetsRevealed: false,
         });
-        return;
-      case 'btn-buy-anchor':
-        if (state.innerBuydowns >= 3) return;
-        setState({ ritual: Math.max(0, state.ritual - 1), innerBuydowns: state.innerBuydowns + 1 });
         return;
       case 'btn-buy-inner':
         if (state.innerBuydowns >= 3) return;
@@ -1316,10 +1333,7 @@
         setState({ apostleOnMat: true });
         return;
       case 'btn-apostle-arrives':
-        setState({
-          apostleOnMat: true,
-          ritual: 20,
-        });
+        setState({ apostleOnMat: true });
         return;
       case 'a-shield-minus':
       case 'b-shield-minus': {
@@ -1386,7 +1400,7 @@
         setState({ laKnightsUsed: Math.max(0, state.laKnightsUsed - 1) });
         return;
       case 'la-knights-plus':
-        setState({ laKnightsUsed: Math.min(3, state.laKnightsUsed + 1) });
+        setState({ laKnightsUsed: Math.min(2, state.laKnightsUsed + 1) });
         return;
       case 'la-apostle-minus':
         setState({ laApostleUsed: Math.max(0, state.laApostleUsed - 1) });
@@ -1482,29 +1496,8 @@
       return;
     }
 
-    if (node.dataset.skullPile) {
-      const pileNum = Number(node.dataset.skullPile);
-      const { piles, newlyFoundSite } = G.advanceSkullPile(
-        state.skullPiles,
-        pileNum,
-        state.pileSiteMap
-      );
-      const patch = { skullPiles: piles };
-      if (newlyFoundSite) {
-        patch.anchors = {
-          ...state.anchors,
-          [newlyFoundSite.id]: {
-            ...state.anchors[newlyFoundSite.id],
-            located: true,
-          },
-        };
-      }
-      setState(patch);
-      return;
-    }
-
-    if (node.id === 'rim-rite') {
-      setState({ rimRiteKnown: node.checked });
+    if (t.id === 'rim-rite') {
+      setState({ rimRiteKnown: t.checked });
       return;
     }
     if (t.id === 'apostle-on') {

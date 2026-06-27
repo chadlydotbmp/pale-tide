@@ -2820,7 +2820,6 @@ main {
             <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-inner-win">+ Win</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-inner-fail">+ Caught / fail</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-inner">Apply −1 Ritual</button>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-anchor">Anchor bind −1</button>
           </div>
           </div>
         </div>
@@ -3539,7 +3538,7 @@ main {
     return 0;
   }
 
-  /** Ritual 20 · Breach 6 · all rim sites consecrated → Time Collapse · Apostle on mat */
+  /** Ritual 20 · both pylons down · all rim sites consecrated → Time Collapse · Apostle on mat */
   function mergeStatePatch(current, patch) {
     let next = { ...current, ...patch };
     let rimRiteJustCompleted = false;
@@ -3551,8 +3550,9 @@ main {
     }
 
     const wasOnMat = current.apostleOnMat;
+    const bothPylonsDown = next.pylonA.destroyed && next.pylonB.destroyed;
     const autoArrival =
-      !wasOnMat && (next.ritual >= 20 || next.breach >= 6 || rimRiteJustCompleted);
+      !wasOnMat && (next.ritual >= 20 || rimRiteJustCompleted || bothPylonsDown);
     const manualArrival = !wasOnMat && patch.apostleOnMat;
 
     if (autoArrival || manualArrival) {
@@ -3776,20 +3776,20 @@ main {
         'Multiattack: 3× Dread Blade +11',
         'Hellfire Orb · Mortuary Stillness Con 23 (recharge 5–6)',
         'Parry reaction: +6 AC vs one melee hit',
-        'Grave hounds: bite +11 ×2 · Cold Howl Wis 19 · Pack Takedown',
+        'Grave hounds: bite +11 ×2 · Cold Howl Wis DC 19 (Frightened · pierces Rage) · Pack Takedown',
       ],
       la: {
         budget: '2/round · Blade Singer 3/round',
         note: 'End of a PC turn · one headline suppression per round',
         options: [
           'Move — half speed, no OA',
-          'Strike — +12 longsword 2d8+6 + 2d6 nec',
+          'Strike — +12 longsword · 2d8+6 slash + 2d6 nec',
           'Command — one cluster half speed',
-          'Chill Command — Wis 21 or Charmed (non-Raging)',
-          'Bone Litany — Wis 21 or can’t extend Rage',
-          'Crown’s Weight — Wis 21 or auras off (Anax)',
-          'Skull Weight — Wis 21 or no psychic (Theokoles)',
-          'Blade Burst — Blade Singer only · 30-ft line 8d8 force Dex 18 half',
+          'Chill Command — Wis DC 21 or Charmed until end of next turn (non-Raging)',
+          'Bone Litany — Wis DC 21 or can’t extend Rage next turn (Raging)',
+          'Crown’s Weight — Wis DC 21 or auras off until end of next turn (Anax)',
+          'Skull Weight — Wis DC 21 or no psychic until end of next turn (Theokoles)',
+          'Blade Burst — Blade Singer only · 30-ft line · 8d8 force · Dex DC 18 half',
         ],
       },
     },
@@ -3800,15 +3800,16 @@ main {
         'Life Drain +10 · 5d8+6 nec · max HP − damage',
         'Soul Grit: 4 wraiths on one target or crit → Con 23 or Rage ends',
         'Banshee friendly only → neutral · attacks if neutral or worse',
+        'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',
       ],
       la: {
         budget: 'Banshee 2/round · hostile if neutral or worse',
         note: 'End of another creature’s turn',
         options: [
-          'Drift — fly half speed',
-          'Touch — Corrupting Touch +10',
-          'Keening — Wis 20 or Frightened',
-          'Still Counting — Wis 21 or no healing until her next turn',
+          'Drift — fly half speed, no OA',
+          'Touch — Corrupting Touch +10 · 3d8+6 necrotic',
+          'Keening — Wis DC 20 or Frightened until end of her next turn · pierces Rage',
+          'Still Counting — Wis DC 21 or no healing until end of her next turn',
         ],
       },
     },
@@ -3825,7 +3826,8 @@ main {
       lines: [
         'Leader Lich → Keeper Lich → Apostle last',
         'Lichens: 2 LA/round each · LR 2/day',
-        'Apostle: 3 LA/round · 4 when bloodied ≤290',
+        'Apostle: 3 LA/round · 4 when bloodied (≤ half max HP)',
+        'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',
       ],
       la: {
         budget: 'See active unit below',
@@ -3833,27 +3835,27 @@ main {
           {
             name: 'Leader Lich (2/round)',
             options: [
-              'Cantrip — Ray of Frost',
-              'Frightening Gaze — Wis 20',
-              'Teleport — 60 ft',
-              'Bone Litany — Wis 21 vs Raging',
+              'Cantrip — Ray of Frost +12 · 2d8 cold',
+              'Frightening Gaze — Wis DC 20 or Frightened until end of next turn · pierces Rage',
+              'Teleport — 60 ft to seen space',
+              'Bone Litany — Wis DC 21 or can’t extend Rage next turn (Raging)',
             ],
           },
           {
             name: 'Keeper Lich (2/round)',
             options: [
-              'Cantrip — Chill Touch',
-              'Frightening Gaze — Wis 21',
-              'Teleport — 60 ft',
-              'Ledger’s Tally — Con 21 or conc save at disadv',
+              'Cantrip — Chill Touch +13 · 2d8 necrotic',
+              'Frightening Gaze — Wis DC 21 or Frightened until end of next turn · pierces Rage',
+              'Teleport — 60 ft to seen space',
+              'Ledger’s Tally — Con DC 21 or concentration save at disadv',
             ],
           },
           {
             name: 'Apostle (3/round · 4 bloodied)',
             options: [
-              '1 · Swipe — Scythe attack',
-              '2 · Finger of Death — Empowered only · DC 21 · 7d8+30 nec',
-              '3 · Stare of Mortality — Con 20 or +1 Exhaustion',
+              '1 · Swipe — Scythe +12 · 2d8+6 slash + 3d8 nec · Con DC 21 or max HP − nec',
+              '2 · Finger of Death — Empowered only · Con DC 21 · 7d8+30 nec (half on success)',
+              '3 · Stare of Mortality — Con DC 20 or +1 Exhaustion',
             ],
           },
         ],
@@ -4044,7 +4046,7 @@ main {
         { name: 'Bite ×2', text: '+11 · 2d8+6 necrotic' },
         {
           name: 'Cold Howl (Bonus)',
-          text: '30 ft · Wis DC 19 or Frightened until end of next turn · disadv if saw PC drop to 0 HP',
+          text: '30 ft · Wis DC 19 or Frightened until end of next turn · pierces Rage · disadv if saw PC drop to 0 HP',
         },
         {
           name: 'Pack Takedown',
@@ -4119,14 +4121,14 @@ main {
         },
       ],
       legendary: [
-        'Move · half speed no OA',
-        'Strike · +12 longsword 2d8+6 + 2d6 nec',
+        'Move · half speed, no OA',
+        'Strike · +12 longsword · 2d8+6 slash + 2d6 nec',
         'Command · one cluster half speed',
-        'Chill Command · Wis 21 or Charmed (non-Raging)',
-        'Bone Litany · Wis 21 or can’t extend Rage',
-        'Crown’s Weight · Wis 21 or auras off (Anax)',
-        'Skull Weight · Wis 21 or no psychic (Theokoles)',
-        'Blade Burst (Blade Singer LA) · 30-ft line 8d8 force Dex 18 half',
+        'Chill Command · Wis DC 21 or Charmed until end of next turn (non-Raging)',
+        'Bone Litany · Wis DC 21 or can’t extend Rage next turn (Raging)',
+        'Crown’s Weight · Wis DC 21 or auras off until end of next turn (Anax)',
+        'Skull Weight · Wis DC 21 or no psychic until end of next turn (Theokoles)',
+        'Blade Burst (Blade Singer LA) · 30-ft line · 8d8 force · Dex DC 18 half',
       ],
       variants: [
         'Marshal R2 gate · Marshal of the Dead · hordes +10 · 2 LA/round',
@@ -4166,10 +4168,10 @@ main {
         },
       ],
       legendary: [
-        'Cantrip · Ray of Frost',
-        'Frightening Gaze · Wis DC 20',
-        'Teleport 60 ft',
-        'Bone Litany · Wis DC 21 vs Raging',
+        'Cantrip · Ray of Frost +12 · 2d8 cold',
+        'Frightening Gaze · Wis DC 20 or Frightened until end of next turn · pierces Rage',
+        'Teleport · 60 ft to seen space',
+        'Bone Litany · Wis DC 21 or can’t extend Rage next turn (Raging)',
       ],
     },
     {
@@ -4198,9 +4200,9 @@ main {
         },
       ],
       legendary: [
-        'Cantrip · Chill Touch',
-        'Frightening Gaze · Wis DC 21',
-        'Teleport 60 ft',
+        'Cantrip · Chill Touch +13 · 2d8 necrotic',
+        'Frightening Gaze · Wis DC 21 or Frightened until end of next turn · pierces Rage',
+        'Teleport · 60 ft to seen space',
         'Ledger’s Tally · Con DC 21 or concentration save at disadv',
       ],
     },
@@ -4231,7 +4233,7 @@ main {
         { name: 'Corrupting Touch', text: '+10 · 3d8+6 necrotic' },
         {
           name: 'Horrify',
-          text: 'Wis DC 20 · 60 ft · Frightened until her next turn · success immune 24 hr',
+          text: 'Wis DC 20 · 60 ft · Frightened until her next turn · pierces Rage · success immune 24 hr',
         },
         {
           name: 'Deathly Wail (Recharge 5–6)',
@@ -4239,10 +4241,10 @@ main {
         },
       ],
       legendary: [
-        'Drift · fly half speed',
-        'Touch · Corrupting Touch',
-        'Keening · Wis DC 20 Frightened',
-        'Still Counting · Wis DC 21 or no healing until her next turn',
+        'Drift · fly half speed, no OA',
+        'Touch · Corrupting Touch +10 · 3d8+6 necrotic',
+        'Keening · Wis DC 20 or Frightened until end of her next turn · pierces Rage',
+        'Still Counting · Wis DC 21 or no healing until end of her next turn',
       ],
       special: [
         'Friendly → neutral · no LA unless provoked',
@@ -4259,7 +4261,7 @@ main {
       cr: 'apex',
       stats: [
         ['AC', '19'],
-        ['HP', '580 (bloodied 290)'],
+        ['HP', '580 premature · 725 if Ritual 20 (bloodied ≤ half max)'],
         ['Speed', 'fly 30 hover · Init +8'],
         ['Saves', 'Str +10 · Con +10 · Wis +9 · Cha +11'],
         ['Immune', 'Cold, Necrotic, Poison + 3 rotating wheel'],
@@ -4280,7 +4282,7 @@ main {
         },
         {
           name: 'Gaze of the Dead (Bonus)',
-          text: '60 ft below max HP · Wis DC 20 or Frightened',
+          text: '60 ft below max HP · Wis DC 20 or Frightened · pierces Rage',
         },
       ],
       reactions: [
@@ -4288,14 +4290,14 @@ main {
         'Dead Thoughts: on psychic damage · attacker Wis DC 23 or no psychic next turn',
       ],
       legendary: [
-        '1 · Swipe · Scythe',
-        '2 · Finger of Death (Empowered only) · DC 21 · 7d8+30 nec',
+        '1 · Swipe · Scythe +12 · 2d8+6 slash + 3d8 nec · Con DC 21 or max HP − nec',
+        '2 · Finger of Death (Empowered only) · Con DC 21 · 7d8+30 nec (half on success)',
         '3 · Stare of Mortality · Con DC 20 or +1 Exhaustion',
-        '3/round · 4 when bloodied',
+        'Budget · 3/round · 4 when bloodied',
       ],
       special: [
         'Wheel: acid, fire, force, lightning, physical, psychic, radiant, thunder — FIFO on 4th type',
-        'Arrives: Ritual 20 · both pylons down · clock ≥ 2:15',
+        'Arrives: Ritual 20 (725 HP) · all 3 rim sites consecrated (580 HP) · both pylons down · clock ≥ 2:15',
       ],
     },
     {
@@ -4349,7 +4351,8 @@ main {
       ],
       traits: [
         'Ward: no teleport/flight · Misty Step/Dimension Door blocked',
-        'G+0 Wail Wis 21 · G+4+ cone 12d6 + Stillness Con 23',
+        'G+0 Wail Wis DC 21 (disadv if Raging) · Frightened pierces Rage · can’t extend Rage · no psychic until next turn',
+        'G+4+ cone 12d6 necrotic + Stillness Con DC 23',
         'Null Pulse: no auras · no psychic · radiant healing halved 60 ft',
       ],
       actions: [],
@@ -4403,9 +4406,8 @@ main {
     });
     (m.legendary || []).forEach((l) => {
       const text = typeof l === 'string' ? l : l.text || String(l);
-      if (/\d+d\d|\+\d{1,2}\b|DC \d+/i.test(text)) {
-        out.push({ name: 'Legendary', text });
-      }
+      if (/^Budget ·/i.test(text)) return;
+      out.push({ name: 'Legendary', text });
     });
     return out;
   }
@@ -5509,7 +5511,7 @@ main {
     if (t && t.nodeType === 3) t = t.parentElement;
     if (!t || !t.closest) return null;
     return t.closest(
-      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn, .phase-section-toggle, .inner-bust-option'
+      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn, .phase-section-toggle, .inner-bust-option, [data-skull-pile]'
     );
   }
 
@@ -5522,6 +5524,27 @@ main {
 
     if (node.dataset.innerBust) {
       applyInnerBustChoice(node.dataset.innerBust);
+      return;
+    }
+
+    if (node.dataset.skullPile) {
+      const pileNum = Number(node.dataset.skullPile);
+      const { piles, newlyFoundSite } = G.advanceSkullPile(
+        state.skullPiles,
+        pileNum,
+        state.pileSiteMap
+      );
+      const patch = { skullPiles: piles };
+      if (newlyFoundSite) {
+        patch.anchors = {
+          ...state.anchors,
+          [newlyFoundSite.id]: {
+            ...state.anchors[newlyFoundSite.id],
+            located: true,
+          },
+        };
+      }
+      setState(patch);
       return;
     }
 
@@ -5633,10 +5656,6 @@ main {
           skullPiles: G.defaultSkullPiles(),
           skullTargetsRevealed: false,
         });
-        return;
-      case 'btn-buy-anchor':
-        if (state.innerBuydowns >= 3) return;
-        setState({ ritual: Math.max(0, state.ritual - 1), innerBuydowns: state.innerBuydowns + 1 });
         return;
       case 'btn-buy-inner':
         if (state.innerBuydowns >= 3) return;
@@ -5767,10 +5786,7 @@ main {
         setState({ apostleOnMat: true });
         return;
       case 'btn-apostle-arrives':
-        setState({
-          apostleOnMat: true,
-          ritual: 20,
-        });
+        setState({ apostleOnMat: true });
         return;
       case 'a-shield-minus':
       case 'b-shield-minus': {
@@ -5837,7 +5853,7 @@ main {
         setState({ laKnightsUsed: Math.max(0, state.laKnightsUsed - 1) });
         return;
       case 'la-knights-plus':
-        setState({ laKnightsUsed: Math.min(3, state.laKnightsUsed + 1) });
+        setState({ laKnightsUsed: Math.min(2, state.laKnightsUsed + 1) });
         return;
       case 'la-apostle-minus':
         setState({ laApostleUsed: Math.max(0, state.laApostleUsed - 1) });
@@ -5933,29 +5949,8 @@ main {
       return;
     }
 
-    if (node.dataset.skullPile) {
-      const pileNum = Number(node.dataset.skullPile);
-      const { piles, newlyFoundSite } = G.advanceSkullPile(
-        state.skullPiles,
-        pileNum,
-        state.pileSiteMap
-      );
-      const patch = { skullPiles: piles };
-      if (newlyFoundSite) {
-        patch.anchors = {
-          ...state.anchors,
-          [newlyFoundSite.id]: {
-            ...state.anchors[newlyFoundSite.id],
-            located: true,
-          },
-        };
-      }
-      setState(patch);
-      return;
-    }
-
-    if (node.id === 'rim-rite') {
-      setState({ rimRiteKnown: node.checked });
+    if (t.id === 'rim-rite') {
+      setState({ rimRiteKnown: t.checked });
       return;
     }
     if (t.id === 'apostle-on') {
