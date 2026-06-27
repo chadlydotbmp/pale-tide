@@ -9,109 +9,193 @@
       Use <strong>GitHub Pages</strong> (HTTPS) — see DEPLOY.md in this folder. Open in <strong>Safari</strong>, not Files preview.
     </div>
     <header class="app-header">
-      <div class="header-row">
-        <h1 id="header-title">The Pale Tide</h1>
-        <div class="session-timer" id="session-timer">
-          <button type="button" class="timer-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
-          <div class="timer-face">
-            <span class="timer-clock" id="timer-clock">0:00</span>
-            <span class="timer-segment" id="timer-segment">Teleport</span>
+      <div class="header-toolbar">
+        <div class="header-clocks clocks-bar" id="header-clocks">
+          <div class="clocks-row">
+            <div class="clock-group ritual">
+              <span class="clock-label">Ritual</span>
+              <div class="clock-stepper">
+                <button type="button" class="clock-step" id="btn-ritual-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                <span class="clock-value"><strong id="ritual-compact">0</strong><span class="max">/20</span></span>
+                <button type="button" class="clock-step" id="btn-ritual-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+              </div>
+            </div>
+            <div class="clock-group breach">
+              <span class="clock-label">Breach</span>
+              <div class="clock-stepper">
+                <button type="button" class="clock-step" id="btn-breach-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                <span class="clock-value"><strong id="breach-compact">0</strong><span class="max">/6</span></span>
+                <button type="button" class="clock-step" id="btn-breach-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+              </div>
+              <div class="breach-pips" id="breach-pips"></div>
+            </div>
           </div>
         </div>
+        <div class="header-round" id="header-round" aria-label="Round">R1</div>
+        <button type="button" class="header-btn primary header-next-round" id="btn-new-round" onclick="PaleTideApp.tap(this,event)">Next Round</button>
+        <div class="header-timer">
+          <div class="timer-alert hidden" id="timer-alert">
+            <span id="timer-alert-text"></span>
+            <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)" title="Dismiss">✕</button>
+          </div>
+          <div class="session-timer" id="session-timer">
+            <button type="button" class="timer-btn header-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
+            <div class="timer-face">
+              <span class="timer-clock" id="timer-clock">0:00</span>
+              <span class="timer-segment" id="timer-segment">Teleport</span>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="header-btn header-reset danger" id="btn-reset" onclick="PaleTideApp.tap(this,event)" title="Reset all encounter state">Reset</button>
       </div>
-      <div class="timer-alert hidden" id="timer-alert">
-        <span id="timer-alert-text"></span>
-        <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)">✕</button>
+      <div class="header-status">
+        <div class="meta" id="meta-chips"></div>
+        <p id="ritual-stop" class="header-clock-note hidden">Ticks stopped</p>
+        <p id="g-info" class="header-clock-note hidden"></p>
+        <p id="pylon-ac" class="header-clock-note hidden"></p>
       </div>
-      <div class="meta" id="meta-chips"></div>
     </header>
 
     <main>
       <div id="combat-layout" class="combat-layout">
-        <aside id="init-rail" class="init-rail panel">
-          <h2>Initiative · high → low</h2>
-          <div class="init-ref-strip" id="init-ref-strip"></div>
-          <div id="reminder-panel" class="reminder-panel empty">Tap <strong>Mark</strong> on a row for turn · LA · lair reminders</div>
-          <div class="shuffle-bar">
-            <div>
-              <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase">Shuffle</div>
-              <div id="shuffle-info" style="font-size:0.88rem;margin-top:4px">Round 1 default</div>
-            </div>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-new-round">New Round</button>
+        <div id="init-rail-column" class="init-rail-column">
+          <aside id="init-rail" class="init-rail panel">
+          <div class="init-rail-tracker">
+            <div class="init-list" id="init-list"></div>
           </div>
-          <div class="init-list" id="init-list"></div>
-          <div class="lair-block">
-            <h2>Lair @ 20 · pick one</h2>
-            <div class="lair-grid" id="lair-quick-ref"></div>
+          <div class="init-rail-scroll">
+          <div class="pc-init-panel" id="allies-init-panel">
+            <button type="button" class="pc-init-header" id="btn-allies-init-toggle" onclick="PaleTideApp.tap(this,event)">
+              <span class="pc-init-chevron" id="allies-init-chevron" aria-hidden="true">▾</span>
+              <span class="pc-init-title">PCs &amp; allies</span>
+              <span id="allies-init-summary" class="pc-init-summary"></span>
+            </button>
+            <div id="allies-init-body" class="pc-init-body">
+              <div class="allies-init-section">
+                <div class="allies-init-section-head">
+                  <span class="allies-init-section-label">PCs</span>
+                  <div class="allies-init-section-actions">
+                    <button type="button" class="ghost pc-init-action" id="btn-pc-add-all" onclick="PaleTideApp.tap(this,event)">Add all → tracker</button>
+                    <button type="button" class="ghost pc-init-action" id="btn-pc-clear-tracker" onclick="PaleTideApp.tap(this,event)">Clear PCs</button>
+                  </div>
+                </div>
+                <div id="pc-init-list" class="pc-init-list"></div>
+              </div>
+              <div class="allies-init-section">
+                <div class="allies-init-section-head">
+                  <span class="allies-init-section-label">Summons &amp; allies</span>
+                  <div class="allies-init-section-actions">
+                    <button type="button" class="ghost pc-init-action" id="btn-summon-add-all" onclick="PaleTideApp.tap(this,event)">Add all → tracker</button>
+                    <button type="button" class="ghost pc-init-action" id="btn-summon-clear-tracker" onclick="PaleTideApp.tap(this,event)">Clear summons</button>
+                  </div>
+                </div>
+                <div id="summon-init-list" class="pc-init-list"></div>
+              </div>
+            </div>
           </div>
           <div class="btn-row init-actions">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-shuffle-preview">Re-roll shuffle</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-on">PULSE on</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-off">PULSE off</button>
           </div>
+          </div>
         </aside>
+        </div>
 
         <div id="phase-rail" class="phase-rail">
-          <div class="clocks-bar panel clocks-panel">
-            <div class="clocks-row">
-              <div class="clock-group ritual">
-                <span class="clock-label">Ritual</span>
-                <div class="clock-stepper">
-                  <button type="button" class="clock-step" id="btn-ritual-minus" onclick="PaleTideApp.tap(this,event)">−</button>
-                  <span class="clock-value"><strong id="ritual-compact">0</strong><span class="max">/20</span></span>
-                  <button type="button" class="clock-step" id="btn-ritual-plus" onclick="PaleTideApp.tap(this,event)">+</button>
-                </div>
-              </div>
-              <div class="clock-group breach">
-                <span class="clock-label">Breach</span>
-                <div class="clock-stepper">
-                  <button type="button" class="clock-step" id="btn-breach-minus" onclick="PaleTideApp.tap(this,event)">−</button>
-                  <span class="clock-value"><strong id="breach-compact">0</strong><span class="max">/6</span></span>
-                  <button type="button" class="clock-step" id="btn-breach-plus" onclick="PaleTideApp.tap(this,event)">+</button>
-                </div>
-                <div class="breach-pips" id="breach-pips"></div>
-              </div>
-            </div>
-            <p id="ritual-stop" class="hidden clock-note">Ticks stopped</p>
-            <p id="g-info" class="hidden clock-note"></p>
-            <p id="pylon-ac" class="hidden clock-note"></p>
-          </div>
+        <div id="reminder-panel" class="reminder-popup hidden" aria-live="polite"></div>
 
       <!-- PHASE 1 — The Tide (~0:05–0:50) -->
       <section class="tab-panel" data-tab="phase1">
-        <div class="gate-tracker">
-          <div id="gate-banner" class="gate-banner locked">GATE LOCKED</div>
-          <p id="gate-info" class="gate-info">Road spawns only · Lane + Gate fronts · Breach = road lost</p>
-        </div>
-
         <div class="phase-banner phase-1">
           <strong>Phase 1 · The Tide</strong>
           <span>0:05–0:50 · Gate LOCKED · Gate + Lane</span>
         </div>
 
-        <div class="panel">
-          <h2>Fronts · R1</h2>
+        <div class="panel phase-section gate-section" data-phase1-section="gate">
+          <button type="button" class="phase-section-toggle" data-phase1-section="gate" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Gate</h2>
+          </button>
+          <div class="phase-section-body">
+        <div class="gate-tracker">
+          <div id="gate-banner" class="gate-banner locked">GATE LOCKED</div>
+          <p id="gate-info" class="gate-info">Road spawns only · Lane + Gate fronts · Breach = road lost</p>
+          <div id="gate-locks-panel" class="gate-locks-panel">
+            <p class="gate-brussel-note">
+              <strong>Brussel</strong> can't work the iron—they point at the <strong>prior Passage's body</strong>
+              (face-down in the mud): <strong>thieves' tools</strong> on the corpse.
+            </p>
+            <div class="gate-locks">
+              <div class="gate-lock" id="gate-lock-1">
+                <span class="gate-lock-icon" aria-hidden="true">🔒</span>
+                <span class="gate-lock-label">Lock 1</span>
+              </div>
+              <div class="gate-lock" id="gate-lock-2">
+                <span class="gate-lock-icon" aria-hidden="true">🔒</span>
+                <span class="gate-lock-label">Lock 2</span>
+              </div>
+            </div>
+            <p id="gate-tools-broken" class="gate-tools-broken hidden">Tools broken — that lock is unpickable</p>
+            <div class="btn-row gate-lock-actions">
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-gate-pick">Pick success · DC 20</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="btn-gate-pick-fail">Pick failed · miss by 5+</button>
+            </div>
+            <div id="gate-smash-track" class="gate-smash-track">
+              <p class="gate-smash-label">Smash track · Ath DC 22 · failures don't cost progress</p>
+              <div id="gate-smash-successes" class="gate-smash-successes" aria-label="Smash successes"></div>
+              <div class="btn-row gate-smash-actions">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-gate-smash">+1 Smash success</button>
+              </div>
+            </div>
+            <p class="gate-lock-hint"><strong>Pick both locks</strong> · fail by 5+ breaks tools &amp; jams a lock · <strong>OR smash</strong> (3 successes) — gate opens automatically · picked gates can re-close in Ph 2</p>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase1-section="fronts">
+          <button type="button" class="phase-section-toggle" data-phase1-section="fronts" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Fronts · R1</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list">
-            <li><strong>Gate</strong> — open iron · Brussel within 15 ft · hold Breach</li>
+            <li><strong>Gate</strong> — pick both locks · fail by 5+ jams a lock · OR smash 3× (separate track)</li>
             <li><strong>Lane</strong> — ring + NE column · R1 only while locked</li>
             <li>Road spawns only · hordes 20 ft · graves silent · no pylons</li>
             <li>Lane empty EOR → Breach +1 · all 5 on Gate → Breach +2</li>
           </ul>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Gate opens → Phase 2</h2>
+        <div class="panel phase-section" data-phase1-section="afterOpen">
+          <button type="button" class="phase-section-toggle" data-phase1-section="afterOpen" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>After gate opens</h2>
+          </button>
+          <div class="phase-section-body">
           <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Same round: place pylons · G+0 pulse · re-split Gate · Sanctum · Crown's Edge</p>
-          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-open-gate" style="width:100%">Open gate (G+0) → go to Phase 2</button>
+          <ul class="phase-list muted">
+            <li>Step 1 — Iron gives · road 30 ft · fed hordes Ritual +1</li>
+            <li>Step 2 — Place both pylons · wail · PULSE · Breach +1</li>
+            <li>Step 3 — Graves wake · Grave churn 25 · cone at G+4</li>
+          </ul>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>EOR · Phase 1</h2>
+        <div class="panel phase-section" data-phase1-section="eor">
+          <button type="button" class="phase-section-toggle" data-phase1-section="eor" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>EOR · Phase 1</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list muted">
             <li>Ritual +1 (+ fed hordes max +2 after R2)</li>
             <li>Knights R2 · Hood reveal ≤2 bodies · end Horde slot</li>
             <li>Buy-down: knight kill −1 Ritual</li>
           </ul>
+          </div>
         </div>
       </section>
 
@@ -122,47 +206,12 @@
           <span>0:50–2:00 · Gate OPEN · 3 fronts</span>
         </div>
 
-        <div class="panel">
-          <h2>Fronts</h2>
-          <ul class="phase-list">
-            <li><strong>Gate</strong> — Outer mouth · Task 2 Breach</li>
-            <li><strong>Sanctum</strong> — Inner · Task 1 · stop the count</li>
-            <li><strong>Crown's Edge</strong> — pylons · rim anchors · Task 3</li>
-            <li>Sanctum empty G+3 & G+4 → inner opposed +2</li>
-          </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Inner track</h2>
-          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">3 wins before 2 failures = Ritual −1 (max 3)</p>
-          <div style="text-align:center;margin-bottom:8px">
-            <span style="color:var(--muted);font-size:0.8rem">Wins</span>
-            <div class="track-dots" id="win-dots"></div>
-            <span style="color:var(--muted);font-size:0.8rem">Failures</span>
-            <div class="track-dots" id="fail-dots"></div>
-          </div>
-          <p style="text-align:center;font-size:0.85rem">Buy-downs earned: <strong id="inner-buy">0</strong>/3</p>
-          <div class="btn-row">
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-inner-win">+ Win</button>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-inner-fail">+ Failure</button>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-inner">Apply −1 Ritual</button>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-anchor">Anchor bind −1</button>
-          </div>
-          <label class="check-item" style="margin-top:12px"><input type="checkbox" id="woman-friendly" /> Woman friendly → neutral banshee (Ph 3)</label>
-        </div>
-
-        <div class="panel">
-          <h2>Sanctum · at table</h2>
-          <ul class="phase-list muted">
-            <li>Leader + Keeper: Time Armour — parley only Ph 1–2</li>
-            <li>Attack them: backlash · +1 inner fail · Ritual +1</li>
-            <li>Disrupt counting: Insight DC 26 → Ritual −1</li>
-            <li>G+4: push Counting House · crypt · parley</li>
-          </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Rim pylons</h2>
+        <div class="panel phase-section pylon-panel" data-phase2-section="pylons">
+          <button type="button" class="phase-section-toggle" data-phase2-section="pylons" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Rim pylons</h2>
+          </button>
+          <div class="phase-section-body">
           <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Field AC 25 · 100 HP · Stone 90 HP · Init 20: +d100 shield</p>
           <div class="pylon-grid">
             <div class="pylon-card" id="pylon-a">
@@ -198,23 +247,123 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Grave churn</h2>
-          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Cumulative Perception · start 25 · pylons up only</p>
-          <div style="text-align:center;font-size:2rem;font-weight:700" id="grave-val">25</div>
-          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="grave-plus" style="width:100%;margin-top:8px">+ Perception roll</button>
+        <div class="panel phase-section sanctum-path-panel" data-phase2-section="sanctum">
+          <button type="button" class="phase-section-toggle" data-phase2-section="sanctum" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Sanctum path · Lower</h2>
+          </button>
+          <div class="phase-section-body">
+          <p class="sanctum-path-intro">Social / sneak past the woman · riddles at the echo children</p>
+
+          <div class="sanctum-beat">
+            <h3 class="sanctum-beat-title">Weeping woman</h3>
+            <p class="sanctum-beat-hint">Insight DC 30 · Persuasion DC 34 · sneak — pass without violence. Attack → hostile.</p>
+            <div class="disposition-row" role="group" aria-label="Woman disposition">
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="disp-btn friendly" id="btn-woman-friendly">Friendly</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="disp-btn" id="btn-woman-neutral">Neutral</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="disp-btn hostile" id="btn-woman-hostile">Hostile</button>
+            </div>
+            <p id="woman-banshee-note" class="sanctum-beat-note">Ph 3 banshee: <strong>friendly only</strong> won't attack · neutral or worse → <strong>attacks</strong></p>
+          </div>
+
+          <div class="sanctum-beat">
+            <h3 class="sanctum-beat-title">Echo children · Norman</h3>
+            <p class="sanctum-beat-hint">Answer riddles → remove a child mini → check <strong>NORMAN</strong> on the bottom. Right Norman → they open the way upstairs.</p>
+            <div class="children-tracker">
+              <span class="children-removed-label">Removed <strong id="children-removed">0</strong> / 10</span>
+              <div class="btn-row children-tracker-actions">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-child-remove">+ Riddle · remove child</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-norman-found">Norman found · way opens</button>
+              </div>
+            </div>
+            <p id="children-pass-note" class="sanctum-beat-note success hidden">Norman found — one child walks up the stairs</p>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="inner">
+          <button type="button" class="phase-section-toggle" data-phase2-section="inner" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Inner track · Counting House</h2>
+          </button>
+          <div class="phase-section-body">
+          <p class="inner-track-intro">Persuasion game vs <strong>Leader</strong> + <strong>Ledger Keeper</strong> · and/or gaining knowledge inside the Counting House (ledger lattice · Rim Rite · crypt leads). <strong>3 wins before 2 failures</strong> = Ritual −1 *(max 3)*.</p>
+          <ul class="phase-list muted inner-track-wins">
+            <li><strong>Win:</strong> opposed liturgy · Persuasion/Deception vs Inner +26 *(+1 per 4 Ritual ticks)* · lattice insight · funerary key beats</li>
+            <li><strong>Caught inside:</strong> counts as a failure — party rolls <strong>d20 at disadvantage</strong> to slip notice</li>
+            <li><strong>2 failures before 3 wins:</strong> Leader <strong>banishes the 2nd offender</strong> — <strong>CON 25</strong> or <strong>10d10</strong> unblockable · Outer graveyard · then <strong>pick the ledger's price</strong> below</li>
+          </ul>
+          <div id="inner-bust-panel" class="inner-bust-panel hidden" role="status">
+            <strong>Inner track bust</strong>
+            <p class="inner-bust-banish">Banish <strong>2nd offender only</strong>: <strong>CON DC 25</strong> or <strong>10d10</strong> *(unblockable)* · hurled into the <strong>Outer graveyard</strong>.</p>
+            <p id="inner-bust-prompt" class="inner-bust-prompt">Choose the ledger's price:</p>
+            <div id="inner-bust-options" class="inner-bust-options"></div>
+          </div>
+          <div style="text-align:center;margin-bottom:8px">
+            <span style="color:var(--muted);font-size:0.8rem">Wins</span>
+            <div class="track-dots" id="win-dots"></div>
+            <span style="color:var(--muted);font-size:0.8rem">Failures</span>
+            <div class="track-dots" id="fail-dots"></div>
+          </div>
+          <p style="text-align:center;font-size:0.85rem">Buy-downs earned: <strong id="inner-buy">0</strong>/3</p>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-inner-win">+ Win</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-inner-fail">+ Caught / fail</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-inner">Apply −1 Ritual</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-anchor">Anchor bind −1</button>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="sanctumTable">
+          <button type="button" class="phase-section-toggle" data-phase2-section="sanctumTable" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Sanctum · at table</h2>
+          </button>
+          <div class="phase-section-body">
+          <ul class="phase-list muted">
+            <li>Leader + Keeper: Time Armour — parley only Ph 1–2 · track wins on <strong>Inner track</strong></li>
+            <li>Attack them: backlash · +1 inner fail · Ritual +1</li>
+            <li>Disrupt counting: Insight DC 26 → Ritual −1 *(does not pierce Time Armour)*</li>
+            <li>G+4: push Counting House · crypt · parley</li>
+          </ul>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="grave">
+          <button type="button" class="phase-section-toggle" data-phase2-section="grave" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Grave churn</h2>
+          </button>
+          <div class="phase-section-body">
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Cumulative Perception · start 25 · pylons up only · add each roll (d20 + mod)</p>
+          <div class="grave-churn-total" id="grave-val">25</div>
+          <form class="grave-churn-form" id="grave-churn-form" onsubmit="return false">
+            <label class="grave-churn-label" for="grave-roll-input">Perception total</label>
+            <div class="grave-churn-row">
+              <input type="number" id="grave-roll-input" class="grave-roll-input" inputmode="numeric" min="1" max="60" placeholder="e.g. 32" />
+              <button type="button" class="primary" id="grave-add-roll" onclick="PaleTideApp.tap(this,event)">Add roll</button>
+              <button type="button" id="grave-reset" onclick="PaleTideApp.tap(this,event)">Reset</button>
+            </div>
+          </form>
           <div class="check-grid" style="margin-top:12px">
             <label class="check-item"><input type="checkbox" id="tier-t25" disabled checked /> 25 — not all form ranks</label>
             <label class="check-item"><input type="checkbox" id="tier-t50" disabled /> 50 — hiding / running</label>
             <label class="check-item"><input type="checkbox" id="tier-t75" disabled /> 75 — living movement</label>
             <label class="check-item"><input type="checkbox" id="tier-t100" disabled /> 100 — avoiding gate · crystals</label>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Rim anchors</h2>
+        <div class="panel phase-section" data-phase2-section="anchors">
+          <button type="button" class="phase-section-toggle" data-phase2-section="anchors" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Rim anchors</h2>
+          </button>
+          <div class="phase-section-body">
           <label class="check-item"><input type="checkbox" id="rim-rite" /> Rim Rite known</label>
           <label class="check-item"><input type="checkbox" id="anchor-north-loc" /> North row · located</label>
           <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> North row · bound (−1 Ritual)</label>
@@ -222,14 +371,41 @@
           <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> East row · bound (−1 Ritual)</label>
           <label class="check-item"><input type="checkbox" id="anchor-skull-loc" /> Skull pits · located</label>
           <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Skull pits · bound (−1 Ritual)</label>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>→ Phase 3 (~2:15)</h2>
+        <div class="panel phase-section" data-phase2-section="phase3">
+          <button type="button" class="phase-section-toggle" data-phase2-section="phase3" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>→ Phase 3 (~2:15)</h2>
+          </button>
+          <div class="phase-section-body">
           <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Break 2:00–2:15 · then Time Collapse</p>
           <div class="btn-row">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-break">Mark break @ 2:00</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-phase-3">Time Collapse → Phase 3</button>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="fronts">
+          <button type="button" class="phase-section-toggle" data-phase2-section="fronts" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Fronts</h2>
+          </button>
+          <div class="phase-section-body">
+          <p id="gate-smashed-note" class="gate-smashed-note hidden">Gate was smashed — iron cannot re-close · no hold-gate Breach buy-down</p>
+          <div id="gate-hold-panel" class="gate-hold-panel hidden">
+            <p class="gate-hold-note">Picked open — iron can <strong>re-close</strong> to hold the gate line · buy-down: <strong>−1 Breach or Ritual</strong> *(once)*</p>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-gate-hold">Re-close gate · hold the line</button>
+          </div>
+          <p id="gate-held-note" class="gate-held-note hidden">Gate held — iron re-closed · hold-gate buy-down available</p>
+          <ul class="phase-list">
+            <li><strong>Gate</strong> — Outer mouth · Task 2 Breach</li>
+            <li><strong>Sanctum</strong> — Inner · Task 1 · stop the count</li>
+            <li><strong>Crown's Edge</strong> — pylons · rim anchors · Task 3</li>
+            <li>Sanctum empty G+3 & G+4 → inner opposed +2</li>
+          </ul>
           </div>
         </div>
       </section>
@@ -241,19 +417,28 @@
           <span>2:15–3:45 · Dismissal at vortex threshold</span>
         </div>
 
-        <div class="panel">
-          <h2>Time Collapse</h2>
+        <div class="panel phase-section" data-phase3-section="timeCollapse">
+          <button type="button" class="phase-section-toggle" data-phase3-section="timeCollapse" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Time Collapse</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list muted">
-            <li>Leader + Keeper → liches · woman → banshee (unless friendly)</li>
+            <li>Leader + Keeper → liches · woman → banshee (attacks if neutral or worse)</li>
             <li>Inner fence OFF · Apostle from vortex · Ritual ticks stop on mat</li>
           </ul>
           <div class="btn-row" style="margin-top:12px">
             <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Apostle of Myrkul</h2>
+        <div class="panel phase-section" data-phase3-section="apostle">
+          <button type="button" class="phase-section-toggle" data-phase3-section="apostle" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Apostle of Myrkul</h2>
+          </button>
+          <div class="phase-section-body">
           <label class="check-item"><input type="checkbox" id="apostle-on" /> On mat · Ritual ticks stop</label>
           <label class="check-item"><input type="checkbox" id="apostle-bloodied" /> Bloodied (≤290)</label>
           <div class="stepper" style="margin-top:12px;justify-content:center">
@@ -277,33 +462,38 @@
             <label class="check-item"><input type="checkbox" id="wheel-radiant" /> Radiant</label>
             <label class="check-item"><input type="checkbox" id="wheel-thunder" /> Thunder</label>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Dismissal · ~3:15</h2>
+        <div class="panel phase-section" data-phase3-section="dismissal">
+          <button type="button" class="phase-section-toggle" data-phase3-section="dismissal" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Dismissal · ~3:15</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list">
             <li>Apostle out + (bloodied OR both pylons down) at vortex threshold</li>
             <li>Brussel adjacent for step 2 · Religion/Arcana DC 22 each step</li>
             <li><strong>Win:</strong> Dismissal · 0 HP</li>
             <li><strong>Loss:</strong> 2 PCs dead OR Breach 6 + Apostle at 3:45</li>
           </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Phase 3 spawns</h2>
-          <ul class="phase-list muted">
-            <li>Batch 3: ghosts · banshee (neutral if woman friendly)</li>
-            <li>Batch 5: liches · Apostle · LA 3/4 bloodied</li>
-            <li>Apostle +30 HP init 20 if any pylon intact</li>
-          </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Session</h2>
-          <div class="btn-row">
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="btn-reset">Reset encounter</button>
           </div>
         </div>
+
+        <div class="panel phase-section" data-phase3-section="spawns">
+          <button type="button" class="phase-section-toggle" data-phase3-section="spawns" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Phase 3 spawns</h2>
+          </button>
+          <div class="phase-section-body">
+          <ul class="phase-list muted">
+            <li>Wraiths: ghosts · banshee (friendly only stays neutral)</li>
+            <li>Apex: liches · Apostle · LA 3/4 bloodied</li>
+            <li>Apostle +30 HP init 20 if any pylon intact</li>
+          </ul>
+          </div>
+        </div>
+
       </section>
 
         </div>

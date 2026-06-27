@@ -132,23 +132,159 @@ header.app-header {
   z-index: 50;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 12px 16px;
+  padding: 10px 16px;
 }
 
-.header-row {
+.header-toolbar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-header.app-header h1 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  flex: 1;
+.header-btn {
+  min-height: 36px;
+  min-width: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.header-reset {
+  padding: 0 12px;
+  margin-left: 4px;
+}
+
+.header-timer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  margin-right: 14px;
   min-width: 0;
+}
+
+.header-round {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.header-next-round {
+  white-space: nowrap;
+}
+
+.header-clocks {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.header-clocks .clocks-row {
+  gap: 12px;
+  align-items: center;
+}
+
+.header-clocks .clock-group {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-clocks .clock-group .clock-label {
+  text-align: left;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.header-clocks .clock-stepper {
+  gap: 4px;
+}
+
+.header-clocks .clock-step {
+  min-width: 32px;
+  min-height: 36px;
+  font-size: 1rem;
+  padding: 0;
+}
+
+.header-clocks .clock-value {
+  min-width: 2.75rem;
+}
+
+.header-clocks .clock-value strong {
+  font-size: 1.35rem;
+}
+
+.header-clocks .clock-value .max {
+  font-size: 0.68rem;
+}
+
+.header-clocks .clock-group.breach .breach-pips {
+  display: none;
+}
+
+.header-clocks.ritual-stopped {
+  outline: 1px solid var(--warn);
+  outline-offset: 2px;
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+
+.header-clocks.ritual-high .clock-group.ritual .clock-value strong {
+  color: var(--warn);
+}
+
+.header-clocks.breach-high .clock-group.breach .clock-value strong {
+  color: var(--danger);
+}
+
+.header-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.header-status:empty {
+  display: none;
+  margin-top: 0;
+}
+
+.header-clock-note {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.header-clock-note.hidden {
+  display: none;
+}
+
+#ritual-stop.header-clock-note {
+  color: var(--warn);
+  font-weight: 600;
 }
 
 .session-timer {
@@ -159,16 +295,31 @@ header.app-header h1 {
   text-align: right;
 }
 
-.timer-btn {
-  min-width: 36px;
-  min-height: 36px;
-  padding: 0;
-  border-radius: 8px;
+.header-timer .timer-btn {
+  min-width: 42px;
+  min-height: 42px;
+  font-size: 0.85rem;
+}
+
+.header-timer .timer-clock {
+  font-size: 1.75rem;
+}
+
+.header-timer .timer-segment {
   font-size: 0.75rem;
-  line-height: 1;
+}
+
+.header-timer .timer-face {
+  min-width: 5.25rem;
+}
+
+.timer-btn {
+  padding: 0;
   background: var(--surface2);
   border: 1px solid var(--border);
   color: var(--text);
+  font-size: 0.75rem;
+  line-height: 1;
 }
 
 .timer-btn.paused {
@@ -208,37 +359,63 @@ header.app-header h1 {
 }
 
 .timer-alert {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
   background: rgba(196, 92, 92, 0.15);
   border: 1px solid var(--danger);
   color: var(--text);
-  font-size: 0.88rem;
-  line-height: 1.35;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  max-width: min(14rem, 38vw);
+  text-align: left;
+  flex-shrink: 1;
   animation: timer-pulse 1.2s ease-in-out 3;
+}
+
+.header-timer .timer-alert:not(.hidden) {
+  order: -1;
 }
 
 .timer-alert.hidden {
   display: none;
 }
 
+#timer-alert-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+}
+
+.header-timer #timer-alert-text {
+  align-items: flex-start;
+}
+
 .timer-alert strong {
   color: var(--warn);
+  font-size: 0.72rem;
+}
+
+.timer-alert-hint {
+  color: var(--muted);
+  font-size: 0.65rem;
 }
 
 .timer-alert-dismiss {
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 22px;
+  min-height: 22px;
   padding: 0;
   border: none;
   background: transparent;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 0.85rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 @keyframes timer-pulse {
@@ -252,19 +429,17 @@ header.app-header h1 {
   }
 }
 
-html[data-app='pale-tide-app-ok-v3'] header.app-header h1::after {
-  content: ' · live';
+html[data-app='pale-tide-app-ok-v3'] .chip-live {
   color: var(--ok);
-  font-size: 0.72rem;
-  font-weight: 500;
+  border: 1px solid var(--ok);
 }
 
 header .meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 8px;
-  font-size: 0.82rem;
+  margin: 0;
+  font-size: 0.78rem;
   color: var(--muted);
 }
 
@@ -299,6 +474,9 @@ main {
   flex-direction: row;
   gap: 12px;
   align-items: flex-start;
+  --combat-rail-height: calc(
+    100vh - var(--safe-top) - var(--safe-bottom) - 80px - 24px
+  );
 }
 
 .combat-layout.hidden,
@@ -306,24 +484,58 @@ main {
   display: none !important;
 }
 
-.init-rail {
+.init-rail-column {
+  position: sticky;
+  top: 8px;
   flex: 0 0 40%;
   width: 40%;
   min-width: 280px;
   max-width: 400px;
-  position: sticky;
-  top: 8px;
   align-self: flex-start;
-  max-height: calc(100vh - var(--safe-top) - 80px - var(--safe-bottom) - 24px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  height: var(--combat-rail-height);
+  max-height: var(--combat-rail-height);
+}
+
+.init-rail {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
   margin-bottom: 0;
   padding: 12px;
+}
+
+.init-rail-tracker {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
+
+.init-rail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 10px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .phase-rail {
   flex: 1;
   min-width: 0;
+  position: sticky;
+  top: 8px;
+  align-self: flex-start;
+  height: var(--combat-rail-height);
+  max-height: var(--combat-rail-height);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phase-rail > .reminder-popup:not(.hidden) {
+  margin-bottom: 0;
 }
 
 .phase-rail .tab-panel {
@@ -332,22 +544,6 @@ main {
 
 .phase-rail .tab-panel .panel:last-child {
   margin-bottom: 0;
-}
-
-.lair-block {
-  margin-top: 12px;
-  padding: 10px;
-  background: var(--surface2);
-  border-radius: var(--radius);
-}
-
-.lair-block h2 {
-  margin: 0 0 8px;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  font-weight: 600;
 }
 
 .init-rail .btn-row.init-actions {
@@ -360,23 +556,30 @@ main {
   min-height: 42px;
 }
 
-.init-rail .shuffle-bar {
-  margin-bottom: 8px;
-}
-
-.init-rail .shuffle-bar button {
-  min-width: 0;
-  padding: 0 12px;
-  font-size: 0.82rem;
-}
-
-.init-rail .reminder-panel {
-  font-size: 0.82rem;
-  padding: 10px;
-}
-
 .init-rail .init-ref-strip {
   margin-bottom: 8px;
+}
+
+.reminder-popup {
+  width: min(360px, 43.2vw);
+  z-index: 30;
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  max-height: calc(100vh - var(--safe-top) - 100px - var(--safe-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  font-size: 0.82rem;
+}
+
+.reminder-popup.anchored {
+  position: fixed;
+}
+
+.reminder-popup.hidden {
+  display: none;
 }
 
 @media (max-width: 700px) {
@@ -384,11 +587,45 @@ main {
     flex-direction: column;
   }
 
-  .init-rail {
+  .init-rail-column {
     width: 100%;
     max-width: none;
     position: relative;
+    top: auto;
+    height: auto;
     max-height: none;
+  }
+
+  .init-rail {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .init-rail-scroll {
+    overflow: visible;
+    margin-top: 10px;
+  }
+
+  .phase-rail {
+    position: relative;
+    top: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .reminder-popup {
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: none;
+    max-height: none;
+  }
+
+  .reminder-popup.anchored {
+    position: static;
+    left: auto !important;
+    top: auto !important;
   }
 }
 
@@ -407,6 +644,114 @@ main {
   letter-spacing: 0.08em;
   color: var(--muted);
   font-weight: 600;
+}
+
+.sanctum-path-intro {
+  margin: 0 0 14px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.sanctum-beat {
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.sanctum-beat:last-child {
+  margin-bottom: 0;
+}
+
+.sanctum-beat-title {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.sanctum-beat-hint {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.sanctum-beat-note {
+  margin: 10px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.sanctum-beat-note.success {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.sanctum-beat-note.hidden {
+  display: none;
+}
+
+.disposition-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.disp-btn {
+  flex: 1 1 calc(33.333% - 6px);
+  min-width: 4.5rem;
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  color: var(--muted);
+}
+
+.disp-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(107, 140, 174, 0.12);
+}
+
+.disp-btn.friendly.active {
+  border-color: var(--ok);
+  color: var(--ok);
+  background: rgba(74, 124, 89, 0.15);
+}
+
+.disp-btn.hostile.active {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(196, 92, 92, 0.15);
+}
+
+.children-tracker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.children-removed-label {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.children-tracker-actions {
+  margin-top: 0;
+}
+
+.children-tracker-actions button {
+  flex: 1 1 calc(50% - 4px);
+  font-size: 0.76rem;
 }
 
 .clock-row {
@@ -527,22 +872,264 @@ main {
   margin-top: 2px;
 }
 
-.shuffle-bar {
+.pc-init-panel {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.pc-init-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pc-init-header:active {
+  opacity: 0.85;
+}
+
+.pc-init-chevron {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.pc-init-panel.collapsed .pc-init-chevron {
+  transform: rotate(-90deg);
+}
+
+.pc-init-panel.collapsed .pc-init-body {
+  display: none;
+}
+
+.allies-init-section + .allies-init-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.allies-init-section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
-  background: var(--surface2);
-  border-radius: var(--radius);
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.shuffle-bar .d5 {
-  font-size: 1.5rem;
+.allies-init-section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.allies-init-section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.pc-init-title {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.pc-init-summary {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pc-init-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.pc-init-action {
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
+.pc-init-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pc-init-row {
+  display: grid;
+  grid-template-columns: 1fr 3.25rem auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.pc-init-row.in-tracker .pc-init-name {
+  color: var(--ok);
+}
+
+.pc-init-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pc-init-input {
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
   font-weight: 700;
-  min-width: 2.5rem;
+  font-variant-numeric: tabular-nums;
   text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.pc-init-input::-webkit-outer-spin-button,
+.pc-init-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pc-init-toggle {
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.pc-init-toggle.active {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.pc-init-clear {
+  width: 100%;
+  margin-top: 8px;
+  min-height: 28px;
+  font-size: 0.68rem;
+}
+
+.init-row.pc {
+  border-color: rgba(107, 140, 174, 0.45);
+  background: rgba(107, 140, 174, 0.08);
+}
+
+.init-row.pc.active {
+  border-color: var(--accent);
+  background: rgba(107, 140, 174, 0.18);
+}
+
+.init-row.summon {
+  border-color: rgba(140, 174, 107, 0.45);
+  background: rgba(140, 174, 107, 0.08);
+}
+
+.init-row.summon.active {
+  border-color: var(--ok);
+  background: rgba(140, 174, 107, 0.18);
+}
+
+.pylon-panel {
+  margin-top: 12px;
+}
+
+.pylon-panel .phase-section-toggle h2 {
+  margin-top: 0;
+}
+
+.gate-section {
+  margin-top: 12px;
+}
+
+.gate-section .gate-tracker {
+  margin-bottom: 0;
+}
+
+.gate-section .phase-section-body {
+  padding-top: 0;
+}
+
+.gate-section .gate-tracker .gate-banner {
+  margin-top: 0;
+}
+
+.phase-section {
+  padding: 0;
+}
+
+.phase-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.phase-section-toggle:active {
+  opacity: 0.85;
+}
+
+.phase-section-toggle h2 {
+  margin: 0;
+  flex: 1;
+}
+
+.phase-section-chevron {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.phase-section.collapsed .phase-section-chevron {
+  transform: rotate(-90deg);
+}
+
+.phase-section-body {
+  padding: 0 16px 16px;
+}
+
+.phase-section.collapsed .phase-section-body {
+  display: none;
 }
 
 .pylon-grid {
@@ -564,6 +1151,165 @@ main {
 .pylon-card h3 {
   margin: 0 0 10px;
   font-size: 0.95rem;
+}
+
+.inner-track-intro {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.inner-track-wins {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+}
+
+.inner-track-wins li {
+  margin-bottom: 4px;
+}
+
+.inner-bust-panel {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: rgba(196, 92, 92, 0.12);
+  border: 1px solid var(--danger);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.inner-bust-panel.hidden {
+  display: none;
+}
+
+.inner-bust-panel strong {
+  color: var(--danger);
+}
+
+.inner-bust-panel p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.inner-bust-banish {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.inner-bust-prompt {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--warn);
+}
+
+.inner-bust-prompt.hidden {
+  display: none;
+}
+
+.inner-bust-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.inner-bust-option {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.inner-bust-option:active {
+  opacity: 0.9;
+}
+
+.inner-bust-option.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.inner-bust-option-title {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.inner-bust-option-effect {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.chip.inner-bust {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+
+.grave-churn-total {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.grave-churn-form {
+  margin-bottom: 12px;
+}
+
+.grave-churn-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.grave-churn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grave-churn-row .primary,
+.grave-churn-row #grave-reset {
+  flex-shrink: 0;
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.grave-churn-row #grave-reset {
+  font-size: 0.78rem;
+  padding: 0 10px;
+}
+
+.grave-roll-input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  min-height: 42px;
+  text-align: left;
+  padding: 0 12px;
 }
 
 .bar-track {
@@ -596,6 +1342,16 @@ main {
   padding: 0;
   font-size: 1.25rem;
   font-weight: 600;
+}
+
+.pylon-card .stepper button.danger {
+  width: auto;
+  min-width: 0;
+  flex: 1;
+  padding: 0 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .tabs {
@@ -727,12 +1483,243 @@ main {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-top: none;
+}
+
+.gate-locks-panel {
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.gate-brussel-note {
+  margin: 0 0 12px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.gate-locks {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.gate-lock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.gate-lock.cleared {
+  border-color: var(--ok);
+  background: rgba(74, 124, 89, 0.12);
+}
+
+.gate-lock-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.gate-lock-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.gate-lock.cleared .gate-lock-label {
+  color: var(--ok);
+}
+
+.gate-lock.unpickable {
+  border-color: var(--warn);
+  background: rgba(180, 120, 40, 0.12);
+}
+
+.gate-lock.unpickable .gate-lock-label {
+  color: var(--warn);
+}
+
+.gate-tools-broken {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--warn);
+  background: rgba(180, 120, 40, 0.15);
+  border: 1px solid rgba(180, 120, 40, 0.35);
+}
+
+.gate-smash-track {
+  margin-bottom: 10px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.gate-smash-track.hidden {
+  display: none;
+}
+
+.gate-smash-label {
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.gate-smash-successes {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.gate-smash-slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.gate-smash-slot.filled {
+  border-color: var(--accent);
+  background: rgba(107, 140, 174, 0.15);
+}
+
+.gate-smash-slot-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.gate-smash-slot.filled .gate-smash-slot-icon {
+  color: var(--accent);
+}
+
+.gate-smash-slot-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.gate-smash-slot.filled .gate-smash-slot-label {
+  color: var(--accent);
+}
+
+.gate-smash-actions {
+  margin-top: 0;
+}
+
+.gate-smash-actions button {
+  width: 100%;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.gate-lock-actions {
+  margin-bottom: 10px;
+}
+
+.gate-lock-actions button {
+  min-width: calc(50% - 6px);
+  font-size: 0.78rem;
+}
+
+.gate-lock-hint {
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.gate-open-btn:disabled {
+  opacity: 0.45;
+}
+
+.gate-tracker.gate-open .gate-locks-panel {
+  display: none;
+}
+
+.gate-smashed-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: var(--warn);
+  background: rgba(196, 160, 92, 0.12);
+  border: 1px solid var(--warn);
+}
+
+.gate-smashed-note.hidden {
+  display: none;
+}
+
+.gate-hold-panel {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(74, 124, 89, 0.1);
+  border: 1px solid var(--ok);
+}
+
+.gate-hold-panel.hidden {
+  display: none;
+}
+
+.gate-hold-note {
+  margin: 0 0 10px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.gate-hold-panel button {
+  width: 100%;
+}
+
+.gate-held-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: var(--ok);
+  background: rgba(74, 124, 89, 0.12);
+  border: 1px solid var(--ok);
+}
+
+.gate-held-note.hidden {
+  display: none;
 }
 
 .clocks-panel {
   margin-bottom: 12px;
-  padding: 12px 14px;
+  padding: 14px 16px;
 }
 
 .clocks-row {
@@ -763,16 +1750,17 @@ main {
 }
 
 .clock-step {
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 40px;
+  min-height: 40px;
   padding: 0;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   line-height: 1;
   font-weight: 600;
   background: var(--surface2);
   border: 1px solid var(--border);
   color: var(--text);
+  flex-shrink: 0;
 }
 
 .clock-step:active {
@@ -782,16 +1770,23 @@ main {
 .clock-value {
   flex: 1;
   text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  min-width: 3.2rem;
+  min-width: 4.5rem;
+  line-height: 1;
+}
+
+.clock-value strong {
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .clock-value .max {
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   font-weight: 500;
   color: var(--muted);
+  margin-left: 1px;
 }
 
 .clock-group.ritual .clock-value strong {
@@ -936,26 +1931,14 @@ main {
   color: var(--accent);
 }
 
-.reminder-panel {
-  background: var(--surface2);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 12px;
-}
-
-.reminder-panel.empty {
-  border-color: var(--border);
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
+.reminder-popup h3,
 .reminder-panel h3 {
   margin: 0 0 8px;
   font-size: 1rem;
   color: var(--accent);
 }
 
+.reminder-popup ul,
 .reminder-panel ul {
   margin: 0;
   padding-left: 1.1rem;
@@ -963,12 +1946,14 @@ main {
   line-height: 1.55;
 }
 
+.reminder-popup .la-block,
 .reminder-panel .la-block {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
 
+.reminder-popup .la-block h4,
 .reminder-panel .la-block h4 {
   margin: 0 0 6px;
   font-size: 0.78rem;
@@ -977,23 +1962,11 @@ main {
   color: var(--warn);
 }
 
+.reminder-popup .la-note,
 .reminder-panel .la-note {
   font-size: 0.8rem;
   color: var(--muted);
   margin: 0 0 8px;
-}
-
-.init-row .reminder-hint {
-  grid-column: 1 / -1;
-  font-size: 0.76rem;
-  color: var(--muted);
-  line-height: 1.4;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
-
-.init-row.active .reminder-hint {
-  color: var(--text);
 }
 
 .lair-grid {
@@ -1266,109 +2239,193 @@ main {
       Use <strong>GitHub Pages</strong> (HTTPS) — see DEPLOY.md in this folder. Open in <strong>Safari</strong>, not Files preview.
     </div>
     <header class="app-header">
-      <div class="header-row">
-        <h1 id="header-title">The Pale Tide</h1>
-        <div class="session-timer" id="session-timer">
-          <button type="button" class="timer-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
-          <div class="timer-face">
-            <span class="timer-clock" id="timer-clock">0:00</span>
-            <span class="timer-segment" id="timer-segment">Teleport</span>
+      <div class="header-toolbar">
+        <div class="header-clocks clocks-bar" id="header-clocks">
+          <div class="clocks-row">
+            <div class="clock-group ritual">
+              <span class="clock-label">Ritual</span>
+              <div class="clock-stepper">
+                <button type="button" class="clock-step" id="btn-ritual-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                <span class="clock-value"><strong id="ritual-compact">0</strong><span class="max">/20</span></span>
+                <button type="button" class="clock-step" id="btn-ritual-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+              </div>
+            </div>
+            <div class="clock-group breach">
+              <span class="clock-label">Breach</span>
+              <div class="clock-stepper">
+                <button type="button" class="clock-step" id="btn-breach-minus" onclick="PaleTideApp.tap(this,event)">−</button>
+                <span class="clock-value"><strong id="breach-compact">0</strong><span class="max">/6</span></span>
+                <button type="button" class="clock-step" id="btn-breach-plus" onclick="PaleTideApp.tap(this,event)">+</button>
+              </div>
+              <div class="breach-pips" id="breach-pips"></div>
+            </div>
           </div>
         </div>
+        <div class="header-round" id="header-round" aria-label="Round">R1</div>
+        <button type="button" class="header-btn primary header-next-round" id="btn-new-round" onclick="PaleTideApp.tap(this,event)">Next Round</button>
+        <div class="header-timer">
+          <div class="timer-alert hidden" id="timer-alert">
+            <span id="timer-alert-text"></span>
+            <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)" title="Dismiss">✕</button>
+          </div>
+          <div class="session-timer" id="session-timer">
+            <button type="button" class="timer-btn header-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
+            <div class="timer-face">
+              <span class="timer-clock" id="timer-clock">0:00</span>
+              <span class="timer-segment" id="timer-segment">Teleport</span>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="header-btn header-reset danger" id="btn-reset" onclick="PaleTideApp.tap(this,event)" title="Reset all encounter state">Reset</button>
       </div>
-      <div class="timer-alert hidden" id="timer-alert">
-        <span id="timer-alert-text"></span>
-        <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)">✕</button>
+      <div class="header-status">
+        <div class="meta" id="meta-chips"></div>
+        <p id="ritual-stop" class="header-clock-note hidden">Ticks stopped</p>
+        <p id="g-info" class="header-clock-note hidden"></p>
+        <p id="pylon-ac" class="header-clock-note hidden"></p>
       </div>
-      <div class="meta" id="meta-chips"></div>
     </header>
 
     <main>
       <div id="combat-layout" class="combat-layout">
-        <aside id="init-rail" class="init-rail panel">
-          <h2>Initiative · high → low</h2>
-          <div class="init-ref-strip" id="init-ref-strip"></div>
-          <div id="reminder-panel" class="reminder-panel empty">Tap <strong>Mark</strong> on a row for turn · LA · lair reminders</div>
-          <div class="shuffle-bar">
-            <div>
-              <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase">Shuffle</div>
-              <div id="shuffle-info" style="font-size:0.88rem;margin-top:4px">Round 1 default</div>
-            </div>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-new-round">New Round</button>
+        <div id="init-rail-column" class="init-rail-column">
+          <aside id="init-rail" class="init-rail panel">
+          <div class="init-rail-tracker">
+            <div class="init-list" id="init-list"></div>
           </div>
-          <div class="init-list" id="init-list"></div>
-          <div class="lair-block">
-            <h2>Lair @ 20 · pick one</h2>
-            <div class="lair-grid" id="lair-quick-ref"></div>
+          <div class="init-rail-scroll">
+          <div class="pc-init-panel" id="allies-init-panel">
+            <button type="button" class="pc-init-header" id="btn-allies-init-toggle" onclick="PaleTideApp.tap(this,event)">
+              <span class="pc-init-chevron" id="allies-init-chevron" aria-hidden="true">▾</span>
+              <span class="pc-init-title">PCs &amp; allies</span>
+              <span id="allies-init-summary" class="pc-init-summary"></span>
+            </button>
+            <div id="allies-init-body" class="pc-init-body">
+              <div class="allies-init-section">
+                <div class="allies-init-section-head">
+                  <span class="allies-init-section-label">PCs</span>
+                  <div class="allies-init-section-actions">
+                    <button type="button" class="ghost pc-init-action" id="btn-pc-add-all" onclick="PaleTideApp.tap(this,event)">Add all → tracker</button>
+                    <button type="button" class="ghost pc-init-action" id="btn-pc-clear-tracker" onclick="PaleTideApp.tap(this,event)">Clear PCs</button>
+                  </div>
+                </div>
+                <div id="pc-init-list" class="pc-init-list"></div>
+              </div>
+              <div class="allies-init-section">
+                <div class="allies-init-section-head">
+                  <span class="allies-init-section-label">Summons &amp; allies</span>
+                  <div class="allies-init-section-actions">
+                    <button type="button" class="ghost pc-init-action" id="btn-summon-add-all" onclick="PaleTideApp.tap(this,event)">Add all → tracker</button>
+                    <button type="button" class="ghost pc-init-action" id="btn-summon-clear-tracker" onclick="PaleTideApp.tap(this,event)">Clear summons</button>
+                  </div>
+                </div>
+                <div id="summon-init-list" class="pc-init-list"></div>
+              </div>
+            </div>
           </div>
           <div class="btn-row init-actions">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-shuffle-preview">Re-roll shuffle</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-on">PULSE on</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-pulse-off">PULSE off</button>
           </div>
+          </div>
         </aside>
+        </div>
 
         <div id="phase-rail" class="phase-rail">
-          <div class="clocks-bar panel clocks-panel">
-            <div class="clocks-row">
-              <div class="clock-group ritual">
-                <span class="clock-label">Ritual</span>
-                <div class="clock-stepper">
-                  <button type="button" class="clock-step" id="btn-ritual-minus" onclick="PaleTideApp.tap(this,event)">−</button>
-                  <span class="clock-value"><strong id="ritual-compact">0</strong><span class="max">/20</span></span>
-                  <button type="button" class="clock-step" id="btn-ritual-plus" onclick="PaleTideApp.tap(this,event)">+</button>
-                </div>
-              </div>
-              <div class="clock-group breach">
-                <span class="clock-label">Breach</span>
-                <div class="clock-stepper">
-                  <button type="button" class="clock-step" id="btn-breach-minus" onclick="PaleTideApp.tap(this,event)">−</button>
-                  <span class="clock-value"><strong id="breach-compact">0</strong><span class="max">/6</span></span>
-                  <button type="button" class="clock-step" id="btn-breach-plus" onclick="PaleTideApp.tap(this,event)">+</button>
-                </div>
-                <div class="breach-pips" id="breach-pips"></div>
-              </div>
-            </div>
-            <p id="ritual-stop" class="hidden clock-note">Ticks stopped</p>
-            <p id="g-info" class="hidden clock-note"></p>
-            <p id="pylon-ac" class="hidden clock-note"></p>
-          </div>
+        <div id="reminder-panel" class="reminder-popup hidden" aria-live="polite"></div>
 
       <!-- PHASE 1 — The Tide (~0:05–0:50) -->
       <section class="tab-panel" data-tab="phase1">
-        <div class="gate-tracker">
-          <div id="gate-banner" class="gate-banner locked">GATE LOCKED</div>
-          <p id="gate-info" class="gate-info">Road spawns only · Lane + Gate fronts · Breach = road lost</p>
-        </div>
-
         <div class="phase-banner phase-1">
           <strong>Phase 1 · The Tide</strong>
           <span>0:05–0:50 · Gate LOCKED · Gate + Lane</span>
         </div>
 
-        <div class="panel">
-          <h2>Fronts · R1</h2>
+        <div class="panel phase-section gate-section" data-phase1-section="gate">
+          <button type="button" class="phase-section-toggle" data-phase1-section="gate" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Gate</h2>
+          </button>
+          <div class="phase-section-body">
+        <div class="gate-tracker">
+          <div id="gate-banner" class="gate-banner locked">GATE LOCKED</div>
+          <p id="gate-info" class="gate-info">Road spawns only · Lane + Gate fronts · Breach = road lost</p>
+          <div id="gate-locks-panel" class="gate-locks-panel">
+            <p class="gate-brussel-note">
+              <strong>Brussel</strong> can't work the iron—they point at the <strong>prior Passage's body</strong>
+              (face-down in the mud): <strong>thieves' tools</strong> on the corpse.
+            </p>
+            <div class="gate-locks">
+              <div class="gate-lock" id="gate-lock-1">
+                <span class="gate-lock-icon" aria-hidden="true">🔒</span>
+                <span class="gate-lock-label">Lock 1</span>
+              </div>
+              <div class="gate-lock" id="gate-lock-2">
+                <span class="gate-lock-icon" aria-hidden="true">🔒</span>
+                <span class="gate-lock-label">Lock 2</span>
+              </div>
+            </div>
+            <p id="gate-tools-broken" class="gate-tools-broken hidden">Tools broken — that lock is unpickable</p>
+            <div class="btn-row gate-lock-actions">
+              <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-gate-pick">Pick success · DC 20</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="btn-gate-pick-fail">Pick failed · miss by 5+</button>
+            </div>
+            <div id="gate-smash-track" class="gate-smash-track">
+              <p class="gate-smash-label">Smash track · Ath DC 22 · failures don't cost progress</p>
+              <div id="gate-smash-successes" class="gate-smash-successes" aria-label="Smash successes"></div>
+              <div class="btn-row gate-smash-actions">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-gate-smash">+1 Smash success</button>
+              </div>
+            </div>
+            <p class="gate-lock-hint"><strong>Pick both locks</strong> · fail by 5+ breaks tools &amp; jams a lock · <strong>OR smash</strong> (3 successes) — gate opens automatically · picked gates can re-close in Ph 2</p>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase1-section="fronts">
+          <button type="button" class="phase-section-toggle" data-phase1-section="fronts" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Fronts · R1</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list">
-            <li><strong>Gate</strong> — open iron · Brussel within 15 ft · hold Breach</li>
+            <li><strong>Gate</strong> — pick both locks · fail by 5+ jams a lock · OR smash 3× (separate track)</li>
             <li><strong>Lane</strong> — ring + NE column · R1 only while locked</li>
             <li>Road spawns only · hordes 20 ft · graves silent · no pylons</li>
             <li>Lane empty EOR → Breach +1 · all 5 on Gate → Breach +2</li>
           </ul>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Gate opens → Phase 2</h2>
+        <div class="panel phase-section" data-phase1-section="afterOpen">
+          <button type="button" class="phase-section-toggle" data-phase1-section="afterOpen" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>After gate opens</h2>
+          </button>
+          <div class="phase-section-body">
           <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Same round: place pylons · G+0 pulse · re-split Gate · Sanctum · Crown's Edge</p>
-          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-open-gate" style="width:100%">Open gate (G+0) → go to Phase 2</button>
+          <ul class="phase-list muted">
+            <li>Step 1 — Iron gives · road 30 ft · fed hordes Ritual +1</li>
+            <li>Step 2 — Place both pylons · wail · PULSE · Breach +1</li>
+            <li>Step 3 — Graves wake · Grave churn 25 · cone at G+4</li>
+          </ul>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>EOR · Phase 1</h2>
+        <div class="panel phase-section" data-phase1-section="eor">
+          <button type="button" class="phase-section-toggle" data-phase1-section="eor" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>EOR · Phase 1</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list muted">
             <li>Ritual +1 (+ fed hordes max +2 after R2)</li>
             <li>Knights R2 · Hood reveal ≤2 bodies · end Horde slot</li>
             <li>Buy-down: knight kill −1 Ritual</li>
           </ul>
+          </div>
         </div>
       </section>
 
@@ -1379,47 +2436,12 @@ main {
           <span>0:50–2:00 · Gate OPEN · 3 fronts</span>
         </div>
 
-        <div class="panel">
-          <h2>Fronts</h2>
-          <ul class="phase-list">
-            <li><strong>Gate</strong> — Outer mouth · Task 2 Breach</li>
-            <li><strong>Sanctum</strong> — Inner · Task 1 · stop the count</li>
-            <li><strong>Crown's Edge</strong> — pylons · rim anchors · Task 3</li>
-            <li>Sanctum empty G+3 & G+4 → inner opposed +2</li>
-          </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Inner track</h2>
-          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">3 wins before 2 failures = Ritual −1 (max 3)</p>
-          <div style="text-align:center;margin-bottom:8px">
-            <span style="color:var(--muted);font-size:0.8rem">Wins</span>
-            <div class="track-dots" id="win-dots"></div>
-            <span style="color:var(--muted);font-size:0.8rem">Failures</span>
-            <div class="track-dots" id="fail-dots"></div>
-          </div>
-          <p style="text-align:center;font-size:0.85rem">Buy-downs earned: <strong id="inner-buy">0</strong>/3</p>
-          <div class="btn-row">
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-inner-win">+ Win</button>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-inner-fail">+ Failure</button>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-inner">Apply −1 Ritual</button>
-            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-anchor">Anchor bind −1</button>
-          </div>
-          <label class="check-item" style="margin-top:12px"><input type="checkbox" id="woman-friendly" /> Woman friendly → neutral banshee (Ph 3)</label>
-        </div>
-
-        <div class="panel">
-          <h2>Sanctum · at table</h2>
-          <ul class="phase-list muted">
-            <li>Leader + Keeper: Time Armour — parley only Ph 1–2</li>
-            <li>Attack them: backlash · +1 inner fail · Ritual +1</li>
-            <li>Disrupt counting: Insight DC 26 → Ritual −1</li>
-            <li>G+4: push Counting House · crypt · parley</li>
-          </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Rim pylons</h2>
+        <div class="panel phase-section pylon-panel" data-phase2-section="pylons">
+          <button type="button" class="phase-section-toggle" data-phase2-section="pylons" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Rim pylons</h2>
+          </button>
+          <div class="phase-section-body">
           <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Field AC 25 · 100 HP · Stone 90 HP · Init 20: +d100 shield</p>
           <div class="pylon-grid">
             <div class="pylon-card" id="pylon-a">
@@ -1455,23 +2477,123 @@ main {
               </div>
             </div>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Grave churn</h2>
-          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Cumulative Perception · start 25 · pylons up only</p>
-          <div style="text-align:center;font-size:2rem;font-weight:700" id="grave-val">25</div>
-          <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="grave-plus" style="width:100%;margin-top:8px">+ Perception roll</button>
+        <div class="panel phase-section sanctum-path-panel" data-phase2-section="sanctum">
+          <button type="button" class="phase-section-toggle" data-phase2-section="sanctum" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Sanctum path · Lower</h2>
+          </button>
+          <div class="phase-section-body">
+          <p class="sanctum-path-intro">Social / sneak past the woman · riddles at the echo children</p>
+
+          <div class="sanctum-beat">
+            <h3 class="sanctum-beat-title">Weeping woman</h3>
+            <p class="sanctum-beat-hint">Insight DC 30 · Persuasion DC 34 · sneak — pass without violence. Attack → hostile.</p>
+            <div class="disposition-row" role="group" aria-label="Woman disposition">
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="disp-btn friendly" id="btn-woman-friendly">Friendly</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="disp-btn" id="btn-woman-neutral">Neutral</button>
+              <button type="button" onclick="PaleTideApp.tap(this,event)" class="disp-btn hostile" id="btn-woman-hostile">Hostile</button>
+            </div>
+            <p id="woman-banshee-note" class="sanctum-beat-note">Ph 3 banshee: <strong>friendly only</strong> won't attack · neutral or worse → <strong>attacks</strong></p>
+          </div>
+
+          <div class="sanctum-beat">
+            <h3 class="sanctum-beat-title">Echo children · Norman</h3>
+            <p class="sanctum-beat-hint">Answer riddles → remove a child mini → check <strong>NORMAN</strong> on the bottom. Right Norman → they open the way upstairs.</p>
+            <div class="children-tracker">
+              <span class="children-removed-label">Removed <strong id="children-removed">0</strong> / 10</span>
+              <div class="btn-row children-tracker-actions">
+                <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-child-remove">+ Riddle · remove child</button>
+                <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-norman-found">Norman found · way opens</button>
+              </div>
+            </div>
+            <p id="children-pass-note" class="sanctum-beat-note success hidden">Norman found — one child walks up the stairs</p>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="inner">
+          <button type="button" class="phase-section-toggle" data-phase2-section="inner" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Inner track · Counting House</h2>
+          </button>
+          <div class="phase-section-body">
+          <p class="inner-track-intro">Persuasion game vs <strong>Leader</strong> + <strong>Ledger Keeper</strong> · and/or gaining knowledge inside the Counting House (ledger lattice · Rim Rite · crypt leads). <strong>3 wins before 2 failures</strong> = Ritual −1 *(max 3)*.</p>
+          <ul class="phase-list muted inner-track-wins">
+            <li><strong>Win:</strong> opposed liturgy · Persuasion/Deception vs Inner +26 *(+1 per 4 Ritual ticks)* · lattice insight · funerary key beats</li>
+            <li><strong>Caught inside:</strong> counts as a failure — party rolls <strong>d20 at disadvantage</strong> to slip notice</li>
+            <li><strong>2 failures before 3 wins:</strong> Leader <strong>banishes the 2nd offender</strong> — <strong>CON 25</strong> or <strong>10d10</strong> unblockable · Outer graveyard · then <strong>pick the ledger's price</strong> below</li>
+          </ul>
+          <div id="inner-bust-panel" class="inner-bust-panel hidden" role="status">
+            <strong>Inner track bust</strong>
+            <p class="inner-bust-banish">Banish <strong>2nd offender only</strong>: <strong>CON DC 25</strong> or <strong>10d10</strong> *(unblockable)* · hurled into the <strong>Outer graveyard</strong>.</p>
+            <p id="inner-bust-prompt" class="inner-bust-prompt">Choose the ledger's price:</p>
+            <div id="inner-bust-options" class="inner-bust-options"></div>
+          </div>
+          <div style="text-align:center;margin-bottom:8px">
+            <span style="color:var(--muted);font-size:0.8rem">Wins</span>
+            <div class="track-dots" id="win-dots"></div>
+            <span style="color:var(--muted);font-size:0.8rem">Failures</span>
+            <div class="track-dots" id="fail-dots"></div>
+          </div>
+          <p style="text-align:center;font-size:0.85rem">Buy-downs earned: <strong id="inner-buy">0</strong>/3</p>
+          <div class="btn-row">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-inner-win">+ Win</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-inner-fail">+ Caught / fail</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-inner">Apply −1 Ritual</button>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-buy-anchor">Anchor bind −1</button>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="sanctumTable">
+          <button type="button" class="phase-section-toggle" data-phase2-section="sanctumTable" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Sanctum · at table</h2>
+          </button>
+          <div class="phase-section-body">
+          <ul class="phase-list muted">
+            <li>Leader + Keeper: Time Armour — parley only Ph 1–2 · track wins on <strong>Inner track</strong></li>
+            <li>Attack them: backlash · +1 inner fail · Ritual +1</li>
+            <li>Disrupt counting: Insight DC 26 → Ritual −1 *(does not pierce Time Armour)*</li>
+            <li>G+4: push Counting House · crypt · parley</li>
+          </ul>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="grave">
+          <button type="button" class="phase-section-toggle" data-phase2-section="grave" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Grave churn</h2>
+          </button>
+          <div class="phase-section-body">
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 8px">Cumulative Perception · start 25 · pylons up only · add each roll (d20 + mod)</p>
+          <div class="grave-churn-total" id="grave-val">25</div>
+          <form class="grave-churn-form" id="grave-churn-form" onsubmit="return false">
+            <label class="grave-churn-label" for="grave-roll-input">Perception total</label>
+            <div class="grave-churn-row">
+              <input type="number" id="grave-roll-input" class="grave-roll-input" inputmode="numeric" min="1" max="60" placeholder="e.g. 32" />
+              <button type="button" class="primary" id="grave-add-roll" onclick="PaleTideApp.tap(this,event)">Add roll</button>
+              <button type="button" id="grave-reset" onclick="PaleTideApp.tap(this,event)">Reset</button>
+            </div>
+          </form>
           <div class="check-grid" style="margin-top:12px">
             <label class="check-item"><input type="checkbox" id="tier-t25" disabled checked /> 25 — not all form ranks</label>
             <label class="check-item"><input type="checkbox" id="tier-t50" disabled /> 50 — hiding / running</label>
             <label class="check-item"><input type="checkbox" id="tier-t75" disabled /> 75 — living movement</label>
             <label class="check-item"><input type="checkbox" id="tier-t100" disabled /> 100 — avoiding gate · crystals</label>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Rim anchors</h2>
+        <div class="panel phase-section" data-phase2-section="anchors">
+          <button type="button" class="phase-section-toggle" data-phase2-section="anchors" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Rim anchors</h2>
+          </button>
+          <div class="phase-section-body">
           <label class="check-item"><input type="checkbox" id="rim-rite" /> Rim Rite known</label>
           <label class="check-item"><input type="checkbox" id="anchor-north-loc" /> North row · located</label>
           <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> North row · bound (−1 Ritual)</label>
@@ -1479,14 +2601,41 @@ main {
           <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> East row · bound (−1 Ritual)</label>
           <label class="check-item"><input type="checkbox" id="anchor-skull-loc" /> Skull pits · located</label>
           <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Skull pits · bound (−1 Ritual)</label>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>→ Phase 3 (~2:15)</h2>
+        <div class="panel phase-section" data-phase2-section="phase3">
+          <button type="button" class="phase-section-toggle" data-phase2-section="phase3" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>→ Phase 3 (~2:15)</h2>
+          </button>
+          <div class="phase-section-body">
           <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Break 2:00–2:15 · then Time Collapse</p>
           <div class="btn-row">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-break">Mark break @ 2:00</button>
             <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-phase-3">Time Collapse → Phase 3</button>
+          </div>
+          </div>
+        </div>
+
+        <div class="panel phase-section" data-phase2-section="fronts">
+          <button type="button" class="phase-section-toggle" data-phase2-section="fronts" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Fronts</h2>
+          </button>
+          <div class="phase-section-body">
+          <p id="gate-smashed-note" class="gate-smashed-note hidden">Gate was smashed — iron cannot re-close · no hold-gate Breach buy-down</p>
+          <div id="gate-hold-panel" class="gate-hold-panel hidden">
+            <p class="gate-hold-note">Picked open — iron can <strong>re-close</strong> to hold the gate line · buy-down: <strong>−1 Breach or Ritual</strong> *(once)*</p>
+            <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-gate-hold">Re-close gate · hold the line</button>
+          </div>
+          <p id="gate-held-note" class="gate-held-note hidden">Gate held — iron re-closed · hold-gate buy-down available</p>
+          <ul class="phase-list">
+            <li><strong>Gate</strong> — Outer mouth · Task 2 Breach</li>
+            <li><strong>Sanctum</strong> — Inner · Task 1 · stop the count</li>
+            <li><strong>Crown's Edge</strong> — pylons · rim anchors · Task 3</li>
+            <li>Sanctum empty G+3 & G+4 → inner opposed +2</li>
+          </ul>
           </div>
         </div>
       </section>
@@ -1498,19 +2647,28 @@ main {
           <span>2:15–3:45 · Dismissal at vortex threshold</span>
         </div>
 
-        <div class="panel">
-          <h2>Time Collapse</h2>
+        <div class="panel phase-section" data-phase3-section="timeCollapse">
+          <button type="button" class="phase-section-toggle" data-phase3-section="timeCollapse" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Time Collapse</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list muted">
-            <li>Leader + Keeper → liches · woman → banshee (unless friendly)</li>
+            <li>Leader + Keeper → liches · woman → banshee (attacks if neutral or worse)</li>
             <li>Inner fence OFF · Apostle from vortex · Ritual ticks stop on mat</li>
           </ul>
           <div class="btn-row" style="margin-top:12px">
             <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Apostle of Myrkul</h2>
+        <div class="panel phase-section" data-phase3-section="apostle">
+          <button type="button" class="phase-section-toggle" data-phase3-section="apostle" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Apostle of Myrkul</h2>
+          </button>
+          <div class="phase-section-body">
           <label class="check-item"><input type="checkbox" id="apostle-on" /> On mat · Ritual ticks stop</label>
           <label class="check-item"><input type="checkbox" id="apostle-bloodied" /> Bloodied (≤290)</label>
           <div class="stepper" style="margin-top:12px;justify-content:center">
@@ -1534,33 +2692,38 @@ main {
             <label class="check-item"><input type="checkbox" id="wheel-radiant" /> Radiant</label>
             <label class="check-item"><input type="checkbox" id="wheel-thunder" /> Thunder</label>
           </div>
+          </div>
         </div>
 
-        <div class="panel">
-          <h2>Dismissal · ~3:15</h2>
+        <div class="panel phase-section" data-phase3-section="dismissal">
+          <button type="button" class="phase-section-toggle" data-phase3-section="dismissal" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Dismissal · ~3:15</h2>
+          </button>
+          <div class="phase-section-body">
           <ul class="phase-list">
             <li>Apostle out + (bloodied OR both pylons down) at vortex threshold</li>
             <li>Brussel adjacent for step 2 · Religion/Arcana DC 22 each step</li>
             <li><strong>Win:</strong> Dismissal · 0 HP</li>
             <li><strong>Loss:</strong> 2 PCs dead OR Breach 6 + Apostle at 3:45</li>
           </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Phase 3 spawns</h2>
-          <ul class="phase-list muted">
-            <li>Batch 3: ghosts · banshee (neutral if woman friendly)</li>
-            <li>Batch 5: liches · Apostle · LA 3/4 bloodied</li>
-            <li>Apostle +30 HP init 20 if any pylon intact</li>
-          </ul>
-        </div>
-
-        <div class="panel">
-          <h2>Session</h2>
-          <div class="btn-row">
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="btn-reset">Reset encounter</button>
           </div>
         </div>
+
+        <div class="panel phase-section" data-phase3-section="spawns">
+          <button type="button" class="phase-section-toggle" data-phase3-section="spawns" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Phase 3 spawns</h2>
+          </button>
+          <div class="phase-section-body">
+          <ul class="phase-list muted">
+            <li>Wraiths: ghosts · banshee (friendly only stays neutral)</li>
+            <li>Apex: liches · Apostle · LA 3/4 bloodied</li>
+            <li>Apostle +30 HP init 20 if any pylon intact</li>
+          </ul>
+          </div>
+        </div>
+
       </section>
 
         </div>
@@ -1589,10 +2752,10 @@ main {
   const STORAGE_KEY = 'pale-tide-v1';
 
   const BATCHES = {
-    1: { name: 'Horde', emoji: '🧟', units: 'Hordes · hooded bodies' },
-    2: { name: 'Knights', emoji: '⚔️', units: 'Death knights' },
+    1: { name: 'Horde', emoji: '🧟', units: 'Hordes · hooded bodies · living hoods' },
+    2: { name: 'Knights', emoji: '⚔️', units: 'Death knights · grave hounds' },
     3: { name: 'Wraiths', emoji: '👻', units: 'Ghosts · banshee' },
-    4: { name: 'Hunters', emoji: '🐕', units: 'Living hoods · hounds' },
+    4: { name: 'Reserves', emoji: '⋯', units: 'Spawns · reinforcements' },
     5: { name: 'Apex', emoji: '💀', units: 'Liches · Apostle' },
   };
 
@@ -1602,6 +2765,57 @@ main {
   const LAIR_INIT = 20;
 
   const DEFAULT_ASSIGNMENT = { dead1: 1, dead2: 2, dead3: 3, dead4: 4, dead5: 5 };
+
+  const PC_ROSTER = ['Anax', 'Kilgore', 'Acerian', 'Guts', 'Theo'];
+  const SUMMON_ROSTER = ['Summon 1', 'Summon 2', 'Summon 3'];
+
+  function defaultPcs() {
+    return PC_ROSTER.map((name, i) => ({
+      id: `pc${i + 1}`,
+      name,
+      init: null,
+      inTracker: false,
+    }));
+  }
+
+  function defaultSummons() {
+    return SUMMON_ROSTER.map((name, i) => ({
+      id: `summon${i + 1}`,
+      name,
+      init: null,
+      inTracker: false,
+    }));
+  }
+
+  function normalizePcs(saved) {
+    const base = defaultPcs();
+    if (!Array.isArray(saved)) return base;
+    return base.map((b) => {
+      const s = saved.find((x) => x.id === b.id);
+      if (!s) return b;
+      const init = s.init != null && s.init !== '' ? Number(s.init) : null;
+      return {
+        ...b,
+        init: Number.isFinite(init) ? init : null,
+        inTracker: !!s.inTracker,
+      };
+    });
+  }
+
+  function normalizeSummons(saved) {
+    const base = defaultSummons();
+    if (!Array.isArray(saved)) return base;
+    return base.map((b) => {
+      const s = saved.find((x) => x.id === b.id);
+      if (!s) return b;
+      const init = s.init != null && s.init !== '' ? Number(s.init) : null;
+      return {
+        ...b,
+        init: Number.isFinite(init) ? init : null,
+        inTracker: !!s.inTracker,
+      };
+    });
+  }
 
   /** Wall-clock spine — SESSION_RUNDOWN.md */
   const TIME_MARKERS = [
@@ -1648,12 +2862,52 @@ main {
     return t ? t.label : id;
   }
 
+  function defaultPhase1Collapsed() {
+    return {
+      gate: false,
+      fronts: false,
+      afterOpen: false,
+      eor: false,
+    };
+  }
+
+  function defaultPhase2Collapsed() {
+    return {
+      pylons: false,
+      sanctum: false,
+      inner: false,
+      sanctumTable: false,
+      grave: false,
+      anchors: false,
+      phase3: false,
+      fronts: false,
+    };
+  }
+
+  function defaultPhase3Collapsed() {
+    return {
+      timeCollapse: false,
+      apostle: false,
+      dismissal: false,
+      spawns: false,
+    };
+  }
+
   function defaultState() {
     return {
       phase: 1,
       round: 1,
       gateRound: null,
       gateOpen: false,
+      gateLock1: false,
+      gateLock2: false,
+      gateLock1Unpickable: false,
+      gateLock2Unpickable: false,
+      gateToolsBroken: false,
+      gatePickStarted: false,
+      gateSmashSuccesses: 0,
+      gateSmashed: false,
+      gateHeld: false,
       pulseOn: false,
       ritual: 0,
       ritualStopped: false,
@@ -1668,7 +2922,12 @@ main {
       innerWins: 0,
       innerFails: 0,
       innerBuydowns: 0,
-      womanFriendly: false,
+      innerBustPending: false,
+      innerBustChoice: null,
+      innerOpposedBonus: 0,
+      womanDisposition: 'neutral',
+      childrenRemoved: 0,
+      normanFound: false,
       rimRiteKnown: false,
       anchors: {
         north: { located: false, bound: false },
@@ -1694,6 +2953,12 @@ main {
       lairPick: null,
       laKnightsUsed: 0,
       laApostleUsed: 0,
+      pcs: defaultPcs(),
+      alliesInitCollapsed: false,
+      summons: defaultSummons(),
+      phase2Collapsed: defaultPhase2Collapsed(),
+      phase1Collapsed: defaultPhase1Collapsed(),
+      phase3Collapsed: defaultPhase3Collapsed(),
     };
   }
 
@@ -1763,7 +3028,29 @@ main {
       emoji: '🌑',
       units: 'One lair · pylon regen',
     });
-    return rows.sort((a, b) => b.init - a.init);
+    const pcRows = (state.pcs || [])
+      .filter((pc) => pc.inTracker && pc.init != null)
+      .map((pc) => ({
+        slot: `pc:${pc.id}`,
+        init: pc.init,
+        batch: null,
+        name: pc.name,
+        emoji: '🎲',
+        units: 'Player',
+        isPc: true,
+      }));
+    const summonRows = (state.summons || [])
+      .filter((s) => s.inTracker && s.init != null)
+      .map((s) => ({
+        slot: `summon:${s.id}`,
+        init: s.init,
+        batch: null,
+        name: s.name,
+        emoji: '✨',
+        units: 'Summoned',
+        isSummon: true,
+      }));
+    return [...rows, ...pcRows, ...summonRows].sort((a, b) => b.init - a.init);
   }
 
   function pylonAcBonus(state) {
@@ -1797,6 +3084,41 @@ main {
         },
         apostleWheel: normalizeApostleWheel(saved.apostleWheel),
         timerFired: Array.isArray(saved.timerFired) ? saved.timerFired : base.timerFired,
+        gatePickStarted:
+          saved.gatePickStarted ??
+          !!(saved.gateLock1 || saved.gateLock2 || saved.gateMethod === 'pick' || saved.gateToolsBroken),
+        gateSmashSuccesses:
+          saved.gateSmashSuccesses ?? (saved.gateSmashed ? 3 : 0),
+        womanDisposition: (() => {
+          const d = saved.womanDisposition;
+          if (d === 'friendly' || d === 'neutral' || d === 'hostile') return d;
+          if (saved.womanFriendly) return 'friendly';
+          return 'neutral';
+        })(),
+        childrenRemoved: saved.childrenRemoved ?? 0,
+        normanFound: saved.normanFound ?? false,
+        pcs: normalizePcs(saved.pcs),
+        alliesInitCollapsed:
+          saved.alliesInitCollapsed ??
+          (saved.pcInitCollapsed && saved.summonInitCollapsed) ??
+          saved.pcInitCollapsed ??
+          false,
+        summons: normalizeSummons(saved.summons),
+        phase2Collapsed: {
+          ...defaultPhase2Collapsed(),
+          ...(saved.phase2Collapsed || {}),
+        },
+        phase1Collapsed: {
+          ...defaultPhase1Collapsed(),
+          ...(saved.phase1Collapsed || {}),
+        },
+        phase3Collapsed: {
+          ...defaultPhase3Collapsed(),
+          ...(saved.phase3Collapsed || {}),
+        },
+        innerBustPending: saved.innerBustPending ?? false,
+        innerBustChoice: saved.innerBustChoice ?? null,
+        innerOpposedBonus: saved.innerOpposedBonus ?? 0,
       };
     } catch (e) {
       return defaultState();
@@ -1834,6 +3156,34 @@ main {
     return TIME_MARKERS.find((m) => m.min > elapsedMin) || null;
   }
 
+  const INNER_BUST_OPTIONS = [
+    {
+      id: 'ready',
+      title: 'Count finishes early',
+      effect: 'Ritual +1 — the mistake pulls the finale forward before the party is ready.',
+    },
+    {
+      id: 'ledger',
+      title: 'Ledger locks in',
+      effect: 'Ritual +1 · +2 DC on next inner checks — failure filed in the count.',
+    },
+    {
+      id: 'collapse',
+      title: 'Time bleeds backward',
+      effect: 'Ritual +1 · Phase 3 leaks early (Null Pulse flicker · slot/HP drain Inside).',
+    },
+    {
+      id: 'fuel',
+      title: 'Banishment feeds the vortex',
+      effect: 'Ritual +1 — the ejection fuels what is coming through the crypt.',
+    },
+    {
+      id: 'inventory',
+      title: "Myrkul's inventory",
+      effect: 'Breach +1 — the cemetery answers on the Outer front.',
+    },
+  ];
+
   global.PaleTide = {
     BATCHES,
     SLOT_INIT,
@@ -1847,7 +3197,16 @@ main {
     timerElapsedMs,
     timerSegment,
     timerNextMarker,
+    defaultPcs,
+    normalizePcs,
+    PC_ROSTER,
+    defaultSummons,
+    normalizeSummons,
+    SUMMON_ROSTER,
     defaultState,
+    defaultPhase1Collapsed,
+    defaultPhase2Collapsed,
+    defaultPhase3Collapsed,
     rotateAssignment,
     shuffle,
     nextRound,
@@ -1856,6 +3215,7 @@ main {
     isConeRound,
     resolveOrder,
     pylonAcBonus,
+    INNER_BUST_OPTIONS,
     load,
     save,
     reset,
@@ -1865,23 +3225,25 @@ main {
 (function (global) {
   const BATCH_TURN = {
     1: {
-      title: 'Horde · Batch 1',
+      title: 'Horde',
       lines: [
         'One mob turn per horde · N→S',
         '5 attacks +8 each (+10 if Marshal within 30 ft)',
         'Pin horde: 2 attacks → Str DC 16 grapple',
         'Spawns enter at start of Horde slot this round',
         'Hood reveal at ≤2 bodies · end of Horde slot',
+        'Living hoods: +10 dagger×2 · venom Con 19 · Fade bonus',
       ],
       la: null,
     },
     2: {
-      title: 'Knights · Batch 2',
+      title: 'Knights',
       lines: [
-        'Turn order: Marshal → Heavy → Blade Singer',
+        'Turn order: Marshal → Heavy → Blade Singer → hounds',
         'Multiattack: 3× Dread Blade +11',
-        'Hellfire Orb · Mortuary Stillness (recharge 5–6)',
+        'Hellfire Orb · Mortuary Stillness Con 23 (recharge 5–6)',
         'Parry reaction: +6 AC vs one melee hit',
+        'Grave hounds: bite +11 ×2 · Cold Howl Wis 19 · Pack Takedown',
       ],
       la: {
         budget: '2/round · Blade Singer 3/round',
@@ -1899,15 +3261,15 @@ main {
       },
     },
     3: {
-      title: 'Wraiths · Batch 3',
+      title: 'Wraiths',
       lines: [
         'Ghosts N→S · then banshee if Phase 3',
         'Life Drain +10 · 5d8+6 nec · max HP − damage',
-        'Soul Grit: 4 wraiths on one target or crit → Con 21 or Rage ends',
-        'Banshee friendly → neutral · no LA unless provoked',
+        'Soul Grit: 4 wraiths on one target or crit → Con 23 or Rage ends',
+        'Banshee friendly only → neutral · attacks if neutral or worse',
       ],
       la: {
-        budget: 'Banshee 2/round · hostile only',
+        budget: 'Banshee 2/round · hostile if neutral or worse',
         note: 'End of another creature’s turn',
         options: [
           'Drift — fly half speed',
@@ -1918,17 +3280,15 @@ main {
       },
     },
     4: {
-      title: 'Hunters · Batch 4',
+      title: 'Reserves',
       lines: [
-        'Living hoods first · then grave hounds',
-        'Hood: +10 dagger×2 · venom Con 19 · Fade bonus',
-        'Hound: bite +11 2d8+6 nec×2 · Cold Howl Wis 19',
-        'Pack Takedown: both bites hit → Str 20 or Prone',
+        'Grave spawns / reinforcements when this batch is active',
+        'Living hoods → Horde · hounds → Knights',
       ],
       la: null,
     },
     5: {
-      title: 'Apex · Batch 5',
+      title: 'Apex',
       lines: [
         'Leader Lich → Keeper Lich → Apostle last',
         'Lichens: 2 LA/round each · LR 2/day',
@@ -1981,7 +3341,7 @@ main {
       {
         name: 'Stillness Between Heartbeats',
         effect: 'One Raging creature in 60 ft',
-        save: 'Con 21 or Rage ends · undead heal 2d6',
+        save: 'Con 23 or Rage ends · undead heal 2d6',
       },
       {
         name: 'Grave Fog',
@@ -2005,12 +3365,34 @@ main {
     { init: 31, slot: 'Dead 2', home: 'Knights' },
     { init: 25, slot: 'Dead 5', home: 'Apex' },
     { init: 20, slot: 'Lair', home: 'Lair action' },
-    { init: 19, slot: 'Dead 4', home: 'Hunters' },
+    { init: 19, slot: 'Dead 4', home: 'Reserves' },
     { init: 16, slot: 'Dead 3', home: 'Wraiths' },
     { init: 10, slot: 'Dead 1', home: 'Horde' },
   ];
 
   function reminderForSlot(state, slot) {
+    if (slot.startsWith('pc:')) {
+      const id = slot.slice(3);
+      const pc = (state.pcs || []).find((p) => p.id === id);
+      if (!pc) return null;
+      return {
+        type: 'pc',
+        title: pc.name,
+        init: pc.init,
+        lines: ['Player turn · enemy legendary actions resolve end of this turn'],
+      };
+    }
+    if (slot.startsWith('summon:')) {
+      const id = slot.slice(7);
+      const summon = (state.summons || []).find((s) => s.id === id);
+      if (!summon) return null;
+      return {
+        type: 'summon',
+        title: summon.name,
+        init: summon.init,
+        lines: ['Summoned ally · acts on this initiative'],
+      };
+    }
     if (slot === 'lair') return { type: 'lair', ...LAIR };
     const batch = state.assignment[slot];
     if (!batch) return null;
@@ -2050,7 +3432,7 @@ main {
       traits: [
         'Minion: damage kills; 0 damage unaffected',
         'Undead Fortitude (one horde only): Con 15 or drop to 1 HP once',
-        'Mob turn: 5 attacks per horde on Batch 1',
+        'Mob turn: 5 attacks per horde on Horde turn',
         'AoE: 1 body dead per full die (min 1)',
       ],
       actions: [
@@ -2068,7 +3450,7 @@ main {
       phases: [1, 2, 3],
       qty: '~3–6',
       cr: '—',
-      stats: [['Same as horde', '1 HP · +8 (+10 Marshal) · Batch 1']],
+      stats: [['Same as horde', '1 HP · +8 (+10 Marshal)']],
       traits: [
         'Reveal: horde ≤2 bodies · Perception DC 17 · Investigation DC 18 on corpse',
         'Crystal: zombies within 30 ft ignore bearer unless Marshal commands',
@@ -2082,8 +3464,8 @@ main {
     {
       id: 'living-hood',
       name: 'Living hood',
-      sub: 'Myrkul agent · living · Batch 4',
-      batch: 4,
+      sub: 'Myrkul agent · living',
+      batch: 1,
       phases: [1, 2, 3],
       qty: '~1–3',
       cr: '~8',
@@ -2113,8 +3495,8 @@ main {
     {
       id: 'grave-hound',
       name: 'Grave hound',
-      sub: 'Undead ghost dog · Batch 4',
-      batch: 4,
+      sub: 'Undead ghost dog',
+      batch: 2,
       phases: [1, 2, 3],
       qty: '2',
       cr: '~10',
@@ -2141,7 +3523,7 @@ main {
     {
       id: 'ghost',
       name: 'Ghost',
-      sub: 'Wraith dial · Batch 3',
+      sub: 'Wraith dial',
       batch: 3,
       phases: [1, 2, 3],
       qty: '7',
@@ -2161,7 +3543,7 @@ main {
         },
         {
           name: 'Soul Grit',
-          text: 'Crit or 4 wraiths on one target in a round · Raging: Con DC 21 or Rage ends + expend 1 use',
+          text: 'Crit or 4 wraiths on one target in a round · Raging: Con DC 23 or Rage ends + expend 1 use',
         },
       ],
       deploy: 'R4: 2 skull pits · Ph3: +3–5 rim · peel Theokoles or Acerian on Tile G',
@@ -2169,7 +3551,7 @@ main {
     {
       id: 'death-knight',
       name: 'Death knight',
-      sub: '2024 MM + encounter · Batch 2',
+      sub: '2024 MM + encounter',
       batch: 2,
       phases: [1, 2, 3],
       qty: '3',
@@ -2200,7 +3582,7 @@ main {
         },
         {
           name: 'Mortuary Stillness (Recharge 5–6)',
-          text: '30-ft radius Con DC 21 · fail 6d6 nec + no healing until Greater Restoration · Rage ends',
+          text: '30-ft radius Con DC 23 · fail 6d6 nec + no healing until Greater Restoration · Rage ends',
         },
       ],
       legendary: [
@@ -2223,7 +3605,7 @@ main {
     {
       id: 'leader-lich',
       name: 'Leader lich',
-      sub: 'Phase 3 · Batch 5 · Counting House',
+      sub: 'Phase 3 · Counting House',
       batch: 5,
       phases: [3],
       qty: '1',
@@ -2260,7 +3642,7 @@ main {
     {
       id: 'keeper-lich',
       name: 'Ledger Keeper lich',
-      sub: 'Phase 3 · Batch 5',
+      sub: 'Phase 3',
       batch: 5,
       phases: [3],
       qty: '1',
@@ -2292,7 +3674,7 @@ main {
     {
       id: 'banshee',
       name: 'Weeping woman · banshee',
-      sub: 'Phase 3 · Batch 3 · Lower',
+      sub: 'Phase 3 · Lower',
       batch: 3,
       phases: [3],
       qty: '1',
@@ -2337,7 +3719,7 @@ main {
     {
       id: 'apostle',
       name: 'Apostle of Myrkul',
-      sub: 'Phase 3 boss · Batch 5 last',
+      sub: 'Phase 3 boss · last',
       batch: 5,
       phases: [3],
       qty: '1',
@@ -2393,8 +3775,10 @@ main {
       cr: '—',
       stats: [['Time Armour', 'Cannot be damaged until Time Collapse']],
       traits: [
-        'Parley on Counting House entry · opposed liturgy',
-        'Attack consequences: backlash · +1 inner fail · Ritual +1 · Marshal next Batch 1',
+        'Counting House parley · opposed liturgy · Inner track win',
+        'Track bust: banish 2nd offender · pick ledger price (5 options)',
+        'Caught inside = inner failure · d20 at disadvantage to slip notice',
+        'Attack consequences: backlash · +1 inner fail · Ritual +1 · Marshal next Horde turn',
       ],
       actions: [],
     },
@@ -2411,8 +3795,9 @@ main {
         ['Bubble', 'Half cover + adv saves for reader · Ritual +1/round'],
       ],
       traits: [
+        'Counting House reader · opposed liturgy · lattice knowledge beats',
         'Disrupt counting: Insight DC 26 → Ritual −1 (Kilgore)',
-        'Same attack consequences as Leader',
+        'Caught inside = inner failure · d20 at disadvantage · same attack consequences as Leader',
       ],
       actions: [],
     },
@@ -2431,7 +3816,7 @@ main {
       ],
       traits: [
         'Ward: no teleport/flight · Misty Step/Dimension Door blocked',
-        'G+0 Wail Wis 21 · G+4+ cone 12d6 + Stillness Con 21',
+        'G+0 Wail Wis 21 · G+4+ cone 12d6 + Stillness Con 23',
         'Null Pulse: no auras · no psychic · radiant healing halved 60 ft',
       ],
       actions: [],
@@ -2441,11 +3826,11 @@ main {
 
   const FILTERS = [
     { id: 'all', label: 'All' },
-    { id: '1', label: 'Batch 1' },
-    { id: '2', label: 'Batch 2' },
-    { id: '3', label: 'Batch 3' },
-    { id: '4', label: 'Batch 4' },
-    { id: '5', label: 'Batch 5' },
+    { id: '1', label: 'Horde' },
+    { id: '2', label: 'Knights' },
+    { id: '3', label: 'Wraiths' },
+    { id: '4', label: 'Reserves' },
+    { id: '5', label: 'Apex' },
     { id: 'npc', label: 'NPC' },
     { id: 'object', label: 'Objects' },
   ];
@@ -2465,7 +3850,6 @@ main {
 /* The Pale Tide — UI (iPad Safari) */
 (function () {
   const APP_OK = 'pale-tide-app-ok-v3';
-  const BUILD = '2026-06-27';
 
   function bootError(msg) {
     let bar = document.getElementById('boot-error');
@@ -2590,7 +3974,7 @@ main {
     if (alertEl && alertText) {
       if (state.timerAlert) {
         alertEl.classList.remove('hidden');
-        alertText.innerHTML = `<strong>${state.timerAlert.label}</strong> — ${state.timerAlert.hint}`;
+        alertText.innerHTML = `<strong>${state.timerAlert.label}</strong><span class="timer-alert-hint">${state.timerAlert.hint}</span>`;
       } else {
         alertEl.classList.add('hidden');
         alertText.textContent = '';
@@ -2600,14 +3984,30 @@ main {
 
   function renderHeader() {
     const g = G.gTrack(state);
-    $('#header-title').textContent = 'The Pale Tide';
+    setEl($('#header-round'), (el) => {
+      el.textContent = `R${state.round}`;
+    });
+    const appLive =
+      document.documentElement.getAttribute('data-app') === APP_OK
+        ? '<span class="chip chip-live">live</span>'
+        : '';
     $('#meta-chips').innerHTML = [
-      `<span class="chip">${BUILD}</span>`,
-      `<span class="chip">R${state.round}</span>`,
+      appLive,
       g != null ? `<span class="chip">G+${g - 1}${g === 1 ? ' (open)' : ''}</span>` : '',
-      state.gateOpen ? '<span class="chip">Gate OPEN</span>' : '<span class="chip">Gate LOCKED</span>',
+      state.gateOpen && state.gateHeld
+        ? '<span class="chip">Gate HELD</span>'
+        : state.gateOpen
+          ? '<span class="chip">Gate OPEN</span>'
+          : '<span class="chip">Gate LOCKED</span>',
       state.phase >= 3 ? '<span class="chip phase-3">Phase 3</span>' : `<span class="chip">Phase ${state.phase}</span>`,
       state.pulseOn ? '<span class="chip pulse-on">PULSE</span>' : '',
+      state.innerBustChoice
+        ? (() => {
+            const opt = G.INNER_BUST_OPTIONS.find((o) => o.id === state.innerBustChoice);
+            return opt ? `<span class="chip inner-bust">${opt.title}</span>` : '';
+          })()
+        : '',
+      state.gateOpen && state.gateSmashed ? '<span class="chip">Gate wrecked</span>' : '',
       state.timerPaused ? '<span class="chip">Timer paused</span>' : '',
     ]
       .filter(Boolean)
@@ -2630,7 +4030,7 @@ main {
       pips.appendChild(el('span', `breach-pip${i < state.breach ? ' filled' : ''}`));
     }
 
-    setEl($('.clocks-bar'), (bar) => {
+    setEl($('#header-clocks'), (bar) => {
       bar.classList.toggle('ritual-stopped', state.ritualStopped);
       bar.classList.toggle('ritual-high', state.ritual >= 10);
       bar.classList.toggle('breach-high', state.breach >= 4);
@@ -2658,40 +4058,96 @@ main {
     }
   }
 
-  function shortHint(row) {
-    if (row.slot === 'lair') {
-      return 'Pick ONE lair · +d100/pylon · Apostle +30 if Ph3';
-    }
-    const t = R.reminderForBatch(row.batch);
-    if (!t) return '';
-    if (t.la && t.la.budget) return t.lines[0] + ' · LA: ' + t.la.budget;
-    return t.lines[0];
+  function clearReminderPopupPosition(panel) {
+    if (!panel) return;
+    panel.classList.remove('anchored');
+    panel.style.left = '';
+    panel.style.top = '';
   }
 
-  function renderInitRefStrip() {
-    const strip = $('#init-ref-strip');
-    strip.innerHTML = R.INIT_COUNTS.map(
-      (c) =>
-        `<span class="init-ref-chip"><strong>${c.init}</strong> ${c.home}</span>`
-    ).join('');
+  function scheduleReminderPopupPosition() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => positionReminderPopup());
+    });
+  }
+
+  function positionReminderPopup() {
+    const panel = $('#reminder-panel');
+    const rail = $('#phase-rail');
+    if (!panel || panel.classList.contains('hidden')) return;
+
+    if (window.matchMedia('(max-width: 700px)').matches) {
+      clearReminderPopupPosition(panel);
+      return;
+    }
+
+    if (!rail) {
+      clearReminderPopupPosition(panel);
+      return;
+    }
+
+    const railRect = rail.getBoundingClientRect();
+    const margin = 8;
+    let left = railRect.left;
+    let top = railRect.top;
+
+    const banner = $('#gate-banner');
+    const activePanel = document.querySelector('.tab-panel:not(.hidden)');
+
+    if (state.activeTab === 'phase1' && banner && banner.offsetParent !== null) {
+      const bannerRect = banner.getBoundingClientRect();
+      left = bannerRect.left;
+      top = bannerRect.top;
+    } else if (activePanel) {
+      const panelRect = activePanel.getBoundingClientRect();
+      left = panelRect.left;
+      top = panelRect.top;
+    }
+
+    panel.classList.add('anchored');
+    const panelW = panel.offsetWidth;
+    const panelH = panel.offsetHeight;
+    const maxW = railRect.width - margin * 2;
+    panel.style.maxWidth = `${Math.min(360, maxW)}px`;
+
+    top = Math.max(railRect.top + margin, Math.min(top, railRect.bottom - panelH - margin));
+    left = Math.max(railRect.left + margin, Math.min(left, railRect.right - panelW - margin));
+
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
   }
 
   function renderReminderPanel() {
     const panel = $('#reminder-panel');
     const slot = state.turnHighlight;
 
+    if (!panel) return;
+
     if (!slot) {
-      panel.className = 'reminder-panel empty';
-      panel.innerHTML =
-        'Tap <strong>Mark</strong> on an initiative row · reminders for that batch, legendary actions, or lair (20)';
+      panel.className = 'reminder-popup hidden';
+      panel.innerHTML = '';
+      clearReminderPopupPosition(panel);
       return;
     }
 
-    panel.className = 'reminder-panel';
+    panel.className = 'reminder-popup';
     const info = R.reminderForSlot(state, slot);
     if (!info) {
-      panel.className = 'reminder-panel empty';
-      panel.innerHTML = 'Unknown batch — tap <strong>Mark</strong> again or tap <strong>New Round</strong>';
+      panel.className = 'reminder-popup hidden';
+      panel.innerHTML = '';
+      clearReminderPopupPosition(panel);
+      return;
+    }
+
+    if (info.type === 'pc') {
+      panel.innerHTML = `<h3>🎲 ${info.title} · init ${info.init}</h3><ul>${info.lines.map((line) => `<li>${line}</li>`).join('')}</ul>`;
+      scheduleReminderPopupPosition();
+      return;
+    }
+
+    if (info.type === 'summon') {
+      panel.innerHTML = `<h3>✨ ${info.title} · init ${info.init}</h3><ul>${info.lines.map((line) => `<li>${line}</li>`).join('')}</ul>`;
+      scheduleReminderPopupPosition();
       return;
     }
 
@@ -2711,6 +4167,7 @@ main {
         <div class="lair-grid">${cards}</div>
         <p class="la-note" style="margin-top:10px">${info.pickOne}</p>
       `;
+      scheduleReminderPopupPosition();
       return;
     }
 
@@ -2759,20 +4216,98 @@ main {
     }
 
     panel.innerHTML = html;
+    scheduleReminderPopupPosition();
   }
 
-  function renderLairQuickRef() {
-    const box = $('#lair-quick-ref');
-    if (!box) return;
-    box.innerHTML = R.LAIR.actions
-      .map(
-        (a) => `
-      <button type="button" class="lair-card${state.lairPick === a.name ? ' selected' : ''}" data-lair-ref="${a.name}" onclick="PaleTideApp.tap(this,event)">
-        <div class="lair-name">${a.name}</div>
-        <div class="lair-detail">${a.effect} · ${a.save}</div>
-      </button>`
-      )
-      .join('');
+  function renderInitRefStrip() {}
+
+  function allActorsInTracker(actors) {
+    return actors.length > 0 && actors.every((a) => a.inTracker && a.init != null);
+  }
+
+  function patchAllies(patch) {
+    const pcs = patch.pcs ?? state.pcs;
+    const summons = patch.summons ?? state.summons;
+    const next = { ...patch, pcs, summons };
+    if (allActorsInTracker(pcs) && allActorsInTracker(summons)) {
+      next.alliesInitCollapsed = true;
+    } else if (pcs.every((pc) => !pc.inTracker) && summons.every((s) => !s.inTracker)) {
+      next.alliesInitCollapsed = false;
+    }
+    setState(next);
+  }
+
+  function patchPcs(pcs) {
+    patchAllies({ pcs });
+  }
+
+  function patchSummons(summons) {
+    patchAllies({ summons });
+  }
+
+  function alliesInitSummary() {
+    const pcs = state.pcs || [];
+    const summons = state.summons || [];
+    const all = [...pcs, ...summons];
+    const inTracker = all.filter((a) => a.inTracker).length;
+    if (allActorsInTracker(pcs) && allActorsInTracker(summons)) {
+      return `All ${all.length} in tracker`;
+    }
+    return `${inTracker}/${all.length} in tracker`;
+  }
+
+  function renderAlliesInit() {
+    const pcs = state.pcs || [];
+    const summons = state.summons || [];
+    const panel = $('#allies-init-panel');
+    const pcList = $('#pc-init-list');
+    const summonList = $('#summon-init-list');
+    if (!pcList || !summonList) return;
+
+    setEl(panel, (container) => {
+      container.classList.toggle('collapsed', !!state.alliesInitCollapsed);
+    });
+    setEl($('#allies-init-summary'), (container) => {
+      container.textContent = alliesInitSummary();
+    });
+    setEl($('#btn-allies-init-toggle'), (container) => {
+      container.setAttribute('aria-expanded', state.alliesInitCollapsed ? 'false' : 'true');
+    });
+
+    pcList.innerHTML = '';
+    pcs.forEach((pc) => {
+      const row = el('div', `pc-init-row${pc.inTracker ? ' in-tracker' : ''}`);
+      const canTrack = pc.init != null;
+      row.innerHTML = `
+        <span class="pc-init-name">${pc.name}</span>
+        <input type="text" class="pc-init-input" id="pc-init-${pc.id}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="—" value="${pc.init != null ? pc.init : ''}" />
+        <button type="button" class="ghost pc-init-toggle${pc.inTracker ? ' active' : ''}" data-pc-toggle="${pc.id}" onclick="PaleTideApp.tap(this,event)" ${canTrack ? '' : 'disabled'}>${pc.inTracker ? '✓ In' : '+ Tracker'}</button>
+      `;
+      pcList.appendChild(row);
+    });
+    summonList.innerHTML = '';
+    summons.forEach((s) => {
+      const row = el('div', `pc-init-row${s.inTracker ? ' in-tracker' : ''}`);
+      const canTrack = s.init != null;
+      row.innerHTML = `
+        <span class="pc-init-name">${s.name}</span>
+        <input type="text" class="pc-init-input" id="summon-init-${s.id}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="—" value="${s.init != null ? s.init : ''}" />
+        <button type="button" class="ghost pc-init-toggle${s.inTracker ? ' active' : ''}" data-summon-toggle="${s.id}" onclick="PaleTideApp.tap(this,event)" ${canTrack ? '' : 'disabled'}>${s.inTracker ? '✓ In' : '+ Tracker'}</button>
+      `;
+      summonList.appendChild(row);
+    });
+    setEl($('#btn-pc-add-all'), (el) => {
+      el.disabled = !pcs.some((pc) => pc.init != null && !pc.inTracker);
+    });
+    setEl($('#btn-pc-clear-tracker'), (el) => {
+      el.disabled = !pcs.some((pc) => pc.inTracker);
+    });
+    setEl($('#btn-summon-add-all'), (el) => {
+      el.disabled = !summons.some((s) => s.init != null && !s.inTracker);
+    });
+    setEl($('#btn-summon-clear-tracker'), (el) => {
+      el.disabled = !summons.some((s) => s.inTracker);
+    });
   }
 
   function renderInitiative() {
@@ -2780,33 +4315,126 @@ main {
     const list = $('#init-list');
     list.innerHTML = '';
 
-    if (state.round === 1) {
-      $('#shuffle-info').textContent = 'Round 1 — default order (shuffle from R2)';
-    } else if (state.shuffleRoll != null) {
-      $('#shuffle-info').textContent = `Shuffle d5 = ${state.shuffleRoll} · rotated ${state.shuffleRoll === 1 ? 0 : state.shuffleRoll - 1} steps`;
-    } else {
-      $('#shuffle-info').textContent = 'Tap “New Round” to shuffle';
-    }
-
     order.forEach((row) => {
       const isActive = state.turnHighlight === row.slot;
-      const hint = isActive ? shortHint(row) : '';
       const div = el(
         'div',
-        `init-row${row.slot === 'lair' ? ' lair' : ''}${isActive ? ' active' : ''}`,
+        `init-row${row.slot === 'lair' ? ' lair' : ''}${row.isPc ? ' pc' : ''}${row.isSummon ? ' summon' : ''}${isActive ? ' active' : ''}`,
         `
         <div class="init-count">${row.init}</div>
         <div class="init-info">
-          <div class="name">${row.emoji} ${row.name}${row.batch ? ` <span style="color:var(--muted);font-weight:400">· Batch ${row.batch}</span>` : ''}</div>
+          <div class="name">${row.emoji} ${row.name}</div>
           <div class="units">${row.units}</div>
         </div>
         <button type="button" class="ghost mark-turn" data-slot="${row.slot}" style="min-height:40px;padding:0 12px;font-size:0.8rem" onclick="PaleTideApp.tap(this,event)">${isActive ? '✓' : 'Mark'}</button>
-        ${hint ? `<div class="reminder-hint">${hint}</div>` : ''}
       `
       );
       list.appendChild(div);
     });
 
+    renderAlliesInit();
+  }
+
+  function applyPhaseSectionCollapse(sectionAttr, collapsed, defaults) {
+    const map = collapsed || defaults();
+    $$(`.phase-section[data-${sectionAttr}]`).forEach((section) => {
+      const key = section.getAttribute(`data-${sectionAttr}`);
+      if (!key) return;
+      section.classList.toggle('collapsed', !!map[key]);
+      const toggle = section.querySelector('.phase-section-toggle');
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', map[key] ? 'false' : 'true');
+      }
+    });
+  }
+
+  function renderPhaseSections() {
+    applyPhaseSectionCollapse('phase1-section', state.phase1Collapsed, G.defaultPhase1Collapsed);
+    applyPhaseSectionCollapse('phase2-section', state.phase2Collapsed, G.defaultPhase2Collapsed);
+    applyPhaseSectionCollapse('phase3-section', state.phase3Collapsed, G.defaultPhase3Collapsed);
+  }
+
+  function applyInnerBustChoice(id) {
+    const option = G.INNER_BUST_OPTIONS.find((o) => o.id === id);
+    if (!option) return;
+
+    const prev = state.innerBustChoice;
+    let ritual = state.ritual;
+    let breach = state.breach;
+    let innerOpposedBonus = state.innerOpposedBonus || 0;
+
+    if (prev && prev !== id) {
+      if (prev === 'inventory') {
+        breach = Math.max(0, breach - 1);
+      } else if (!state.ritualStopped) {
+        ritual = Math.max(0, ritual - 1);
+      }
+      if (prev === 'ledger') {
+        innerOpposedBonus = Math.max(0, innerOpposedBonus - 2);
+      }
+    }
+
+    if (!prev || prev !== id) {
+      if (id === 'inventory') {
+        breach = Math.min(6, breach + 1);
+      } else if (!state.ritualStopped && ritual < 20) {
+        ritual = Math.min(20, ritual + 1);
+      }
+      if (id === 'ledger') {
+        innerOpposedBonus += 2;
+      }
+    }
+
+    setState({
+      innerBustPending: false,
+      innerBustChoice: id,
+      ritual,
+      breach,
+      innerOpposedBonus,
+    });
+  }
+
+  function renderInnerBust() {
+    const panel = $('#inner-bust-panel');
+    const optionsEl = $('#inner-bust-options');
+    const promptEl = $('#inner-bust-prompt');
+    if (!panel || !optionsEl) return;
+
+    const show = state.innerBustPending || state.innerBustChoice;
+    panel.classList.toggle('hidden', !show);
+    if (!show) {
+      optionsEl.innerHTML = '';
+      return;
+    }
+
+    if (promptEl) {
+      promptEl.classList.toggle('hidden', !state.innerBustPending);
+      promptEl.textContent = state.innerBustChoice
+        ? "Ledger's price — tap to change:"
+        : "Choose the ledger's price:";
+    }
+
+    optionsEl.innerHTML = G.INNER_BUST_OPTIONS.map(
+      (opt) => `
+        <button type="button" class="inner-bust-option${state.innerBustChoice === opt.id ? ' active' : ''}" data-inner-bust="${opt.id}" onclick="PaleTideApp.tap(this,event)">
+          <span class="inner-bust-option-title">${opt.title}</span>
+          <span class="inner-bust-option-effect">${opt.effect}</span>
+        </button>
+      `
+    ).join('');
+  }
+
+  function applyGraveChurnAdd(add) {
+    const amount = Math.max(0, Math.floor(Number(add) || 0));
+    if (amount <= 0) return;
+    const v = state.graveChurn + amount;
+    const tiers = { ...state.graveTiers };
+    if (v >= 50) tiers.t50 = true;
+    if (v >= 75) tiers.t75 = true;
+    if (v >= 100) tiers.t100 = true;
+    setState({ graveChurn: v, graveTiers: tiers });
+    const input = $('#grave-roll-input');
+    if (input) input.value = '';
   }
 
   function renderPylons() {
@@ -2829,12 +4457,39 @@ main {
       setEl($(`#pylon-${low}-stone-val`), (el) => {
         el.textContent = p.stone;
       });
+      setEl($(`#${low}-destroy`), (el) => {
+        el.textContent = p.destroyed ? 'Restore' : 'Destroyed';
+      });
     });
   }
 
   function renderSanctum() {
-    setEl($('#woman-friendly'), (el) => {
-      el.checked = state.womanFriendly;
+    const womanDisp = state.womanDisposition || 'neutral';
+    ['friendly', 'neutral', 'hostile'].forEach((disp) => {
+      setEl($(`#btn-woman-${disp}`), (el) => {
+        el.classList.toggle('active', womanDisp === disp);
+      });
+    });
+    setEl($('#woman-banshee-note'), (el) => {
+      if (womanDisp === 'friendly') {
+        el.innerHTML = 'Ph 3 banshee: <strong>friendly</strong> — will not attack unless provoked';
+      } else if (womanDisp === 'neutral') {
+        el.innerHTML = 'Ph 3 banshee: <strong>neutral</strong> — <strong>will attack</strong>';
+      } else {
+        el.innerHTML = 'Ph 3 banshee: <strong>hostile</strong> — <strong>will attack</strong>';
+      }
+    });
+    setEl($('#children-removed'), (el) => {
+      el.textContent = state.childrenRemoved;
+    });
+    setEl($('#btn-child-remove'), (el) => {
+      el.disabled = state.childrenRemoved >= 10;
+    });
+    setEl($('#btn-norman-found'), (el) => {
+      el.disabled = state.normanFound;
+    });
+    setEl($('#children-pass-note'), (el) => {
+      el.classList.toggle('hidden', !state.normanFound);
     });
     setEl($('#rim-rite'), (el) => {
       el.checked = state.rimRiteKnown;
@@ -2842,6 +4497,7 @@ main {
     setEl($('#inner-buy'), (el) => {
       el.textContent = state.innerBuydowns;
     });
+    renderInnerBust();
 
     const wins = $('#win-dots');
     if (wins) {
@@ -2910,19 +4566,161 @@ main {
     });
   }
 
+  function gateLocksClearedFrom(s) {
+    return (s.gateLock1 && s.gateLock2) || s.gateSmashSuccesses >= 3;
+  }
+
+  function gateLocksCleared() {
+    return gateLocksClearedFrom(state);
+  }
+
+  function applyAutoGateOpen(patch) {
+    const next = { ...state, ...patch };
+    if (gateLocksClearedFrom(next) && !state.gateOpen) {
+      return {
+        ...patch,
+        gateOpen: true,
+        gateRound: state.round,
+        pulseOn: true,
+        breach: Math.min(6, state.breach + 1),
+        phase: Math.max(state.phase, 2),
+        activeTab: 'phase2',
+      };
+    }
+    return patch;
+  }
+
+  function nextPickTarget() {
+    if (!state.gateLock1 && !state.gateLock1Unpickable) return 1;
+    if (!state.gateLock2 && !state.gateLock2Unpickable) return 2;
+    return null;
+  }
+
+  function clearNextGateLock() {
+    if (gateLocksCleared() || state.gateToolsBroken) return false;
+    const target = nextPickTarget();
+    if (!target) return false;
+    const patch = { gatePickStarted: true };
+    if (target === 1) patch.gateLock1 = true;
+    else patch.gateLock2 = true;
+    setState(applyAutoGateOpen(patch));
+    return true;
+  }
+
+  function pickFailBy5() {
+    if (gateLocksCleared() || state.gateToolsBroken) return false;
+    const target = nextPickTarget();
+    if (!target) return false;
+    const patch = { gatePickStarted: true, gateToolsBroken: true };
+    if (target === 1) patch.gateLock1Unpickable = true;
+    else patch.gateLock2Unpickable = true;
+    setState(patch);
+    return true;
+  }
+
+  function addSmashSuccess() {
+    if (gateLocksCleared()) return false;
+    const next = Math.min(3, state.gateSmashSuccesses + 1);
+    const patch = { gateSmashSuccesses: next };
+    if (next >= 3) {
+      patch.gateLock1 = true;
+      patch.gateLock2 = true;
+      patch.gateSmashed = true;
+    }
+    setState(applyAutoGateOpen(patch));
+    return true;
+  }
+
   function renderGate() {
+    const cleared = gateLocksCleared();
+    const pickTarget = nextPickTarget();
+    const picked = (state.gateLock1 ? 1 : 0) + (state.gateLock2 ? 1 : 0);
+    setEl($('.gate-tracker'), (el) => {
+      el.classList.toggle('gate-open', state.gateOpen);
+    });
     setEl($('#gate-banner'), (el) => {
       el.className = `gate-banner ${state.gateOpen ? 'open' : 'locked'}`;
-      el.textContent = state.gateOpen
-        ? 'GATE OPEN · pylons live · Inner accessible'
-        : 'GATE LOCKED · road spawns only';
+      if (state.gateOpen) {
+        el.textContent = state.gateHeld
+          ? 'GATE HELD · iron re-closed · hold the line'
+          : 'GATE OPEN · pylons live · Inner accessible';
+      } else if (state.gateSmashSuccesses > 0) {
+        el.textContent = `SMASHING · ${state.gateSmashSuccesses}/3 successes`;
+      } else if (state.gatePickStarted) {
+        el.textContent = `PICKING · ${picked}/2 locks${state.gateToolsBroken ? ' · tools broken' : ''}`;
+      } else {
+        el.textContent = 'GATE LOCKED · pick or smash';
+      }
     });
     setEl($('#gate-info'), (el) => {
       if (state.gateOpen) {
-        el.textContent = `Gate opened R${state.gateRound} · switch to Phase 2 for G-track & pylons`;
+        el.textContent = state.gateHeld
+          ? `Gate held R${state.gateRound} · iron re-closed · hold-gate buy-down available`
+          : state.gateSmashed
+            ? `Gate opened R${state.gateRound} · wrecked — cannot re-close in Ph 2`
+            : `Gate opened R${state.gateRound} · picked — can re-close in Ph 2 to hold Breach`;
+      } else if (state.gateToolsBroken) {
+        el.textContent = 'Tools broken — jammed lock unpickable · finish via smash (3 successes · failures OK)';
+      } else if (state.gatePickStarted && state.gateSmashSuccesses > 0) {
+        el.textContent = 'Pick & smash in parallel — tap +1 only on smash success · failures don\'t reset progress';
+      } else if (state.gateSmashSuccesses > 0) {
+        el.textContent = 'Smashing — need 3 successes (Ath DC 22) · failures don\'t harm progress';
+      } else if (state.gatePickStarted) {
+        el.textContent = 'Picking — smash track also available (3 successes · gate can\'t re-close)';
       } else {
-        el.textContent = 'Road spawns only · Gate + Lane fronts · Breach 6 = road lost';
+        el.textContent = 'Pick both locks OR smash 3× — separate tracks · smash failures OK';
       }
+    });
+    [1, 2].forEach((n) => {
+      const clearedLock = n === 1 ? state.gateLock1 : state.gateLock2;
+      const unpickable = n === 1 ? state.gateLock1Unpickable : state.gateLock2Unpickable;
+      setEl($(`#gate-lock-${n}`), (el) => {
+        el.classList.toggle('cleared', clearedLock);
+        el.classList.toggle('unpickable', unpickable && !clearedLock);
+        const icon = el.querySelector('.gate-lock-icon');
+        if (icon) {
+          icon.textContent = clearedLock ? '🔓' : unpickable ? '⛔' : '🔒';
+        }
+        const label = el.querySelector('.gate-lock-label');
+        if (label) {
+          label.textContent = clearedLock ? `Lock ${n} · open` : unpickable ? `Lock ${n} · jammed` : `Lock ${n}`;
+        }
+      });
+    });
+    setEl($('#gate-tools-broken'), (el) => {
+      el.classList.toggle('hidden', !state.gateToolsBroken || state.gateOpen);
+    });
+    setEl($('#gate-smash-track'), (el) => {
+      el.classList.toggle('hidden', state.gateOpen);
+    });
+    setEl($('#gate-smash-successes'), (container) => {
+      container.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const filled = i < state.gateSmashSuccesses;
+        const slot = el('div', `gate-smash-slot${filled ? ' filled' : ''}`);
+        slot.innerHTML = `<span class="gate-smash-slot-icon" aria-hidden="true">${filled ? '✓' : '○'}</span><span class="gate-smash-slot-label">${filled ? 'Hit' : 'Need'} ${i + 1}</span>`;
+        container.appendChild(slot);
+      }
+    });
+    const canPick = !state.gateOpen && !cleared && !state.gateToolsBroken && pickTarget != null;
+    setEl($('#btn-gate-pick'), (el) => {
+      el.disabled = !canPick;
+    });
+    setEl($('#btn-gate-pick-fail'), (el) => {
+      el.disabled = !canPick;
+    });
+    setEl($('#btn-gate-smash'), (el) => {
+      el.disabled = state.gateOpen || cleared || state.gateSmashSuccesses >= 3;
+    });
+    const canHoldGate = state.gateOpen && state.phase >= 2 && !state.gateSmashed && !state.gateHeld;
+    setEl($('#gate-hold-panel'), (el) => {
+      el.classList.toggle('hidden', !canHoldGate);
+    });
+    setEl($('#gate-held-note'), (el) => {
+      el.classList.toggle('hidden', !state.gateHeld);
+    });
+    setEl($('#gate-smashed-note'), (el) => {
+      el.classList.toggle('hidden', !state.gateOpen || !state.gateSmashed);
     });
   }
 
@@ -2946,7 +4744,11 @@ main {
   function renderMonsterCard(m) {
     const open = state.monsterOpen === m.id;
     const batchLabel =
-      m.batch != null ? `Batch ${m.batch}` : m.id === 'pylon' ? 'Object' : 'NPC';
+      m.batch != null && G.BATCHES[m.batch]
+        ? G.BATCHES[m.batch].name
+        : m.id === 'pylon'
+          ? 'Object'
+          : 'NPC';
     const statsHtml = m.stats
       .map(([k, v]) => `<div class="stat-row"><dt>${k}</dt><dd>${v}</dd></div>`)
       .join('');
@@ -3008,16 +4810,17 @@ main {
     $$('.tab-panel').forEach((panel) => {
       panel.classList.toggle('hidden', panel.dataset.tab !== state.activeTab);
     });
+    if (state.turnHighlight) scheduleReminderPopupPosition();
   }
 
   function render() {
     safe('header', renderHeader);
     safe('clocks', renderClocks);
     safe('init-ref', renderInitRefStrip);
-    safe('reminders', renderReminderPanel);
     safe('initiative', renderInitiative);
-    safe('lair', renderLairQuickRef);
+    safe('reminders', renderReminderPanel);
     safe('pylons', renderPylons);
+    safe('phase-sections', renderPhaseSections);
     safe('sanctum', renderSanctum);
     safe('apostle', renderApostle);
     safe('gate', renderGate);
@@ -3030,7 +4833,7 @@ main {
     if (t && t.nodeType === 3) t = t.parentElement;
     if (!t || !t.closest) return null;
     return t.closest(
-      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn'
+      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn, .phase-section-toggle, .inner-bust-option'
     );
   }
 
@@ -3041,10 +4844,59 @@ main {
       return;
     }
 
+    if (node.dataset.innerBust) {
+      applyInnerBustChoice(node.dataset.innerBust);
+      return;
+    }
+
+    if (node.classList.contains('phase-section-toggle')) {
+      if (node.dataset.phase1Section) {
+        const key = node.dataset.phase1Section;
+        const collapsed = { ...(state.phase1Collapsed || G.defaultPhase1Collapsed()) };
+        collapsed[key] = !collapsed[key];
+        setState({ phase1Collapsed: collapsed });
+        return;
+      }
+      if (node.dataset.phase2Section) {
+        const key = node.dataset.phase2Section;
+        const collapsed = { ...(state.phase2Collapsed || G.defaultPhase2Collapsed()) };
+        collapsed[key] = !collapsed[key];
+        setState({ phase2Collapsed: collapsed });
+        return;
+      }
+      if (node.dataset.phase3Section) {
+        const key = node.dataset.phase3Section;
+        const collapsed = { ...(state.phase3Collapsed || G.defaultPhase3Collapsed()) };
+        collapsed[key] = !collapsed[key];
+        setState({ phase3Collapsed: collapsed });
+        return;
+      }
+    }
+
     if (node.dataset.phase) {
       const ph = parseInt(node.dataset.phase, 10);
       const tab = ph === 3 ? 'phase3' : ph === 2 ? 'phase2' : 'phase1';
       setState({ phase: ph, activeTab: tab });
+      return;
+    }
+
+    if (node.dataset.pcToggle) {
+      const id = node.dataset.pcToggle;
+      const pcs = state.pcs.map((pc) => {
+        if (pc.id !== id || pc.init == null) return pc;
+        return { ...pc, inTracker: !pc.inTracker };
+      });
+      patchPcs(pcs);
+      return;
+    }
+
+    if (node.dataset.summonToggle) {
+      const id = node.dataset.summonToggle;
+      const summons = state.summons.map((s) => {
+        if (s.id !== id || s.init == null) return s;
+        return { ...s, inTracker: !s.inTracker };
+      });
+      patchSummons(summons);
       return;
     }
 
@@ -3056,15 +4908,6 @@ main {
 
     if (node.classList.contains('filter-chip')) {
       setState({ monsterFilter: node.dataset.filter, monsterOpen: null });
-      return;
-    }
-
-    if (node.dataset.lairRef) {
-      const name = node.dataset.lairRef;
-      setState({
-        turnHighlight: 'lair',
-        lairPick: state.lairPick === name ? null : name,
-      });
       return;
     }
 
@@ -3134,12 +4977,40 @@ main {
       case 'btn-inner-fail': {
         const f = state.innerFails + 1;
         if (f >= 2 && state.innerWins < 3) {
-          setState({ innerWins: 0, innerFails: 0, ritual: Math.min(20, state.ritual + 1) });
+          setState({
+            innerWins: 0,
+            innerFails: 0,
+            innerBustPending: true,
+            innerBustChoice: null,
+          });
         } else {
           setState({ innerFails: Math.min(2, f) });
         }
         return;
       }
+      case 'btn-allies-init-toggle':
+        setState({ alliesInitCollapsed: !state.alliesInitCollapsed });
+        return;
+      case 'btn-pc-add-all':
+        patchPcs(
+          state.pcs.map((pc) =>
+            pc.init != null ? { ...pc, inTracker: true } : pc
+          )
+        );
+        return;
+      case 'btn-pc-clear-tracker':
+        patchPcs(state.pcs.map((pc) => ({ ...pc, inTracker: false })));
+        return;
+      case 'btn-summon-add-all':
+        patchSummons(
+          state.summons.map((s) =>
+            s.init != null ? { ...s, inTracker: true } : s
+          )
+        );
+        return;
+      case 'btn-summon-clear-tracker':
+        patchSummons(state.summons.map((s) => ({ ...s, inTracker: false })));
+        return;
       case 'btn-new-round': {
         const d5 = Math.floor(Math.random() * 5) + 1;
         const steps = d5 === 1 ? 0 : d5 - 1;
@@ -3174,15 +5045,38 @@ main {
       case 'btn-pulse-off':
         setState({ pulseOn: false });
         return;
-      case 'btn-open-gate':
-        setState({
-          gateOpen: true,
-          gateRound: state.round,
-          pulseOn: true,
-          breach: Math.min(6, state.breach + 1),
-          phase: Math.max(state.phase, 2),
-          activeTab: 'phase2',
-        });
+      case 'btn-woman-friendly':
+        setState({ womanDisposition: 'friendly' });
+        return;
+      case 'btn-woman-neutral':
+        setState({ womanDisposition: 'neutral' });
+        return;
+      case 'btn-woman-hostile':
+        setState({ womanDisposition: 'hostile' });
+        return;
+      case 'btn-child-remove':
+        if (state.childrenRemoved >= 10) return;
+        setState({ childrenRemoved: state.childrenRemoved + 1 });
+        return;
+      case 'btn-norman-found':
+        if (state.normanFound) return;
+        setState({ normanFound: true });
+        return;
+      case 'btn-gate-hold':
+        if (!state.gateOpen || state.gateSmashed || state.gateHeld) return;
+        setState({ gateHeld: true });
+        return;
+      case 'btn-gate-pick':
+        if (gateLocksCleared() || state.gateToolsBroken) return;
+        clearNextGateLock();
+        return;
+      case 'btn-gate-pick-fail':
+        if (gateLocksCleared() || state.gateToolsBroken) return;
+        pickFailBy5();
+        return;
+      case 'btn-gate-smash':
+        if (gateLocksCleared()) return;
+        addSmashSuccess();
         return;
       case 'btn-phase-3':
         setState({
@@ -3235,21 +5129,31 @@ main {
       case 'a-destroy':
       case 'b-destroy': {
         const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
+        const cur = state[key];
+        if (cur.destroyed) {
+          setState({
+            [key]: { shield: 100, stone: 90, destroyed: false },
+          });
+        } else {
+          setState({
+            [key]: { shield: 0, stone: 0, destroyed: true },
+            ritual: Math.max(0, state.ritual - 2),
+          });
+        }
+        return;
+      }
+      case 'grave-add-roll': {
+        const input = $('#grave-roll-input');
+        applyGraveChurnAdd(input?.value);
+        return;
+      }
+      case 'grave-reset':
         setState({
-          [key]: { shield: 0, stone: 0, destroyed: true },
-          ritual: Math.max(0, state.ritual - 2),
+          graveChurn: 25,
+          graveTiers: { t25: true, t50: false, t75: false, t100: false },
         });
+        if ($('#grave-roll-input')) $('#grave-roll-input').value = '';
         return;
-      }
-      case 'grave-plus': {
-        const v = state.graveChurn + 10;
-        const tiers = { ...state.graveTiers };
-        if (v >= 50) tiers.t50 = true;
-        if (v >= 75) tiers.t75 = true;
-        if (v >= 100) tiers.t100 = true;
-        setState({ graveChurn: v, graveTiers: tiers });
-        return;
-      }
       case 'apostle-lr-use':
         setState({ apostleLr: Math.max(0, state.apostleLr - 1) });
         return;
@@ -3323,10 +5227,36 @@ main {
     const t = e.target;
     if (!t || !t.id) return;
 
-    if (t.id === 'woman-friendly') {
-      setState({ womanFriendly: t.checked });
+    const pcInit = t.id.match(/^pc-init-(pc\d+)$/);
+    if (pcInit) {
+      if (e.type === 'input') return;
+      const id = pcInit[1];
+      const raw = String(t.value).trim();
+      const parsed = raw === '' ? null : parseInt(raw, 10);
+      const init = Number.isFinite(parsed) ? Math.max(0, Math.min(99, parsed)) : null;
+      const pcs = state.pcs.map((pc) => {
+        if (pc.id !== id) return pc;
+        return { ...pc, init, inTracker: init == null ? false : pc.inTracker };
+      });
+      patchPcs(pcs);
       return;
     }
+
+    const summonInit = t.id.match(/^summon-init-(summon\d+)$/);
+    if (summonInit) {
+      if (e.type === 'input') return;
+      const id = summonInit[1];
+      const raw = String(t.value).trim();
+      const parsed = raw === '' ? null : parseInt(raw, 10);
+      const init = Number.isFinite(parsed) ? Math.max(0, Math.min(99, parsed)) : null;
+      const summons = state.summons.map((s) => {
+        if (s.id !== id) return s;
+        return { ...s, init, inTracker: init == null ? false : s.inTracker };
+      });
+      patchSummons(summons);
+      return;
+    }
+
     if (t.id === 'rim-rite') {
       setState({ rimRiteKnown: t.checked });
       return;
@@ -3394,6 +5324,39 @@ main {
     }
     document.addEventListener('change', handleChange, false);
     document.addEventListener('input', handleChange, false);
+    const graveForm = $('#grave-churn-form');
+    if (graveForm) {
+      graveForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        applyGraveChurnAdd($('#grave-roll-input')?.value);
+      });
+    }
+    const graveInput = $('#grave-roll-input');
+    if (graveInput) {
+      graveInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyGraveChurnAdd(graveInput.value);
+        }
+      });
+    }
+    window.addEventListener(
+      'resize',
+      () => {
+        if (state.turnHighlight) positionReminderPopup();
+      },
+      { passive: true }
+    );
+    const phaseRail = $('#phase-rail');
+    if (phaseRail) {
+      phaseRail.addEventListener(
+        'scroll',
+        () => {
+          if (state.turnHighlight) positionReminderPopup();
+        },
+        { passive: true }
+      );
+    }
   }
 
   function boot() {

@@ -3,10 +3,10 @@
   const STORAGE_KEY = 'pale-tide-v1';
 
   const BATCHES = {
-    1: { name: 'Horde', emoji: '🧟', units: 'Hordes · hooded bodies' },
-    2: { name: 'Knights', emoji: '⚔️', units: 'Death knights' },
+    1: { name: 'Horde', emoji: '🧟', units: 'Hordes · hooded bodies · living hoods' },
+    2: { name: 'Knights', emoji: '⚔️', units: 'Death knights · grave hounds' },
     3: { name: 'Wraiths', emoji: '👻', units: 'Ghosts · banshee' },
-    4: { name: 'Hunters', emoji: '🐕', units: 'Living hoods · hounds' },
+    4: { name: 'Reserves', emoji: '⋯', units: 'Spawns · reinforcements' },
     5: { name: 'Apex', emoji: '💀', units: 'Liches · Apostle' },
   };
 
@@ -16,6 +16,57 @@
   const LAIR_INIT = 20;
 
   const DEFAULT_ASSIGNMENT = { dead1: 1, dead2: 2, dead3: 3, dead4: 4, dead5: 5 };
+
+  const PC_ROSTER = ['Anax', 'Kilgore', 'Acerian', 'Guts', 'Theo'];
+  const SUMMON_ROSTER = ['Summon 1', 'Summon 2', 'Summon 3'];
+
+  function defaultPcs() {
+    return PC_ROSTER.map((name, i) => ({
+      id: `pc${i + 1}`,
+      name,
+      init: null,
+      inTracker: false,
+    }));
+  }
+
+  function defaultSummons() {
+    return SUMMON_ROSTER.map((name, i) => ({
+      id: `summon${i + 1}`,
+      name,
+      init: null,
+      inTracker: false,
+    }));
+  }
+
+  function normalizePcs(saved) {
+    const base = defaultPcs();
+    if (!Array.isArray(saved)) return base;
+    return base.map((b) => {
+      const s = saved.find((x) => x.id === b.id);
+      if (!s) return b;
+      const init = s.init != null && s.init !== '' ? Number(s.init) : null;
+      return {
+        ...b,
+        init: Number.isFinite(init) ? init : null,
+        inTracker: !!s.inTracker,
+      };
+    });
+  }
+
+  function normalizeSummons(saved) {
+    const base = defaultSummons();
+    if (!Array.isArray(saved)) return base;
+    return base.map((b) => {
+      const s = saved.find((x) => x.id === b.id);
+      if (!s) return b;
+      const init = s.init != null && s.init !== '' ? Number(s.init) : null;
+      return {
+        ...b,
+        init: Number.isFinite(init) ? init : null,
+        inTracker: !!s.inTracker,
+      };
+    });
+  }
 
   /** Wall-clock spine — SESSION_RUNDOWN.md */
   const TIME_MARKERS = [
@@ -62,12 +113,52 @@
     return t ? t.label : id;
   }
 
+  function defaultPhase1Collapsed() {
+    return {
+      gate: false,
+      fronts: false,
+      afterOpen: false,
+      eor: false,
+    };
+  }
+
+  function defaultPhase2Collapsed() {
+    return {
+      pylons: false,
+      sanctum: false,
+      inner: false,
+      sanctumTable: false,
+      grave: false,
+      anchors: false,
+      phase3: false,
+      fronts: false,
+    };
+  }
+
+  function defaultPhase3Collapsed() {
+    return {
+      timeCollapse: false,
+      apostle: false,
+      dismissal: false,
+      spawns: false,
+    };
+  }
+
   function defaultState() {
     return {
       phase: 1,
       round: 1,
       gateRound: null,
       gateOpen: false,
+      gateLock1: false,
+      gateLock2: false,
+      gateLock1Unpickable: false,
+      gateLock2Unpickable: false,
+      gateToolsBroken: false,
+      gatePickStarted: false,
+      gateSmashSuccesses: 0,
+      gateSmashed: false,
+      gateHeld: false,
       pulseOn: false,
       ritual: 0,
       ritualStopped: false,
@@ -82,7 +173,12 @@
       innerWins: 0,
       innerFails: 0,
       innerBuydowns: 0,
-      womanFriendly: false,
+      innerBustPending: false,
+      innerBustChoice: null,
+      innerOpposedBonus: 0,
+      womanDisposition: 'neutral',
+      childrenRemoved: 0,
+      normanFound: false,
       rimRiteKnown: false,
       anchors: {
         north: { located: false, bound: false },
@@ -108,6 +204,12 @@
       lairPick: null,
       laKnightsUsed: 0,
       laApostleUsed: 0,
+      pcs: defaultPcs(),
+      alliesInitCollapsed: false,
+      summons: defaultSummons(),
+      phase2Collapsed: defaultPhase2Collapsed(),
+      phase1Collapsed: defaultPhase1Collapsed(),
+      phase3Collapsed: defaultPhase3Collapsed(),
     };
   }
 
@@ -177,7 +279,29 @@
       emoji: '🌑',
       units: 'One lair · pylon regen',
     });
-    return rows.sort((a, b) => b.init - a.init);
+    const pcRows = (state.pcs || [])
+      .filter((pc) => pc.inTracker && pc.init != null)
+      .map((pc) => ({
+        slot: `pc:${pc.id}`,
+        init: pc.init,
+        batch: null,
+        name: pc.name,
+        emoji: '🎲',
+        units: 'Player',
+        isPc: true,
+      }));
+    const summonRows = (state.summons || [])
+      .filter((s) => s.inTracker && s.init != null)
+      .map((s) => ({
+        slot: `summon:${s.id}`,
+        init: s.init,
+        batch: null,
+        name: s.name,
+        emoji: '✨',
+        units: 'Summoned',
+        isSummon: true,
+      }));
+    return [...rows, ...pcRows, ...summonRows].sort((a, b) => b.init - a.init);
   }
 
   function pylonAcBonus(state) {
@@ -211,6 +335,41 @@
         },
         apostleWheel: normalizeApostleWheel(saved.apostleWheel),
         timerFired: Array.isArray(saved.timerFired) ? saved.timerFired : base.timerFired,
+        gatePickStarted:
+          saved.gatePickStarted ??
+          !!(saved.gateLock1 || saved.gateLock2 || saved.gateMethod === 'pick' || saved.gateToolsBroken),
+        gateSmashSuccesses:
+          saved.gateSmashSuccesses ?? (saved.gateSmashed ? 3 : 0),
+        womanDisposition: (() => {
+          const d = saved.womanDisposition;
+          if (d === 'friendly' || d === 'neutral' || d === 'hostile') return d;
+          if (saved.womanFriendly) return 'friendly';
+          return 'neutral';
+        })(),
+        childrenRemoved: saved.childrenRemoved ?? 0,
+        normanFound: saved.normanFound ?? false,
+        pcs: normalizePcs(saved.pcs),
+        alliesInitCollapsed:
+          saved.alliesInitCollapsed ??
+          (saved.pcInitCollapsed && saved.summonInitCollapsed) ??
+          saved.pcInitCollapsed ??
+          false,
+        summons: normalizeSummons(saved.summons),
+        phase2Collapsed: {
+          ...defaultPhase2Collapsed(),
+          ...(saved.phase2Collapsed || {}),
+        },
+        phase1Collapsed: {
+          ...defaultPhase1Collapsed(),
+          ...(saved.phase1Collapsed || {}),
+        },
+        phase3Collapsed: {
+          ...defaultPhase3Collapsed(),
+          ...(saved.phase3Collapsed || {}),
+        },
+        innerBustPending: saved.innerBustPending ?? false,
+        innerBustChoice: saved.innerBustChoice ?? null,
+        innerOpposedBonus: saved.innerOpposedBonus ?? 0,
       };
     } catch (e) {
       return defaultState();
@@ -248,6 +407,34 @@
     return TIME_MARKERS.find((m) => m.min > elapsedMin) || null;
   }
 
+  const INNER_BUST_OPTIONS = [
+    {
+      id: 'ready',
+      title: 'Count finishes early',
+      effect: 'Ritual +1 — the mistake pulls the finale forward before the party is ready.',
+    },
+    {
+      id: 'ledger',
+      title: 'Ledger locks in',
+      effect: 'Ritual +1 · +2 DC on next inner checks — failure filed in the count.',
+    },
+    {
+      id: 'collapse',
+      title: 'Time bleeds backward',
+      effect: 'Ritual +1 · Phase 3 leaks early (Null Pulse flicker · slot/HP drain Inside).',
+    },
+    {
+      id: 'fuel',
+      title: 'Banishment feeds the vortex',
+      effect: 'Ritual +1 — the ejection fuels what is coming through the crypt.',
+    },
+    {
+      id: 'inventory',
+      title: "Myrkul's inventory",
+      effect: 'Breach +1 — the cemetery answers on the Outer front.',
+    },
+  ];
+
   global.PaleTide = {
     BATCHES,
     SLOT_INIT,
@@ -261,7 +448,16 @@
     timerElapsedMs,
     timerSegment,
     timerNextMarker,
+    defaultPcs,
+    normalizePcs,
+    PC_ROSTER,
+    defaultSummons,
+    normalizeSummons,
+    SUMMON_ROSTER,
     defaultState,
+    defaultPhase1Collapsed,
+    defaultPhase2Collapsed,
+    defaultPhase3Collapsed,
     rotateAssignment,
     shuffle,
     nextRound,
@@ -270,6 +466,7 @@
     isConeRound,
     resolveOrder,
     pylonAcBonus,
+    INNER_BUST_OPTIONS,
     load,
     save,
     reset,

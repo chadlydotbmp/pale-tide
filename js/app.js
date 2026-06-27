@@ -1,7 +1,6 @@
 /* The Pale Tide — UI (iPad Safari) */
 (function () {
   const APP_OK = 'pale-tide-app-ok-v3';
-  const BUILD = '__BUILD__';
 
   function bootError(msg) {
     let bar = document.getElementById('boot-error');
@@ -126,7 +125,7 @@
     if (alertEl && alertText) {
       if (state.timerAlert) {
         alertEl.classList.remove('hidden');
-        alertText.innerHTML = `<strong>${state.timerAlert.label}</strong> — ${state.timerAlert.hint}`;
+        alertText.innerHTML = `<strong>${state.timerAlert.label}</strong><span class="timer-alert-hint">${state.timerAlert.hint}</span>`;
       } else {
         alertEl.classList.add('hidden');
         alertText.textContent = '';
@@ -136,14 +135,30 @@
 
   function renderHeader() {
     const g = G.gTrack(state);
-    $('#header-title').textContent = 'The Pale Tide';
+    setEl($('#header-round'), (el) => {
+      el.textContent = `R${state.round}`;
+    });
+    const appLive =
+      document.documentElement.getAttribute('data-app') === APP_OK
+        ? '<span class="chip chip-live">live</span>'
+        : '';
     $('#meta-chips').innerHTML = [
-      `<span class="chip">${BUILD}</span>`,
-      `<span class="chip">R${state.round}</span>`,
+      appLive,
       g != null ? `<span class="chip">G+${g - 1}${g === 1 ? ' (open)' : ''}</span>` : '',
-      state.gateOpen ? '<span class="chip">Gate OPEN</span>' : '<span class="chip">Gate LOCKED</span>',
+      state.gateOpen && state.gateHeld
+        ? '<span class="chip">Gate HELD</span>'
+        : state.gateOpen
+          ? '<span class="chip">Gate OPEN</span>'
+          : '<span class="chip">Gate LOCKED</span>',
       state.phase >= 3 ? '<span class="chip phase-3">Phase 3</span>' : `<span class="chip">Phase ${state.phase}</span>`,
       state.pulseOn ? '<span class="chip pulse-on">PULSE</span>' : '',
+      state.innerBustChoice
+        ? (() => {
+            const opt = G.INNER_BUST_OPTIONS.find((o) => o.id === state.innerBustChoice);
+            return opt ? `<span class="chip inner-bust">${opt.title}</span>` : '';
+          })()
+        : '',
+      state.gateOpen && state.gateSmashed ? '<span class="chip">Gate wrecked</span>' : '',
       state.timerPaused ? '<span class="chip">Timer paused</span>' : '',
     ]
       .filter(Boolean)
@@ -166,7 +181,7 @@
       pips.appendChild(el('span', `breach-pip${i < state.breach ? ' filled' : ''}`));
     }
 
-    setEl($('.clocks-bar'), (bar) => {
+    setEl($('#header-clocks'), (bar) => {
       bar.classList.toggle('ritual-stopped', state.ritualStopped);
       bar.classList.toggle('ritual-high', state.ritual >= 10);
       bar.classList.toggle('breach-high', state.breach >= 4);
@@ -194,40 +209,96 @@
     }
   }
 
-  function shortHint(row) {
-    if (row.slot === 'lair') {
-      return 'Pick ONE lair · +d100/pylon · Apostle +30 if Ph3';
-    }
-    const t = R.reminderForBatch(row.batch);
-    if (!t) return '';
-    if (t.la && t.la.budget) return t.lines[0] + ' · LA: ' + t.la.budget;
-    return t.lines[0];
+  function clearReminderPopupPosition(panel) {
+    if (!panel) return;
+    panel.classList.remove('anchored');
+    panel.style.left = '';
+    panel.style.top = '';
   }
 
-  function renderInitRefStrip() {
-    const strip = $('#init-ref-strip');
-    strip.innerHTML = R.INIT_COUNTS.map(
-      (c) =>
-        `<span class="init-ref-chip"><strong>${c.init}</strong> ${c.home}</span>`
-    ).join('');
+  function scheduleReminderPopupPosition() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => positionReminderPopup());
+    });
+  }
+
+  function positionReminderPopup() {
+    const panel = $('#reminder-panel');
+    const rail = $('#phase-rail');
+    if (!panel || panel.classList.contains('hidden')) return;
+
+    if (window.matchMedia('(max-width: 700px)').matches) {
+      clearReminderPopupPosition(panel);
+      return;
+    }
+
+    if (!rail) {
+      clearReminderPopupPosition(panel);
+      return;
+    }
+
+    const railRect = rail.getBoundingClientRect();
+    const margin = 8;
+    let left = railRect.left;
+    let top = railRect.top;
+
+    const banner = $('#gate-banner');
+    const activePanel = document.querySelector('.tab-panel:not(.hidden)');
+
+    if (state.activeTab === 'phase1' && banner && banner.offsetParent !== null) {
+      const bannerRect = banner.getBoundingClientRect();
+      left = bannerRect.left;
+      top = bannerRect.top;
+    } else if (activePanel) {
+      const panelRect = activePanel.getBoundingClientRect();
+      left = panelRect.left;
+      top = panelRect.top;
+    }
+
+    panel.classList.add('anchored');
+    const panelW = panel.offsetWidth;
+    const panelH = panel.offsetHeight;
+    const maxW = railRect.width - margin * 2;
+    panel.style.maxWidth = `${Math.min(360, maxW)}px`;
+
+    top = Math.max(railRect.top + margin, Math.min(top, railRect.bottom - panelH - margin));
+    left = Math.max(railRect.left + margin, Math.min(left, railRect.right - panelW - margin));
+
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
   }
 
   function renderReminderPanel() {
     const panel = $('#reminder-panel');
     const slot = state.turnHighlight;
 
+    if (!panel) return;
+
     if (!slot) {
-      panel.className = 'reminder-panel empty';
-      panel.innerHTML =
-        'Tap <strong>Mark</strong> on an initiative row · reminders for that batch, legendary actions, or lair (20)';
+      panel.className = 'reminder-popup hidden';
+      panel.innerHTML = '';
+      clearReminderPopupPosition(panel);
       return;
     }
 
-    panel.className = 'reminder-panel';
+    panel.className = 'reminder-popup';
     const info = R.reminderForSlot(state, slot);
     if (!info) {
-      panel.className = 'reminder-panel empty';
-      panel.innerHTML = 'Unknown batch — tap <strong>Mark</strong> again or tap <strong>New Round</strong>';
+      panel.className = 'reminder-popup hidden';
+      panel.innerHTML = '';
+      clearReminderPopupPosition(panel);
+      return;
+    }
+
+    if (info.type === 'pc') {
+      panel.innerHTML = `<h3>🎲 ${info.title} · init ${info.init}</h3><ul>${info.lines.map((line) => `<li>${line}</li>`).join('')}</ul>`;
+      scheduleReminderPopupPosition();
+      return;
+    }
+
+    if (info.type === 'summon') {
+      panel.innerHTML = `<h3>✨ ${info.title} · init ${info.init}</h3><ul>${info.lines.map((line) => `<li>${line}</li>`).join('')}</ul>`;
+      scheduleReminderPopupPosition();
       return;
     }
 
@@ -247,6 +318,7 @@
         <div class="lair-grid">${cards}</div>
         <p class="la-note" style="margin-top:10px">${info.pickOne}</p>
       `;
+      scheduleReminderPopupPosition();
       return;
     }
 
@@ -295,20 +367,98 @@
     }
 
     panel.innerHTML = html;
+    scheduleReminderPopupPosition();
   }
 
-  function renderLairQuickRef() {
-    const box = $('#lair-quick-ref');
-    if (!box) return;
-    box.innerHTML = R.LAIR.actions
-      .map(
-        (a) => `
-      <button type="button" class="lair-card${state.lairPick === a.name ? ' selected' : ''}" data-lair-ref="${a.name}" onclick="PaleTideApp.tap(this,event)">
-        <div class="lair-name">${a.name}</div>
-        <div class="lair-detail">${a.effect} · ${a.save}</div>
-      </button>`
-      )
-      .join('');
+  function renderInitRefStrip() {}
+
+  function allActorsInTracker(actors) {
+    return actors.length > 0 && actors.every((a) => a.inTracker && a.init != null);
+  }
+
+  function patchAllies(patch) {
+    const pcs = patch.pcs ?? state.pcs;
+    const summons = patch.summons ?? state.summons;
+    const next = { ...patch, pcs, summons };
+    if (allActorsInTracker(pcs) && allActorsInTracker(summons)) {
+      next.alliesInitCollapsed = true;
+    } else if (pcs.every((pc) => !pc.inTracker) && summons.every((s) => !s.inTracker)) {
+      next.alliesInitCollapsed = false;
+    }
+    setState(next);
+  }
+
+  function patchPcs(pcs) {
+    patchAllies({ pcs });
+  }
+
+  function patchSummons(summons) {
+    patchAllies({ summons });
+  }
+
+  function alliesInitSummary() {
+    const pcs = state.pcs || [];
+    const summons = state.summons || [];
+    const all = [...pcs, ...summons];
+    const inTracker = all.filter((a) => a.inTracker).length;
+    if (allActorsInTracker(pcs) && allActorsInTracker(summons)) {
+      return `All ${all.length} in tracker`;
+    }
+    return `${inTracker}/${all.length} in tracker`;
+  }
+
+  function renderAlliesInit() {
+    const pcs = state.pcs || [];
+    const summons = state.summons || [];
+    const panel = $('#allies-init-panel');
+    const pcList = $('#pc-init-list');
+    const summonList = $('#summon-init-list');
+    if (!pcList || !summonList) return;
+
+    setEl(panel, (container) => {
+      container.classList.toggle('collapsed', !!state.alliesInitCollapsed);
+    });
+    setEl($('#allies-init-summary'), (container) => {
+      container.textContent = alliesInitSummary();
+    });
+    setEl($('#btn-allies-init-toggle'), (container) => {
+      container.setAttribute('aria-expanded', state.alliesInitCollapsed ? 'false' : 'true');
+    });
+
+    pcList.innerHTML = '';
+    pcs.forEach((pc) => {
+      const row = el('div', `pc-init-row${pc.inTracker ? ' in-tracker' : ''}`);
+      const canTrack = pc.init != null;
+      row.innerHTML = `
+        <span class="pc-init-name">${pc.name}</span>
+        <input type="text" class="pc-init-input" id="pc-init-${pc.id}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="—" value="${pc.init != null ? pc.init : ''}" />
+        <button type="button" class="ghost pc-init-toggle${pc.inTracker ? ' active' : ''}" data-pc-toggle="${pc.id}" onclick="PaleTideApp.tap(this,event)" ${canTrack ? '' : 'disabled'}>${pc.inTracker ? '✓ In' : '+ Tracker'}</button>
+      `;
+      pcList.appendChild(row);
+    });
+    summonList.innerHTML = '';
+    summons.forEach((s) => {
+      const row = el('div', `pc-init-row${s.inTracker ? ' in-tracker' : ''}`);
+      const canTrack = s.init != null;
+      row.innerHTML = `
+        <span class="pc-init-name">${s.name}</span>
+        <input type="text" class="pc-init-input" id="summon-init-${s.id}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="—" value="${s.init != null ? s.init : ''}" />
+        <button type="button" class="ghost pc-init-toggle${s.inTracker ? ' active' : ''}" data-summon-toggle="${s.id}" onclick="PaleTideApp.tap(this,event)" ${canTrack ? '' : 'disabled'}>${s.inTracker ? '✓ In' : '+ Tracker'}</button>
+      `;
+      summonList.appendChild(row);
+    });
+    setEl($('#btn-pc-add-all'), (el) => {
+      el.disabled = !pcs.some((pc) => pc.init != null && !pc.inTracker);
+    });
+    setEl($('#btn-pc-clear-tracker'), (el) => {
+      el.disabled = !pcs.some((pc) => pc.inTracker);
+    });
+    setEl($('#btn-summon-add-all'), (el) => {
+      el.disabled = !summons.some((s) => s.init != null && !s.inTracker);
+    });
+    setEl($('#btn-summon-clear-tracker'), (el) => {
+      el.disabled = !summons.some((s) => s.inTracker);
+    });
   }
 
   function renderInitiative() {
@@ -316,33 +466,126 @@
     const list = $('#init-list');
     list.innerHTML = '';
 
-    if (state.round === 1) {
-      $('#shuffle-info').textContent = 'Round 1 — default order (shuffle from R2)';
-    } else if (state.shuffleRoll != null) {
-      $('#shuffle-info').textContent = `Shuffle d5 = ${state.shuffleRoll} · rotated ${state.shuffleRoll === 1 ? 0 : state.shuffleRoll - 1} steps`;
-    } else {
-      $('#shuffle-info').textContent = 'Tap “New Round” to shuffle';
-    }
-
     order.forEach((row) => {
       const isActive = state.turnHighlight === row.slot;
-      const hint = isActive ? shortHint(row) : '';
       const div = el(
         'div',
-        `init-row${row.slot === 'lair' ? ' lair' : ''}${isActive ? ' active' : ''}`,
+        `init-row${row.slot === 'lair' ? ' lair' : ''}${row.isPc ? ' pc' : ''}${row.isSummon ? ' summon' : ''}${isActive ? ' active' : ''}`,
         `
         <div class="init-count">${row.init}</div>
         <div class="init-info">
-          <div class="name">${row.emoji} ${row.name}${row.batch ? ` <span style="color:var(--muted);font-weight:400">· Batch ${row.batch}</span>` : ''}</div>
+          <div class="name">${row.emoji} ${row.name}</div>
           <div class="units">${row.units}</div>
         </div>
         <button type="button" class="ghost mark-turn" data-slot="${row.slot}" style="min-height:40px;padding:0 12px;font-size:0.8rem" onclick="PaleTideApp.tap(this,event)">${isActive ? '✓' : 'Mark'}</button>
-        ${hint ? `<div class="reminder-hint">${hint}</div>` : ''}
       `
       );
       list.appendChild(div);
     });
 
+    renderAlliesInit();
+  }
+
+  function applyPhaseSectionCollapse(sectionAttr, collapsed, defaults) {
+    const map = collapsed || defaults();
+    $$(`.phase-section[data-${sectionAttr}]`).forEach((section) => {
+      const key = section.getAttribute(`data-${sectionAttr}`);
+      if (!key) return;
+      section.classList.toggle('collapsed', !!map[key]);
+      const toggle = section.querySelector('.phase-section-toggle');
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', map[key] ? 'false' : 'true');
+      }
+    });
+  }
+
+  function renderPhaseSections() {
+    applyPhaseSectionCollapse('phase1-section', state.phase1Collapsed, G.defaultPhase1Collapsed);
+    applyPhaseSectionCollapse('phase2-section', state.phase2Collapsed, G.defaultPhase2Collapsed);
+    applyPhaseSectionCollapse('phase3-section', state.phase3Collapsed, G.defaultPhase3Collapsed);
+  }
+
+  function applyInnerBustChoice(id) {
+    const option = G.INNER_BUST_OPTIONS.find((o) => o.id === id);
+    if (!option) return;
+
+    const prev = state.innerBustChoice;
+    let ritual = state.ritual;
+    let breach = state.breach;
+    let innerOpposedBonus = state.innerOpposedBonus || 0;
+
+    if (prev && prev !== id) {
+      if (prev === 'inventory') {
+        breach = Math.max(0, breach - 1);
+      } else if (!state.ritualStopped) {
+        ritual = Math.max(0, ritual - 1);
+      }
+      if (prev === 'ledger') {
+        innerOpposedBonus = Math.max(0, innerOpposedBonus - 2);
+      }
+    }
+
+    if (!prev || prev !== id) {
+      if (id === 'inventory') {
+        breach = Math.min(6, breach + 1);
+      } else if (!state.ritualStopped && ritual < 20) {
+        ritual = Math.min(20, ritual + 1);
+      }
+      if (id === 'ledger') {
+        innerOpposedBonus += 2;
+      }
+    }
+
+    setState({
+      innerBustPending: false,
+      innerBustChoice: id,
+      ritual,
+      breach,
+      innerOpposedBonus,
+    });
+  }
+
+  function renderInnerBust() {
+    const panel = $('#inner-bust-panel');
+    const optionsEl = $('#inner-bust-options');
+    const promptEl = $('#inner-bust-prompt');
+    if (!panel || !optionsEl) return;
+
+    const show = state.innerBustPending || state.innerBustChoice;
+    panel.classList.toggle('hidden', !show);
+    if (!show) {
+      optionsEl.innerHTML = '';
+      return;
+    }
+
+    if (promptEl) {
+      promptEl.classList.toggle('hidden', !state.innerBustPending);
+      promptEl.textContent = state.innerBustChoice
+        ? "Ledger's price — tap to change:"
+        : "Choose the ledger's price:";
+    }
+
+    optionsEl.innerHTML = G.INNER_BUST_OPTIONS.map(
+      (opt) => `
+        <button type="button" class="inner-bust-option${state.innerBustChoice === opt.id ? ' active' : ''}" data-inner-bust="${opt.id}" onclick="PaleTideApp.tap(this,event)">
+          <span class="inner-bust-option-title">${opt.title}</span>
+          <span class="inner-bust-option-effect">${opt.effect}</span>
+        </button>
+      `
+    ).join('');
+  }
+
+  function applyGraveChurnAdd(add) {
+    const amount = Math.max(0, Math.floor(Number(add) || 0));
+    if (amount <= 0) return;
+    const v = state.graveChurn + amount;
+    const tiers = { ...state.graveTiers };
+    if (v >= 50) tiers.t50 = true;
+    if (v >= 75) tiers.t75 = true;
+    if (v >= 100) tiers.t100 = true;
+    setState({ graveChurn: v, graveTiers: tiers });
+    const input = $('#grave-roll-input');
+    if (input) input.value = '';
   }
 
   function renderPylons() {
@@ -365,12 +608,39 @@
       setEl($(`#pylon-${low}-stone-val`), (el) => {
         el.textContent = p.stone;
       });
+      setEl($(`#${low}-destroy`), (el) => {
+        el.textContent = p.destroyed ? 'Restore' : 'Destroyed';
+      });
     });
   }
 
   function renderSanctum() {
-    setEl($('#woman-friendly'), (el) => {
-      el.checked = state.womanFriendly;
+    const womanDisp = state.womanDisposition || 'neutral';
+    ['friendly', 'neutral', 'hostile'].forEach((disp) => {
+      setEl($(`#btn-woman-${disp}`), (el) => {
+        el.classList.toggle('active', womanDisp === disp);
+      });
+    });
+    setEl($('#woman-banshee-note'), (el) => {
+      if (womanDisp === 'friendly') {
+        el.innerHTML = 'Ph 3 banshee: <strong>friendly</strong> — will not attack unless provoked';
+      } else if (womanDisp === 'neutral') {
+        el.innerHTML = 'Ph 3 banshee: <strong>neutral</strong> — <strong>will attack</strong>';
+      } else {
+        el.innerHTML = 'Ph 3 banshee: <strong>hostile</strong> — <strong>will attack</strong>';
+      }
+    });
+    setEl($('#children-removed'), (el) => {
+      el.textContent = state.childrenRemoved;
+    });
+    setEl($('#btn-child-remove'), (el) => {
+      el.disabled = state.childrenRemoved >= 10;
+    });
+    setEl($('#btn-norman-found'), (el) => {
+      el.disabled = state.normanFound;
+    });
+    setEl($('#children-pass-note'), (el) => {
+      el.classList.toggle('hidden', !state.normanFound);
     });
     setEl($('#rim-rite'), (el) => {
       el.checked = state.rimRiteKnown;
@@ -378,6 +648,7 @@
     setEl($('#inner-buy'), (el) => {
       el.textContent = state.innerBuydowns;
     });
+    renderInnerBust();
 
     const wins = $('#win-dots');
     if (wins) {
@@ -446,19 +717,161 @@
     });
   }
 
+  function gateLocksClearedFrom(s) {
+    return (s.gateLock1 && s.gateLock2) || s.gateSmashSuccesses >= 3;
+  }
+
+  function gateLocksCleared() {
+    return gateLocksClearedFrom(state);
+  }
+
+  function applyAutoGateOpen(patch) {
+    const next = { ...state, ...patch };
+    if (gateLocksClearedFrom(next) && !state.gateOpen) {
+      return {
+        ...patch,
+        gateOpen: true,
+        gateRound: state.round,
+        pulseOn: true,
+        breach: Math.min(6, state.breach + 1),
+        phase: Math.max(state.phase, 2),
+        activeTab: 'phase2',
+      };
+    }
+    return patch;
+  }
+
+  function nextPickTarget() {
+    if (!state.gateLock1 && !state.gateLock1Unpickable) return 1;
+    if (!state.gateLock2 && !state.gateLock2Unpickable) return 2;
+    return null;
+  }
+
+  function clearNextGateLock() {
+    if (gateLocksCleared() || state.gateToolsBroken) return false;
+    const target = nextPickTarget();
+    if (!target) return false;
+    const patch = { gatePickStarted: true };
+    if (target === 1) patch.gateLock1 = true;
+    else patch.gateLock2 = true;
+    setState(applyAutoGateOpen(patch));
+    return true;
+  }
+
+  function pickFailBy5() {
+    if (gateLocksCleared() || state.gateToolsBroken) return false;
+    const target = nextPickTarget();
+    if (!target) return false;
+    const patch = { gatePickStarted: true, gateToolsBroken: true };
+    if (target === 1) patch.gateLock1Unpickable = true;
+    else patch.gateLock2Unpickable = true;
+    setState(patch);
+    return true;
+  }
+
+  function addSmashSuccess() {
+    if (gateLocksCleared()) return false;
+    const next = Math.min(3, state.gateSmashSuccesses + 1);
+    const patch = { gateSmashSuccesses: next };
+    if (next >= 3) {
+      patch.gateLock1 = true;
+      patch.gateLock2 = true;
+      patch.gateSmashed = true;
+    }
+    setState(applyAutoGateOpen(patch));
+    return true;
+  }
+
   function renderGate() {
+    const cleared = gateLocksCleared();
+    const pickTarget = nextPickTarget();
+    const picked = (state.gateLock1 ? 1 : 0) + (state.gateLock2 ? 1 : 0);
+    setEl($('.gate-tracker'), (el) => {
+      el.classList.toggle('gate-open', state.gateOpen);
+    });
     setEl($('#gate-banner'), (el) => {
       el.className = `gate-banner ${state.gateOpen ? 'open' : 'locked'}`;
-      el.textContent = state.gateOpen
-        ? 'GATE OPEN · pylons live · Inner accessible'
-        : 'GATE LOCKED · road spawns only';
+      if (state.gateOpen) {
+        el.textContent = state.gateHeld
+          ? 'GATE HELD · iron re-closed · hold the line'
+          : 'GATE OPEN · pylons live · Inner accessible';
+      } else if (state.gateSmashSuccesses > 0) {
+        el.textContent = `SMASHING · ${state.gateSmashSuccesses}/3 successes`;
+      } else if (state.gatePickStarted) {
+        el.textContent = `PICKING · ${picked}/2 locks${state.gateToolsBroken ? ' · tools broken' : ''}`;
+      } else {
+        el.textContent = 'GATE LOCKED · pick or smash';
+      }
     });
     setEl($('#gate-info'), (el) => {
       if (state.gateOpen) {
-        el.textContent = `Gate opened R${state.gateRound} · switch to Phase 2 for G-track & pylons`;
+        el.textContent = state.gateHeld
+          ? `Gate held R${state.gateRound} · iron re-closed · hold-gate buy-down available`
+          : state.gateSmashed
+            ? `Gate opened R${state.gateRound} · wrecked — cannot re-close in Ph 2`
+            : `Gate opened R${state.gateRound} · picked — can re-close in Ph 2 to hold Breach`;
+      } else if (state.gateToolsBroken) {
+        el.textContent = 'Tools broken — jammed lock unpickable · finish via smash (3 successes · failures OK)';
+      } else if (state.gatePickStarted && state.gateSmashSuccesses > 0) {
+        el.textContent = 'Pick & smash in parallel — tap +1 only on smash success · failures don\'t reset progress';
+      } else if (state.gateSmashSuccesses > 0) {
+        el.textContent = 'Smashing — need 3 successes (Ath DC 22) · failures don\'t harm progress';
+      } else if (state.gatePickStarted) {
+        el.textContent = 'Picking — smash track also available (3 successes · gate can\'t re-close)';
       } else {
-        el.textContent = 'Road spawns only · Gate + Lane fronts · Breach 6 = road lost';
+        el.textContent = 'Pick both locks OR smash 3× — separate tracks · smash failures OK';
       }
+    });
+    [1, 2].forEach((n) => {
+      const clearedLock = n === 1 ? state.gateLock1 : state.gateLock2;
+      const unpickable = n === 1 ? state.gateLock1Unpickable : state.gateLock2Unpickable;
+      setEl($(`#gate-lock-${n}`), (el) => {
+        el.classList.toggle('cleared', clearedLock);
+        el.classList.toggle('unpickable', unpickable && !clearedLock);
+        const icon = el.querySelector('.gate-lock-icon');
+        if (icon) {
+          icon.textContent = clearedLock ? '🔓' : unpickable ? '⛔' : '🔒';
+        }
+        const label = el.querySelector('.gate-lock-label');
+        if (label) {
+          label.textContent = clearedLock ? `Lock ${n} · open` : unpickable ? `Lock ${n} · jammed` : `Lock ${n}`;
+        }
+      });
+    });
+    setEl($('#gate-tools-broken'), (el) => {
+      el.classList.toggle('hidden', !state.gateToolsBroken || state.gateOpen);
+    });
+    setEl($('#gate-smash-track'), (el) => {
+      el.classList.toggle('hidden', state.gateOpen);
+    });
+    setEl($('#gate-smash-successes'), (container) => {
+      container.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const filled = i < state.gateSmashSuccesses;
+        const slot = el('div', `gate-smash-slot${filled ? ' filled' : ''}`);
+        slot.innerHTML = `<span class="gate-smash-slot-icon" aria-hidden="true">${filled ? '✓' : '○'}</span><span class="gate-smash-slot-label">${filled ? 'Hit' : 'Need'} ${i + 1}</span>`;
+        container.appendChild(slot);
+      }
+    });
+    const canPick = !state.gateOpen && !cleared && !state.gateToolsBroken && pickTarget != null;
+    setEl($('#btn-gate-pick'), (el) => {
+      el.disabled = !canPick;
+    });
+    setEl($('#btn-gate-pick-fail'), (el) => {
+      el.disabled = !canPick;
+    });
+    setEl($('#btn-gate-smash'), (el) => {
+      el.disabled = state.gateOpen || cleared || state.gateSmashSuccesses >= 3;
+    });
+    const canHoldGate = state.gateOpen && state.phase >= 2 && !state.gateSmashed && !state.gateHeld;
+    setEl($('#gate-hold-panel'), (el) => {
+      el.classList.toggle('hidden', !canHoldGate);
+    });
+    setEl($('#gate-held-note'), (el) => {
+      el.classList.toggle('hidden', !state.gateHeld);
+    });
+    setEl($('#gate-smashed-note'), (el) => {
+      el.classList.toggle('hidden', !state.gateOpen || !state.gateSmashed);
     });
   }
 
@@ -482,7 +895,11 @@
   function renderMonsterCard(m) {
     const open = state.monsterOpen === m.id;
     const batchLabel =
-      m.batch != null ? `Batch ${m.batch}` : m.id === 'pylon' ? 'Object' : 'NPC';
+      m.batch != null && G.BATCHES[m.batch]
+        ? G.BATCHES[m.batch].name
+        : m.id === 'pylon'
+          ? 'Object'
+          : 'NPC';
     const statsHtml = m.stats
       .map(([k, v]) => `<div class="stat-row"><dt>${k}</dt><dd>${v}</dd></div>`)
       .join('');
@@ -544,16 +961,17 @@
     $$('.tab-panel').forEach((panel) => {
       panel.classList.toggle('hidden', panel.dataset.tab !== state.activeTab);
     });
+    if (state.turnHighlight) scheduleReminderPopupPosition();
   }
 
   function render() {
     safe('header', renderHeader);
     safe('clocks', renderClocks);
     safe('init-ref', renderInitRefStrip);
-    safe('reminders', renderReminderPanel);
     safe('initiative', renderInitiative);
-    safe('lair', renderLairQuickRef);
+    safe('reminders', renderReminderPanel);
     safe('pylons', renderPylons);
+    safe('phase-sections', renderPhaseSections);
     safe('sanctum', renderSanctum);
     safe('apostle', renderApostle);
     safe('gate', renderGate);
@@ -566,7 +984,7 @@
     if (t && t.nodeType === 3) t = t.parentElement;
     if (!t || !t.closest) return null;
     return t.closest(
-      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn'
+      'button, .lair-card, .filter-chip, .monster-head, [data-phase], .mark-turn, .phase-section-toggle, .inner-bust-option'
     );
   }
 
@@ -577,10 +995,59 @@
       return;
     }
 
+    if (node.dataset.innerBust) {
+      applyInnerBustChoice(node.dataset.innerBust);
+      return;
+    }
+
+    if (node.classList.contains('phase-section-toggle')) {
+      if (node.dataset.phase1Section) {
+        const key = node.dataset.phase1Section;
+        const collapsed = { ...(state.phase1Collapsed || G.defaultPhase1Collapsed()) };
+        collapsed[key] = !collapsed[key];
+        setState({ phase1Collapsed: collapsed });
+        return;
+      }
+      if (node.dataset.phase2Section) {
+        const key = node.dataset.phase2Section;
+        const collapsed = { ...(state.phase2Collapsed || G.defaultPhase2Collapsed()) };
+        collapsed[key] = !collapsed[key];
+        setState({ phase2Collapsed: collapsed });
+        return;
+      }
+      if (node.dataset.phase3Section) {
+        const key = node.dataset.phase3Section;
+        const collapsed = { ...(state.phase3Collapsed || G.defaultPhase3Collapsed()) };
+        collapsed[key] = !collapsed[key];
+        setState({ phase3Collapsed: collapsed });
+        return;
+      }
+    }
+
     if (node.dataset.phase) {
       const ph = parseInt(node.dataset.phase, 10);
       const tab = ph === 3 ? 'phase3' : ph === 2 ? 'phase2' : 'phase1';
       setState({ phase: ph, activeTab: tab });
+      return;
+    }
+
+    if (node.dataset.pcToggle) {
+      const id = node.dataset.pcToggle;
+      const pcs = state.pcs.map((pc) => {
+        if (pc.id !== id || pc.init == null) return pc;
+        return { ...pc, inTracker: !pc.inTracker };
+      });
+      patchPcs(pcs);
+      return;
+    }
+
+    if (node.dataset.summonToggle) {
+      const id = node.dataset.summonToggle;
+      const summons = state.summons.map((s) => {
+        if (s.id !== id || s.init == null) return s;
+        return { ...s, inTracker: !s.inTracker };
+      });
+      patchSummons(summons);
       return;
     }
 
@@ -592,15 +1059,6 @@
 
     if (node.classList.contains('filter-chip')) {
       setState({ monsterFilter: node.dataset.filter, monsterOpen: null });
-      return;
-    }
-
-    if (node.dataset.lairRef) {
-      const name = node.dataset.lairRef;
-      setState({
-        turnHighlight: 'lair',
-        lairPick: state.lairPick === name ? null : name,
-      });
       return;
     }
 
@@ -670,12 +1128,40 @@
       case 'btn-inner-fail': {
         const f = state.innerFails + 1;
         if (f >= 2 && state.innerWins < 3) {
-          setState({ innerWins: 0, innerFails: 0, ritual: Math.min(20, state.ritual + 1) });
+          setState({
+            innerWins: 0,
+            innerFails: 0,
+            innerBustPending: true,
+            innerBustChoice: null,
+          });
         } else {
           setState({ innerFails: Math.min(2, f) });
         }
         return;
       }
+      case 'btn-allies-init-toggle':
+        setState({ alliesInitCollapsed: !state.alliesInitCollapsed });
+        return;
+      case 'btn-pc-add-all':
+        patchPcs(
+          state.pcs.map((pc) =>
+            pc.init != null ? { ...pc, inTracker: true } : pc
+          )
+        );
+        return;
+      case 'btn-pc-clear-tracker':
+        patchPcs(state.pcs.map((pc) => ({ ...pc, inTracker: false })));
+        return;
+      case 'btn-summon-add-all':
+        patchSummons(
+          state.summons.map((s) =>
+            s.init != null ? { ...s, inTracker: true } : s
+          )
+        );
+        return;
+      case 'btn-summon-clear-tracker':
+        patchSummons(state.summons.map((s) => ({ ...s, inTracker: false })));
+        return;
       case 'btn-new-round': {
         const d5 = Math.floor(Math.random() * 5) + 1;
         const steps = d5 === 1 ? 0 : d5 - 1;
@@ -710,15 +1196,38 @@
       case 'btn-pulse-off':
         setState({ pulseOn: false });
         return;
-      case 'btn-open-gate':
-        setState({
-          gateOpen: true,
-          gateRound: state.round,
-          pulseOn: true,
-          breach: Math.min(6, state.breach + 1),
-          phase: Math.max(state.phase, 2),
-          activeTab: 'phase2',
-        });
+      case 'btn-woman-friendly':
+        setState({ womanDisposition: 'friendly' });
+        return;
+      case 'btn-woman-neutral':
+        setState({ womanDisposition: 'neutral' });
+        return;
+      case 'btn-woman-hostile':
+        setState({ womanDisposition: 'hostile' });
+        return;
+      case 'btn-child-remove':
+        if (state.childrenRemoved >= 10) return;
+        setState({ childrenRemoved: state.childrenRemoved + 1 });
+        return;
+      case 'btn-norman-found':
+        if (state.normanFound) return;
+        setState({ normanFound: true });
+        return;
+      case 'btn-gate-hold':
+        if (!state.gateOpen || state.gateSmashed || state.gateHeld) return;
+        setState({ gateHeld: true });
+        return;
+      case 'btn-gate-pick':
+        if (gateLocksCleared() || state.gateToolsBroken) return;
+        clearNextGateLock();
+        return;
+      case 'btn-gate-pick-fail':
+        if (gateLocksCleared() || state.gateToolsBroken) return;
+        pickFailBy5();
+        return;
+      case 'btn-gate-smash':
+        if (gateLocksCleared()) return;
+        addSmashSuccess();
         return;
       case 'btn-phase-3':
         setState({
@@ -771,21 +1280,31 @@
       case 'a-destroy':
       case 'b-destroy': {
         const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
+        const cur = state[key];
+        if (cur.destroyed) {
+          setState({
+            [key]: { shield: 100, stone: 90, destroyed: false },
+          });
+        } else {
+          setState({
+            [key]: { shield: 0, stone: 0, destroyed: true },
+            ritual: Math.max(0, state.ritual - 2),
+          });
+        }
+        return;
+      }
+      case 'grave-add-roll': {
+        const input = $('#grave-roll-input');
+        applyGraveChurnAdd(input?.value);
+        return;
+      }
+      case 'grave-reset':
         setState({
-          [key]: { shield: 0, stone: 0, destroyed: true },
-          ritual: Math.max(0, state.ritual - 2),
+          graveChurn: 25,
+          graveTiers: { t25: true, t50: false, t75: false, t100: false },
         });
+        if ($('#grave-roll-input')) $('#grave-roll-input').value = '';
         return;
-      }
-      case 'grave-plus': {
-        const v = state.graveChurn + 10;
-        const tiers = { ...state.graveTiers };
-        if (v >= 50) tiers.t50 = true;
-        if (v >= 75) tiers.t75 = true;
-        if (v >= 100) tiers.t100 = true;
-        setState({ graveChurn: v, graveTiers: tiers });
-        return;
-      }
       case 'apostle-lr-use':
         setState({ apostleLr: Math.max(0, state.apostleLr - 1) });
         return;
@@ -859,10 +1378,36 @@
     const t = e.target;
     if (!t || !t.id) return;
 
-    if (t.id === 'woman-friendly') {
-      setState({ womanFriendly: t.checked });
+    const pcInit = t.id.match(/^pc-init-(pc\d+)$/);
+    if (pcInit) {
+      if (e.type === 'input') return;
+      const id = pcInit[1];
+      const raw = String(t.value).trim();
+      const parsed = raw === '' ? null : parseInt(raw, 10);
+      const init = Number.isFinite(parsed) ? Math.max(0, Math.min(99, parsed)) : null;
+      const pcs = state.pcs.map((pc) => {
+        if (pc.id !== id) return pc;
+        return { ...pc, init, inTracker: init == null ? false : pc.inTracker };
+      });
+      patchPcs(pcs);
       return;
     }
+
+    const summonInit = t.id.match(/^summon-init-(summon\d+)$/);
+    if (summonInit) {
+      if (e.type === 'input') return;
+      const id = summonInit[1];
+      const raw = String(t.value).trim();
+      const parsed = raw === '' ? null : parseInt(raw, 10);
+      const init = Number.isFinite(parsed) ? Math.max(0, Math.min(99, parsed)) : null;
+      const summons = state.summons.map((s) => {
+        if (s.id !== id) return s;
+        return { ...s, init, inTracker: init == null ? false : s.inTracker };
+      });
+      patchSummons(summons);
+      return;
+    }
+
     if (t.id === 'rim-rite') {
       setState({ rimRiteKnown: t.checked });
       return;
@@ -930,6 +1475,39 @@
     }
     document.addEventListener('change', handleChange, false);
     document.addEventListener('input', handleChange, false);
+    const graveForm = $('#grave-churn-form');
+    if (graveForm) {
+      graveForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        applyGraveChurnAdd($('#grave-roll-input')?.value);
+      });
+    }
+    const graveInput = $('#grave-roll-input');
+    if (graveInput) {
+      graveInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyGraveChurnAdd(graveInput.value);
+        }
+      });
+    }
+    window.addEventListener(
+      'resize',
+      () => {
+        if (state.turnHighlight) positionReminderPopup();
+      },
+      { passive: true }
+    );
+    const phaseRail = $('#phase-rail');
+    if (phaseRail) {
+      phaseRail.addEventListener(
+        'scroll',
+        () => {
+          if (state.turnHighlight) positionReminderPopup();
+        },
+        { passive: true }
+      );
+    }
   }
 
   function boot() {
