@@ -646,6 +646,91 @@
         el.checked = state.anchors[a].bound;
       });
     });
+
+    renderSkullPiles();
+  }
+
+  function renderSkullPiles() {
+    const grid = $('#skull-pile-grid');
+    if (!grid) return;
+
+    const map = state.pileSiteMap || {};
+    const found = G.skullAncestorsFound(state.skullPiles);
+    const consecrated = G.countAnchorBinds(state.anchors);
+    const reveal = state.skullTargetsRevealed;
+
+    setEl($('#skull-ancestor-summary'), (el) => {
+      el.textContent = `${found}/${G.ANCESTOR_COUNT} directed · ${consecrated}/${G.ANCESTOR_COUNT} consecrated`;
+    });
+    setEl($('#btn-skull-reveal'), (el) => {
+      el.textContent = reveal ? 'Hide routing' : 'Reveal routing';
+      el.classList.toggle('active', reveal);
+    });
+    setEl($('#skull-targets-hint'), (el) => {
+      if (!reveal) {
+        el.classList.add('hidden');
+        el.textContent = '';
+        return;
+      }
+      el.classList.remove('hidden');
+      const lines = G.ANCESTOR_PILE_NUMBERS.map((pile) => {
+        const site = G.pileConsecrationSite(pile, map);
+        return site ? `Pile ${pile} → ${site.label}` : `Pile ${pile}`;
+      });
+      el.textContent = lines.join(' · ');
+    });
+
+    G.CONSECRATION_SITES.forEach((site) => {
+      const pileNum = G.pileForSite(site.id, map);
+      const pile = pileNum ? state.skullPiles.find((p) => p.num === pileNum) : null;
+      const siteEl = $(`.consecration-site[data-site="${site.id}"]`);
+      setEl($(`#directed-${site.id}`), (el) => {
+        if (pile && pile.found) {
+          el.textContent = `Directed · pile ${pileNum}`;
+          el.classList.add('active');
+        } else if (reveal) {
+          el.textContent = `Pile ${pileNum}`;
+          el.classList.remove('active');
+        } else {
+          el.textContent = '';
+          el.classList.remove('active');
+        }
+      });
+      if (siteEl) {
+        siteEl.classList.toggle('directed', !!(pile && pile.found));
+        siteEl.classList.toggle('consecrated', !!state.anchors[site.id].bound);
+      }
+    });
+
+    grid.innerHTML = '';
+    state.skullPiles.forEach((pile) => {
+      const site = G.pileConsecrationSite(pile.num, map);
+      const isTarget = G.ANCESTOR_PILE_NUMBERS.includes(pile.num);
+      let cls = 'skull-pile';
+      let sub = '';
+      if (pile.found && site) {
+        cls += ' found';
+        sub = `→${site.tag}`;
+      } else if (pile.searched) {
+        cls += ' searched';
+        sub = '—';
+      }
+      if (reveal && isTarget) cls += ' target';
+
+      const btn = el('button', cls);
+      btn.type = 'button';
+      btn.dataset.skullPile = String(pile.num);
+      btn.setAttribute('onclick', 'PaleTideApp.tap(this,event)');
+      btn.innerHTML = `<span class="skull-pile-num">${pile.num}</span>${sub ? `<span class="skull-pile-mark">${sub}</span>` : ''}`;
+      btn.title = pile.found && site
+        ? `Bloodline gap → sanctify at ${site.label}`
+        : pile.searched
+          ? 'Searched · not a bloodline gap'
+          : isTarget && reveal && site
+            ? `→ ${site.label} (DM reveal)`
+            : 'Tap when party searches this pile';
+      grid.appendChild(btn);
+    });
   }
 
   function renderApostle() {
@@ -1064,6 +1149,15 @@
       case 'btn-buy-pylon':
         setState({ ritual: Math.max(0, state.ritual - 2) });
         return;
+      case 'btn-skull-reveal':
+        setState({ skullTargetsRevealed: !state.skullTargetsRevealed });
+        return;
+      case 'btn-skull-reset':
+        setState({
+          skullPiles: G.defaultSkullPiles(),
+          skullTargetsRevealed: false,
+        });
+        return;
       case 'btn-buy-anchor':
         if (state.innerBuydowns >= 3) return;
         setState({ ritual: Math.max(0, state.ritual - 1), innerBuydowns: state.innerBuydowns + 1 });
@@ -1372,8 +1466,29 @@
       return;
     }
 
-    if (t.id === 'rim-rite') {
-      setState({ rimRiteKnown: t.checked });
+    if (node.dataset.skullPile) {
+      const pileNum = Number(node.dataset.skullPile);
+      const { piles, newlyFoundSite } = G.advanceSkullPile(
+        state.skullPiles,
+        pileNum,
+        state.pileSiteMap
+      );
+      const patch = { skullPiles: piles };
+      if (newlyFoundSite) {
+        patch.anchors = {
+          ...state.anchors,
+          [newlyFoundSite.id]: {
+            ...state.anchors[newlyFoundSite.id],
+            located: true,
+          },
+        };
+      }
+      setState(patch);
+      return;
+    }
+
+    if (node.id === 'rim-rite') {
+      setState({ rimRiteKnown: node.checked });
       return;
     }
     if (t.id === 'apostle-on') {
@@ -1401,13 +1516,17 @@
     const anchorBind = t.id.match(/^anchor-(north|east|skull)-bind$/);
     if (anchorBind) {
       const a = anchorBind[1];
-      const anchors = { ...state.anchors, [a]: { ...state.anchors[a], bound: t.checked } };
       const bound = t.checked;
-      setState({
-        anchors,
-        ritual: bound ? Math.max(0, state.ritual - 1) : state.ritual,
-        innerBuydowns: bound ? Math.min(3, state.innerBuydowns + 1) : state.innerBuydowns,
-      });
+      const prevBound = state.anchors[a].bound;
+      if (bound === prevBound) return;
+      const anchors = { ...state.anchors, [a]: { ...state.anchors[a], bound } };
+      let ritual = state.ritual;
+      if (bound && !prevBound && G.countAnchorBinds(state.anchors) < 3) {
+        ritual = Math.max(0, ritual - 1);
+      } else if (!bound && prevBound) {
+        ritual = Math.min(20, ritual + 1);
+      }
+      setState({ anchors, ritual });
       return;
     }
 

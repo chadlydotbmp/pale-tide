@@ -17,6 +17,111 @@
 
   const DEFAULT_ASSIGNMENT = { dead1: 1, dead2: 2, dead3: 3, dead4: 4, dead5: 5 };
 
+  const SKULL_PILE_COUNT = 10;
+  const ANCESTOR_COUNT = 3;
+  /** Bloodline gaps on the table — piles 3, 6, 9 (some line the road to the gate) */
+  const ANCESTOR_PILE_NUMBERS = [3, 6, 9];
+  /** Fixed rim sites — which pile directs where is shuffled each encounter */
+  const CONSECRATION_SITES = [
+    { id: 'north', label: 'North row', tag: 'N' },
+    { id: 'east', label: 'East row', tag: 'E' },
+    { id: 'skull', label: 'Skull pits', tag: 'S' },
+  ];
+
+  function randomPileSiteMap() {
+    const siteIds = CONSECRATION_SITES.map((s) => s.id);
+    const shuffled = siteIds.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const map = {};
+    ANCESTOR_PILE_NUMBERS.forEach((pile, i) => {
+      map[pile] = shuffled[i];
+    });
+    return map;
+  }
+
+  function normalizePileSiteMap(saved) {
+    if (!saved || typeof saved !== 'object') return randomPileSiteMap();
+    const siteIds = CONSECRATION_SITES.map((s) => s.id);
+    const used = new Set();
+    const map = {};
+    let ok = true;
+    ANCESTOR_PILE_NUMBERS.forEach((pile) => {
+      const id = saved[pile] ?? saved[String(pile)];
+      if (!siteIds.includes(id) || used.has(id)) {
+        ok = false;
+        return;
+      }
+      used.add(id);
+      map[pile] = id;
+    });
+    if (!ok || used.size !== ANCESTOR_COUNT) return randomPileSiteMap();
+    return map;
+  }
+
+  function defaultSkullPiles() {
+    return Array.from({ length: SKULL_PILE_COUNT }, (_, i) => ({
+      num: i + 1,
+      searched: false,
+      found: false,
+    }));
+  }
+
+  function normalizeSkullPiles(saved) {
+    const base = defaultSkullPiles();
+    if (!Array.isArray(saved)) return base;
+    return base.map((b) => {
+      const s = saved.find((x) => x.num === b.num);
+      if (!s) return b;
+      return {
+        ...b,
+        searched: !!s.searched,
+        found: !!s.found || !!s.consecrated,
+      };
+    });
+  }
+
+  function pileConsecrationSite(pileNum, pileSiteMap) {
+    if (!ANCESTOR_PILE_NUMBERS.includes(pileNum)) return null;
+    const id = pileSiteMap[pileNum];
+    if (!id) return null;
+    return CONSECRATION_SITES.find((s) => s.id === id) || null;
+  }
+
+  function pileForSite(siteId, pileSiteMap) {
+    return ANCESTOR_PILE_NUMBERS.find((p) => pileSiteMap[p] === siteId) ?? null;
+  }
+
+  function countAnchorBinds(anchors) {
+    return CONSECRATION_SITES.filter((s) => anchors[s.id].bound).length;
+  }
+
+  function skullAncestorsFound(skullPiles) {
+    return ANCESTOR_PILE_NUMBERS.filter((n) => {
+      const p = skullPiles.find((x) => x.num === n);
+      return p && p.found;
+    }).length;
+  }
+
+  function advanceSkullPile(piles, pileNum, pileSiteMap) {
+    const next = piles.map((p) => ({ ...p }));
+    const p = next[pileNum - 1];
+    if (!p) return { piles: next, newlyFoundSite: null };
+    const site = pileConsecrationSite(pileNum, pileSiteMap);
+    let newlyFoundSite = null;
+    if (site) {
+      if (!p.found) {
+        p.found = true;
+        newlyFoundSite = site;
+      }
+    } else if (!p.searched) {
+      p.searched = true;
+    }
+    return { piles: next, newlyFoundSite };
+  }
+
   const PC_ROSTER = ['Anax', 'Kilgore', 'Acerian', 'Guts', 'Theo'];
   const SUMMON_ROSTER = ['Summon 1', 'Summon 2', 'Summon 3'];
 
@@ -180,6 +285,9 @@
       childrenRemoved: 0,
       normanFound: false,
       rimRiteKnown: false,
+      pileSiteMap: randomPileSiteMap(),
+      skullPiles: defaultSkullPiles(),
+      skullTargetsRevealed: false,
       anchors: {
         north: { located: false, bound: false },
         east: { located: false, bound: false },
@@ -388,6 +496,9 @@
         innerBustPending: saved.innerBustPending ?? false,
         innerBustChoice: saved.innerBustChoice ?? null,
         innerOpposedBonus: saved.innerOpposedBonus ?? 0,
+        pileSiteMap: normalizePileSiteMap(saved.pileSiteMap),
+        skullPiles: normalizeSkullPiles(saved.skullPiles),
+        skullTargetsRevealed: saved.skullTargetsRevealed ?? false,
       };
     } catch (e) {
       return defaultState();
@@ -485,6 +596,17 @@
     resolveOrder,
     pylonAcBonus,
     mergeStatePatch,
+    SKULL_PILE_COUNT,
+    ANCESTOR_COUNT,
+    ANCESTOR_PILE_NUMBERS,
+    CONSECRATION_SITES,
+    randomPileSiteMap,
+    defaultSkullPiles,
+    pileConsecrationSite,
+    pileForSite,
+    countAnchorBinds,
+    skullAncestorsFound,
+    advanceSkullPile,
     INNER_BUST_OPTIONS,
     load,
     save,

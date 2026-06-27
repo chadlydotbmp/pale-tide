@@ -365,12 +365,44 @@
           </button>
           <div class="phase-section-body">
           <label class="check-item"><input type="checkbox" id="rim-rite" /> Rim Rite known</label>
-          <label class="check-item"><input type="checkbox" id="anchor-north-loc" /> North row · located</label>
-          <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> North row · bound (−1 Ritual)</label>
-          <label class="check-item"><input type="checkbox" id="anchor-east-loc" /> East row · located</label>
-          <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> East row · bound (−1 Ritual)</label>
-          <label class="check-item"><input type="checkbox" id="anchor-skull-loc" /> Skull pits · located</label>
-          <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Skull pits · bound (−1 Ritual)</label>
+          <div class="skull-pits-panel">
+            <p class="skull-pits-intro">Ten <strong>numbered skull piles</strong> on the mat — some line the <strong>road to the gate</strong>. Bloodline gaps are piles <strong>3 · 6 · 9</strong>; each directs to a <strong>random</strong> rim site *(set at encounter start · Religion DC 18 on site)*.</p>
+            <div class="skull-pile-toolbar">
+              <span id="skull-ancestor-summary" class="skull-ancestor-summary">0/3 directed · 0/3 consecrated</span>
+              <button type="button" class="ghost skull-pile-action" id="btn-skull-reveal" onclick="PaleTideApp.tap(this,event)">Reveal piles</button>
+              <button type="button" class="ghost skull-pile-action" id="btn-skull-reset" onclick="PaleTideApp.tap(this,event)">Reset search</button>
+            </div>
+            <p id="skull-targets-hint" class="skull-targets-hint hidden"></p>
+            <div class="skull-pile-grid" id="skull-pile-grid"></div>
+            <h3 class="consecration-sites-title">Sanctify on the map</h3>
+            <p class="consecration-sites-note">3 fixed rim locations · −1 Ritual each *(max 3)*</p>
+            <div class="consecration-sites">
+              <div class="consecration-site" data-site="north">
+                <div class="consecration-site-head">
+                  <strong>North row</strong>
+                  <span class="consecration-directed" id="directed-north"></span>
+                </div>
+                <label class="check-item"><input type="checkbox" id="anchor-north-loc" /> At site · ready to sanctify</label>
+                <label class="check-item"><input type="checkbox" id="anchor-north-bind" /> Consecrated (−1 Ritual)</label>
+              </div>
+              <div class="consecration-site" data-site="east">
+                <div class="consecration-site-head">
+                  <strong>East row</strong>
+                  <span class="consecration-directed" id="directed-east"></span>
+                </div>
+                <label class="check-item"><input type="checkbox" id="anchor-east-loc" /> At site · ready to sanctify</label>
+                <label class="check-item"><input type="checkbox" id="anchor-east-bind" /> Consecrated (−1 Ritual)</label>
+              </div>
+              <div class="consecration-site" data-site="skull">
+                <div class="consecration-site-head">
+                  <strong>Skull pits</strong>
+                  <span class="consecration-directed" id="directed-skull"></span>
+                </div>
+                <label class="check-item"><input type="checkbox" id="anchor-skull-loc" /> At site · ready to sanctify</label>
+                <label class="check-item"><input type="checkbox" id="anchor-skull-bind" /> Consecrated (−1 Ritual)</label>
+              </div>
+            </div>
+          </div>
           </div>
         </div>
 
