@@ -514,6 +514,11 @@ main {
   flex-shrink: 0;
 }
 
+.init-rail > .pc-init-panel {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
 .init-rail-scroll {
   flex: 1 1 auto;
   min-height: 0;
@@ -2290,10 +2295,6 @@ main {
       <div id="combat-layout" class="combat-layout">
         <div id="init-rail-column" class="init-rail-column">
           <aside id="init-rail" class="init-rail panel">
-          <div class="init-rail-tracker">
-            <div class="init-list" id="init-list"></div>
-          </div>
-          <div class="init-rail-scroll">
           <div class="pc-init-panel" id="allies-init-panel">
             <button type="button" class="pc-init-header" id="btn-allies-init-toggle" onclick="PaleTideApp.tap(this,event)">
               <span class="pc-init-chevron" id="allies-init-chevron" aria-hidden="true">▾</span>
@@ -2322,6 +2323,10 @@ main {
                 <div id="summon-init-list" class="pc-init-list"></div>
               </div>
             </div>
+          </div>
+          <div class="init-rail-scroll">
+          <div class="init-rail-tracker">
+            <div class="init-list" id="init-list"></div>
           </div>
           <div class="btn-row init-actions">
             <button type="button" onclick="PaleTideApp.tap(this,event)" id="btn-shuffle-preview">Re-roll shuffle</button>

@@ -481,6 +481,11 @@ main {
   flex-shrink: 0;
 }
 
+.init-rail > .pc-init-panel {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
 .init-rail-scroll {
   flex: 1 1 auto;
   min-height: 0;
