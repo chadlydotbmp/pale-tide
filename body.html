@@ -211,6 +211,24 @@
           <span>0:50–2:00 · Gate OPEN · Outer + Inner · Ritual ticking</span>
         </div>
 
+        <div class="panel phase-section" data-phase2-section="readAloud">
+          <button type="button" class="phase-section-toggle" data-phase2-section="readAloud" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Read aloud · Inner</h2>
+          </button>
+          <div class="phase-section-body">
+          <div class="read-aloud-block">
+            <h4>Crossing Inside</h4>
+            <p class="read-aloud-when">First PC through the open gate — open three scenes.</p>
+            <p>Through the open iron: <strong>daylight</strong>—the <strong>past</strong>. The path runs <strong>woman → children → stairs → Counting House</strong>. Three scenes · one roll each · stop the count.</p>
+          </div>
+          <div class="read-aloud-block read-aloud-compact">
+            <h4>Ledger's curse</h4>
+            <p>Violence Inside draws the ledger's price—<strong>psychic pain equal to your damage roll</strong>.</p>
+          </div>
+          </div>
+        </div>
+
         <div class="panel phase-section pylon-panel" data-phase2-section="pylons">
           <button type="button" class="phase-section-toggle" data-phase2-section="pylons" onclick="PaleTideApp.tap(this,event)">
             <span class="phase-section-chevron" aria-hidden="true">▾</span>
@@ -253,6 +271,10 @@
 
           <div class="sanctum-beat">
             <h3 class="sanctum-beat-title">1 · Weeping woman</h3>
+            <div class="read-aloud-block read-aloud-compact">
+              <h4>On pass</h4>
+              <p>She marks you <strong>friendly</strong>—advantage on scene 2 · won't fight in Act III.</p>
+            </div>
             <p id="scene-woman-note" class="sanctum-beat-hint">Insight or Persuasion DC 16</p>
             <div class="btn-row">
               <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary disp-btn" id="btn-scene-woman-pass">Pass · friendly</button>
@@ -263,7 +285,11 @@
 
           <div class="sanctum-beat">
             <h3 class="sanctum-beat-title">2 · Echo children</h3>
-            <p id="scene-children-note" class="sanctum-beat-hint">Arcana or Persuasion DC 16 · or say <strong>Norm</strong></p>
+            <div class="read-aloud-block read-aloud-compact">
+              <h4>On pass</h4>
+              <p>One child walks up the stairs.</p>
+            </div>
+            <p id="scene-children-note" class="sanctum-beat-hint">Perception or Arcana DC 16 · or say <strong>Norm</strong></p>
             <div class="btn-row">
               <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary disp-btn" id="btn-scene-children-pass">Pass</button>
               <button type="button" onclick="PaleTideApp.tap(this,event)" class="danger" id="btn-scene-children-fail">Fail · Ritual +1</button>
@@ -273,6 +299,14 @@
 
           <div class="sanctum-beat">
             <h3 class="sanctum-beat-title">3 · Counting House</h3>
+            <div class="read-aloud-block">
+              <h4>Scene</h4>
+              <p>Scrolls and tomes—names underlined in the margins. A figure bent over a desk ledger never looks up. On the balcony, a lord in mourning: <em>"The count is not complete."</em> Someone has been at this for centuries.</p>
+            </div>
+            <div class="read-aloud-block read-aloud-compact">
+              <h4>On pass</h4>
+              <p>The count stutters. You see it—the <strong>rim glass</strong> is what <strong>feeds</strong> the ritual. <strong>Break the pylons.</strong></p>
+            </div>
             <p id="scene-house-note" class="sanctum-beat-hint">Insight or Persuasion DC 18</p>
             <div class="btn-row">
               <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary disp-btn" id="btn-scene-house-pass">Pass · Ritual −3 · break pylons</button>
@@ -335,6 +369,32 @@
           <span>2:15–3:45 · Dismissal · narrate Time Collapse</span>
         </div>
 
+        <div class="panel phase-section" data-phase3-section="timeCollapse">
+          <button type="button" class="phase-section-toggle" data-phase3-section="timeCollapse" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Time Collapse · read aloud</h2>
+          </button>
+          <div class="phase-section-body">
+          <div class="read-aloud-block">
+            <h4>Apostle arrives</h4>
+            <p class="read-aloud-when">2:15 wall clock · or Ritual 20 — read once</p>
+            <p>Time snaps. The fence falls. The vortex screams—something climbs out.</p>
+          </div>
+          <div class="read-aloud-block read-aloud-compact">
+            <h4>Alt read</h4>
+            <p>Daylight dies. The vortex screams. Something climbs out.</p>
+          </div>
+          <ul class="phase-list muted">
+            <li>Narrate woman → banshee · liches from Act II — no extra init unless garnish</li>
+            <li>Inner fence OFF · Apostle from vortex · Ritual stops on mat</li>
+            <li><strong>Ritual 20</strong> → 140 HP · else 110 HP premature</li>
+          </ul>
+          <div class="btn-row" style="margin-top:12px">
+            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
+          </div>
+          </div>
+        </div>
+
         <div class="panel phase-section" data-phase3-section="apostle">
           <button type="button" class="phase-section-toggle" data-phase3-section="apostle" onclick="PaleTideApp.tap(this,event)">
             <span class="phase-section-chevron" aria-hidden="true">▾</span>
@@ -374,11 +434,22 @@
             <h2>Dismissal · ~3:15</h2>
           </button>
           <div class="phase-section-body">
-          <ul class="phase-list">
-            <li>Apostle out + (bloodied OR both pylons down) at vortex threshold</li>
+          <div class="read-aloud-block">
+            <h4>Dismissal · ~3:15</h4>
+            <p class="read-aloud-when">Vortex threshold · Apostle out · bloodied OR both pylons down</p>
+            <p><strong>Myrkul</strong> counts. <strong>Lliira</strong> dismisses.</p>
+          </div>
+          <div class="read-aloud-block read-aloud-compact">
+            <h4>Step 1 — Lliira</h4>
+            <p>Religion or Arcana DC 14 · threatened · different PC each step.</p>
+          </div>
+          <div class="read-aloud-block read-aloud-compact">
+            <h4>Step 2 — sing / laugh</h4>
+            <p>Chung-Hin lead · Religion or Arcana DC 14.</p>
+          </div>
+          <ul class="phase-list muted">
             <li><strong>Premature</strong> *(rim rite / early stop)* — temporary form · still assails the party</li>
             <li><strong>Permanent</strong> *(ritual 20)* — physical forever unless dismissed or slain</li>
-            <li>Step 2 — sing / laugh · Chung-Hin lead · Religion/Arcana DC 14 each step</li>
             <li><strong>Win:</strong> Dismissal · 0 HP</li>
             <li><strong>Loss:</strong> 2 PCs dead OR Apostle at 3:45</li>
           </ul>
@@ -397,23 +468,6 @@
             <li>Apex: liches · Apostle · LA 3/4 bloodied</li>
             <li>Apostle +30 HP init 20 if any pylon intact</li>
           </ul>
-          </div>
-        </div>
-
-        <div class="panel phase-section" data-phase3-section="timeCollapse">
-          <button type="button" class="phase-section-toggle" data-phase3-section="timeCollapse" onclick="PaleTideApp.tap(this,event)">
-            <span class="phase-section-chevron" aria-hidden="true">▾</span>
-            <h2>Time Collapse</h2>
-          </button>
-          <div class="phase-section-body">
-          <ul class="phase-list muted">
-            <li>Narrate woman → banshee · liches from Act II — no extra init unless garnish</li>
-            <li>Inner fence OFF · Apostle from vortex · Ritual stops on mat</li>
-            <li><strong>Ritual 20</strong> → 140 HP · else 110 HP premature</li>
-          </ul>
-          <div class="btn-row" style="margin-top:12px">
-            <button type="button" onclick="PaleTideApp.tap(this,event)" class="primary" id="btn-apostle-arrives">Apostle on mat</button>
-          </div>
           </div>
         </div>
 

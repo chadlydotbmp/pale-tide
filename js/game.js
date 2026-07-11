@@ -283,6 +283,7 @@
 
   function defaultPhase2Collapsed() {
     return {
+      readAloud: false,
       pylons: false,
       sanctum: false,
       inner: false,

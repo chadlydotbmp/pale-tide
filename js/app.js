@@ -603,7 +603,7 @@
     setEl($('#scene-children-note'), (el) => {
       el.textContent = state.normanFound
         ? 'Passed — one child walks upstairs'
-        : 'Arcana or Persuasion DC 16 · or say Norm';
+        : 'Perception or Arcana DC 16 · or say Norm';
     });
     setEl($('#scene-house-note'), (el) => {
       el.textContent = state.countingHousePassed
