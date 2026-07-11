@@ -3,10 +3,10 @@
   const STORAGE_KEY = 'pale-tide-v1';
 
   const BATCHES = {
-    1: { name: 'Horde', emoji: '🧟', units: 'Hordes · hooded bodies · living hoods' },
-    2: { name: 'Knights', emoji: '⚔️', units: 'Death knights · grave hounds' },
-    3: { name: 'Wraiths', emoji: '👻', units: 'Ghosts · banshee' },
-    4: { name: 'Reserves', emoji: '⋯', units: 'Spawns · reinforcements' },
+    1: { name: 'Horde', emoji: '🧟', units: 'Hordes · hooded bodies' },
+    2: { name: 'Knights', emoji: '⚔️', units: '2 Death knights' },
+    3: { name: 'Wraiths', emoji: '👻', units: '5 Ghosts · banshee' },
+    4: { name: 'Hunters', emoji: '🐕', units: 'Living hoods · grave hounds' },
     5: { name: 'Apex', emoji: '💀', units: 'Liches · Apostle' },
   };
 
@@ -98,8 +98,9 @@
     return CONSECRATION_SITES.filter((s) => anchors[s.id].bound).length;
   }
 
-  const APOSTLE_HP_BASE = 580;
-  const APOSTLE_HP_RITUAL_COMPLETE = 725;
+  const APOSTLE_HP_BASE = 110;
+  const APOSTLE_HP_RITUAL_COMPLETE = 140;
+  const PYLON_STONE_MAX = 35;
   const RIM_ALL_SITES_RITUAL_DROP = 5;
 
   function apostleMaxHp(ritualAtArrival) {
@@ -174,7 +175,7 @@
     return { piles: next, newlyFoundSite };
   }
 
-  const PC_ROSTER = ['Anax', 'Kilgore', 'Acerian', 'Guts', 'Theo'];
+  const PC_ROSTER = ['Chung-Hin', 'Si Yuan', 'Edwin', 'Andrew', 'Wizard'];
   const SUMMON_ROSTER = ['Summon 1', 'Summon 2', 'Summon 3'];
 
   function defaultPcs() {
@@ -229,11 +230,11 @@
   const TIME_MARKERS = [
     { min: 0, label: '0:00', hint: 'Teleport · cold open' },
     { min: 5, label: '0:05', hint: 'R1 — split Gate · Lane' },
-    { min: 45, label: '0:45', hint: 'Gate open? · set G = round' },
-    { min: 50, label: '0:50', hint: 'Phase 2 — The Ledger' },
-    { min: 90, label: '1:30', hint: 'G+4 cone OR Ritual ≥ 10' },
+    { min: 45, label: '0:45', hint: 'Gate open? · Outer / Inner split' },
+    { min: 50, label: '0:50', hint: 'Act II — Count' },
+    { min: 90, label: '1:30', hint: 'R+4 cone OR Ritual ~8' },
     { min: 120, label: '2:00', hint: 'Break — 15 min' },
-    { min: 135, label: '2:15', hint: 'Phase 3 — Apostle on mat' },
+    { min: 135, label: '2:15', hint: 'Act III — Apostle on mat' },
     { min: 195, label: '3:15', hint: 'Dismissal OR Apostle bloodied' },
     { min: 225, label: '3:45', hint: 'Hard stop · wrap' },
   ];
@@ -323,8 +324,8 @@
       fedHordesThisRound: 0,
       assignment: { ...DEFAULT_ASSIGNMENT },
       shuffleRoll: null,
-      pylonA: { shield: 100, stone: 90, destroyed: false },
-      pylonB: { shield: 100, stone: 90, destroyed: false },
+      pylonA: { shield: 0, stone: PYLON_STONE_MAX, destroyed: false },
+      pylonB: { shield: 0, stone: PYLON_STONE_MAX, destroyed: false },
       graveChurn: 25,
       graveTiers: { t25: true, t50: false, t75: false, t100: false },
       innerWins: 0,
@@ -336,6 +337,7 @@
       womanDisposition: 'neutral',
       childrenRemoved: 0,
       normanFound: false,
+      countingHousePassed: false,
       rimRiteKnown: false,
       pileSiteMap: randomPileSiteMap(),
       skullPiles: defaultSkullPiles(),
@@ -396,18 +398,17 @@
   }
 
   function nextRound(state) {
-    const d5 = Math.floor(Math.random() * 5) + 1;
-    const sh = shuffle(d5);
     return {
       ...state,
       round: state.round + 1,
       fedHordesThisRound: 0,
-      assignment:
-        state.round === 1
-          ? { ...DEFAULT_ASSIGNMENT }
-          : rotateAssignment(state.assignment, d5 === 1 ? 0 : d5 - 1),
-      shuffleRoll: state.round === 1 ? null : d5,
+      assignment: { ...DEFAULT_ASSIGNMENT },
+      shuffleRoll: null,
       pulseOn: false,
+      turnHighlight: null,
+      lairPick: null,
+      laKnightsUsed: 0,
+      laApostleUsed: 0,
     };
   }
 
@@ -416,16 +417,29 @@
     return state.round - state.gateRound + 1;
   }
 
-  function nextConeG(state) {
+  /** R+2 wail · R+4 & R+7 cones (rounds after gate opened) */
+  function isWailRound(state) {
     const g = gTrack(state);
-    if (g == null || g < 1) return null;
-    if (g <= 4) return 4;
-    return g % 2 === 0 ? g + 2 : g + 1;
+    return g === 2;
   }
 
   function isConeRound(state) {
     const g = gTrack(state);
-    return g != null && g >= 4 && (g - 4) % 2 === 0;
+    return g === 4 || g === 7;
+  }
+
+  function nextPylonBeat(state) {
+    const g = gTrack(state);
+    if (g == null) return null;
+    if (g < 2) return { at: 2, kind: 'wail' };
+    if (g < 4) return { at: 4, kind: 'cone' };
+    if (g < 7) return { at: 7, kind: 'cone' };
+    return null;
+  }
+
+  function nextConeG(state) {
+    const beat = nextPylonBeat(state);
+    return beat && beat.kind === 'cone' ? beat.at : null;
   }
 
   function batchActiveInPhase(batch, phase) {
@@ -493,27 +507,22 @@
   function pylonAcBonus(state) {
     const a = !state.pylonA.destroyed && state.pylonA.stone > 0;
     const b = !state.pylonB.destroyed && state.pylonB.stone > 0;
-    if (a && b) return 5;
-    if (a || b) return 3;
+    if (a && b) return 2;
+    if (a || b) return 1;
     return 0;
   }
 
-  /** Ritual 20 · Breach 6 · both pylons down · all rim sites consecrated → Time Collapse · Apostle on mat */
+  /** Ritual 20 → Apostle on mat */
   function mergeStatePatch(current, patch) {
     let next = { ...current, ...patch };
-    let rimRiteJustCompleted = false;
 
     if (patch.anchors) {
       const bonus = applyAllSitesConsecrationBonus(current, next);
-      rimRiteJustCompleted = bonus.allSitesConsecrated && !current.allSitesConsecrated;
       next = { ...next, ...bonus };
     }
 
     const wasOnMat = current.apostleOnMat;
-    const bothPylonsDown = next.pylonA.destroyed && next.pylonB.destroyed;
-    const autoArrival =
-      !wasOnMat &&
-      (next.ritual >= 20 || next.breach >= 6 || rimRiteJustCompleted || bothPylonsDown);
+    const autoArrival = !wasOnMat && next.ritual >= 20;
     const manualArrival = !wasOnMat && patch.apostleOnMat;
 
     if (autoArrival || manualArrival) {
@@ -559,6 +568,7 @@
         })(),
         childrenRemoved: saved.childrenRemoved ?? 0,
         normanFound: saved.normanFound ?? false,
+        countingHousePassed: saved.countingHousePassed ?? false,
         pcs: normalizePcs(saved.pcs),
         alliesInitCollapsed:
           saved.alliesInitCollapsed ??
@@ -686,7 +696,10 @@
     rotateAssignment,
     shuffle,
     nextRound,
+    PYLON_STONE_MAX,
     gTrack,
+    isWailRound,
+    nextPylonBeat,
     nextConeG,
     isConeRound,
     resolveOrder,

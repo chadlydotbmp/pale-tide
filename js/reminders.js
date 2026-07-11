@@ -1,105 +1,81 @@
-/* Initiative · LA · Lair reminders — from ENEMY_STAT_BLOCKS.md */
+/* Initiative · LA · Lair reminders — L5 dial */
 (function (global) {
   const BATCH_TURN = {
     1: {
       title: 'Horde',
       lines: [
         'One mob turn per horde · N→S',
-        '5 attacks +8 each (+10 if Marshal within 30 ft)',
-        'Pin horde: 2 attacks → Str DC 16 grapple',
-        'Spawns enter at start of Horde slot this round',
-        'Hood reveal at ≤2 bodies · end of Horde slot',
-        'Living hoods: +10 dagger×2 · venom Con 19 · Fade bonus',
+        '5 attacks +5 each (+7 if Marshal within 30 ft)',
+        'Pin horde: 2 attacks → Str DC 12',
+        'Spawns enter at start of Horde slot',
+        'Hood reveal at ≤2 bodies · Perception DC 12',
       ],
       la: null,
     },
     2: {
       title: 'Knights',
       lines: [
-        'Turn order: Marshal → Heavy → Blade Singer → hounds',
-        'Multiattack: 3× Dread Blade +11',
-        'Hellfire Orb · Mortuary Stillness Con 23 (recharge 5–6)',
-        'Parry reaction: +6 AC vs one melee hit',
-        'Grave hounds: bite +11 ×2 · Cold Howl Wis DC 19 (Frightened · pierces Rage) · Pack Takedown',
+        '2 knights: Marshal → Heavy',
+        'Multiattack: 2× Dread Blade +6',
+        'Hellfire Orb Dex DC 13 · Mortuary Stillness Con DC 15',
+        'Parry: +3 AC vs one melee hit',
       ],
       la: {
-        budget: '2/round · Blade Singer 3/round',
-        note: 'End of a PC turn · one headline suppression per round',
+        budget: '1 headline LA/round across both knights',
+        note: 'End of a PC turn',
         options: [
-          'Move — half speed, no OA',
-          'Strike — +12 longsword · 2d8+6 slash + 2d6 nec',
-          'Command — one cluster half speed',
-          'Chill Command — Wis DC 21 or Charmed until end of next turn (non-Raging)',
-          'Bone Litany — Wis DC 21 or can’t extend Rage next turn (Raging)',
-          'Crown’s Weight — Wis DC 21 or auras off until end of next turn (Anax)',
-          'Skull Weight — Wis DC 21 or no psychic until end of next turn (Theokoles)',
-          'Blade Burst — Blade Singer only · 30-ft line · 8d8 force · Dex DC 18 half',
+          'Move · Strike · Command',
+          'Chill Command — Wis DC 13 or Charmed',
+          'Mute the Song — Wis DC 13 or disadv next spell (Chung-Hin / Wizard / Andrew)',
+          'Ledger’s Pin — Str DC 13 or Restrained',
         ],
       },
     },
     3: {
       title: 'Wraiths',
       lines: [
-        'Phase 2+: ghosts in initiative (Batch 3) · Phase 3: banshee joins slot',
-        'Ghosts N→S · Life Drain +10 · 5d8+6 nec · max HP − damage',
-        'Soul Grit: 4 wraiths on one target or crit → Con 23 or Rage ends',
-        'Banshee friendly only → neutral · attacks if neutral or worse',
-        'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',
+        '5 ghosts · Life Drain +6 · 3d8+3 nec',
+        'Banshee Phase 3 · friendly → neutral',
+        'Peel concentrating casters (Chung-Hin · Wizard · Andrew)',
       ],
       la: {
-        budget: 'Banshee 2/round · hostile if neutral or worse',
-        note: 'End of another creature’s turn',
+        budget: 'Banshee 1/round · hostile only',
         options: [
-          'Drift — fly half speed, no OA',
-          'Touch — Corrupting Touch +10 · 3d8+6 necrotic',
-          'Keening — Wis DC 20 or Frightened until end of her next turn · pierces Rage',
-          'Still Counting — Wis DC 21 or no healing until end of her next turn',
+          'Drift · Touch · Keening Wis DC 13',
         ],
       },
     },
     4: {
-      title: 'Reserves',
+      title: 'Hunters',
       lines: [
-        'Grave spawns / reinforcements when this batch is active',
-        'Living hoods → Horde · hounds → Knights',
+        'Living hoods · grave hounds',
+        'Hound: bite +6 ×2 · Cold Howl Wis DC 13',
+        'Hood: +5 dagger×2 · targets Brussel',
       ],
       la: null,
     },
     5: {
       title: 'Apex',
       lines: [
-        'Phase 3+: Apex in initiative (Batch 5) · liches then Apostle last',
-        'Lichens: 2 LA/round each · LR 2/day',
-        'Apostle: 3 LA/round · 4 when bloodied (≤ half max HP)',
-        'Pale Tide Frightened pierces Rage — barbarians can be Frightened while Raging',
+        'Lichens 1 LA/round each · Apostle 2 LA (3 bloodied)',
+        'Apostle HP 110 premature · 140 if Ritual 20',
       ],
       la: {
-        budget: 'See active unit below',
+        budget: 'One headline across liches + Apostle',
         sections: [
           {
-            name: 'Leader Lich (2/round)',
-            options: [
-              'Cantrip — Ray of Frost +12 · 2d8 cold',
-              'Frightening Gaze — Wis DC 20 or Frightened until end of next turn · pierces Rage',
-              'Teleport — 60 ft to seen space',
-              'Bone Litany — Wis DC 21 or can’t extend Rage next turn (Raging)',
-            ],
+            name: 'Leader Lich',
+            options: ['Ray of Frost · Frightening Gaze Wis DC 13 · Teleport'],
           },
           {
-            name: 'Keeper Lich (2/round)',
-            options: [
-              'Cantrip — Chill Touch +13 · 2d8 necrotic',
-              'Frightening Gaze — Wis DC 21 or Frightened until end of next turn · pierces Rage',
-              'Teleport — 60 ft to seen space',
-              'Ledger’s Tally — Con DC 21 or concentration save at disadv',
-            ],
+            name: 'Keeper Lich',
+            options: ['Chill Touch · Ledger’s Tally Con DC 14'],
           },
           {
-            name: 'Apostle (3/round · 4 bloodied)',
+            name: 'Apostle',
             options: [
-              '1 · Swipe — Scythe +12 · 2d8+6 slash + 3d8 nec · Con DC 21 or max HP − nec',
-              '2 · Finger of Death — Empowered only · Con DC 21 · 7d8+30 nec (half on success)',
-              '3 · Stare of Mortality — Con DC 20 or +1 Exhaustion',
+              'Swipe · Finger of Death Con DC 14 · Stare Con DC 13',
+              'Wheel rotates damage types — fixed immune cold/nec/poison',
             ],
           },
         ],
@@ -112,30 +88,24 @@
     title: 'Lair · init 20',
     pickOne: 'Pick ONE lair action per round',
     extras: [
-      'Each intact pylon: +d100 shield HP (max 100)',
-      'Phase 3: Apostle +30 HP if any pylon intact',
-      'PULSE turns off after lair (if pulsing)',
+      'Optional — pick ONE lair action per round',
     ],
     actions: [
       {
         name: 'Stillness Between Heartbeats',
-        effect: 'One Raging creature in 60 ft',
-        save: 'Con 23 or Rage ends · undead heal 2d6',
+        effect: 'One creature in 60 ft',
+        save: 'Con 15 or can’t regain HP until end of next turn',
       },
       {
         name: 'Grave Fog',
-        effect: 'Two 15-ft spheres heavily obscured until next init 20',
-        save: 'Start turn inside: Con 21 or 4d6 nec',
+        effect: 'Two 15-ft spheres obscured',
+        save: 'Con 13 or 2d6 nec',
       },
-      {
-        name: 'Negative Pulse',
-        effect: 'Raging creatures disadv on Mortuary Stillness saves this round',
-        save: '—',
-      },
+      { name: 'Negative Pulse', effect: 'Disadv Mortuary Stillness saves', save: '—' },
       {
         name: 'Clutch of the Fallen',
-        effect: 'One creature on desecrated ground',
-        save: 'Str 21 or Restrained (escape 21) · no dmg before turn end → Rage ends',
+        effect: 'On desecrated ground',
+        save: 'Str 13 or Restrained (escape 13)',
       },
     ],
   };
@@ -144,7 +114,7 @@
     { init: 31, slot: 'Dead 2', home: 'Knights' },
     { init: 25, slot: 'Dead 5', home: 'Apex' },
     { init: 20, slot: 'Lair', home: 'Lair action' },
-    { init: 19, slot: 'Dead 4', home: 'Reserves' },
+    { init: 19, slot: 'Dead 4', home: 'Hunters' },
     { init: 16, slot: 'Dead 3', home: 'Wraiths' },
     { init: 10, slot: 'Dead 1', home: 'Horde' },
   ];
@@ -158,7 +128,7 @@
         type: 'pc',
         title: pc.name,
         init: pc.init,
-        lines: ['Player turn · enemy legendary actions resolve end of this turn'],
+        lines: ['Player turn · enemy LA resolve end of this turn'],
       };
     }
     if (slot.startsWith('summon:')) {
@@ -169,7 +139,7 @@
         type: 'summon',
         title: summon.name,
         init: summon.init,
-        lines: ['Summoned ally · acts on this initiative'],
+        lines: ['Steel Defender / summon acts on this initiative'],
       };
     }
     if (slot === 'lair') return { type: 'lair', ...LAIR };

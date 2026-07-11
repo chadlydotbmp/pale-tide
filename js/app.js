@@ -77,6 +77,9 @@
         fired.push(mk.min);
         alert = { label: mk.label, hint: mk.hint };
         changed = true;
+        if (mk.min === 135 && !state.apostleOnMat) {
+          state = G.mergeStatePatch(state, { apostleOnMat: true });
+        }
         try {
           if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
         } catch (_) {}
@@ -139,7 +142,8 @@
     });
     setEl($('#header-phase'), (el) => {
       const ph = Math.min(3, Math.max(1, state.phase));
-      el.textContent = `Ph ${ph}`;
+      const labels = ['', 'Act I', 'Act II', 'Act III'];
+      el.textContent = labels[ph];
       el.className = `header-phase phase-${ph}`;
     });
     setEl($('#header-live'), (el) => {
@@ -563,6 +567,21 @@
   }
 
   function renderPylons() {
+    const g = G.gTrack(state);
+    const beatNote = $('#pylon-beat-note');
+    setEl(beatNote, (el) => {
+      if (!state.gateOpen || g == null) {
+        el.textContent = 'R+2 wail · R+4 & R+7 cone (if pylons stand)';
+        return;
+      }
+      const parts = [`R+${g} now`];
+      if (G.isWailRound(state)) parts.push('— WAIL Wis DC 13 · Breach +1');
+      if (G.isConeRound(state)) parts.push('— CONE 4d6 + Stillness DC 15');
+      const next = G.nextPylonBeat(state);
+      if (next) parts.push(`· next R+${next.at} ${next.kind}`);
+      el.textContent = parts.join(' ');
+    });
+
     ['A', 'B'].forEach((id) => {
       const key = `pylon${id}`;
       const p = state[key];
@@ -570,14 +589,8 @@
       const card = $(`#pylon-${low}`);
       if (!card) return;
       card.classList.toggle('destroyed', p.destroyed);
-      setEl($(`#pylon-${low}-shield`), (el) => {
-        el.style.width = `${Math.max(0, (p.shield / 100) * 100)}%`;
-      });
       setEl($(`#pylon-${low}-stone`), (el) => {
-        el.style.width = `${Math.max(0, (p.stone / 90) * 100)}%`;
-      });
-      setEl($(`#pylon-${low}-shield-val`), (el) => {
-        el.textContent = p.shield;
+        el.style.width = `${Math.max(0, (p.stone / G.PYLON_STONE_MAX) * 100)}%`;
       });
       setEl($(`#pylon-${low}-stone-val`), (el) => {
         el.textContent = p.stone;
@@ -590,74 +603,31 @@
 
   function renderSanctum() {
     const womanDisp = state.womanDisposition || 'neutral';
-    ['friendly', 'neutral', 'hostile'].forEach((disp) => {
-      setEl($(`#btn-woman-${disp}`), (el) => {
-        el.classList.toggle('active', womanDisp === disp);
-      });
+    const womanPassed = womanDisp === 'friendly';
+    setEl($('#scene-woman-pass'), (el) => {
+      el.classList.toggle('hidden', !womanPassed);
     });
-    setEl($('#woman-banshee-note'), (el) => {
-      if (womanDisp === 'friendly') {
-        el.innerHTML = 'Ph 3 banshee: <strong>friendly</strong> — will not attack unless provoked';
-      } else if (womanDisp === 'neutral') {
-        el.innerHTML = 'Ph 3 banshee: <strong>neutral</strong> — <strong>will attack</strong>';
-      } else {
-        el.innerHTML = 'Ph 3 banshee: <strong>hostile</strong> — <strong>will attack</strong>';
-      }
-    });
-    setEl($('#children-removed'), (el) => {
-      el.textContent = state.childrenRemoved;
-    });
-    setEl($('#btn-child-remove'), (el) => {
-      el.disabled = state.childrenRemoved >= 10;
-    });
-    setEl($('#btn-norman-found'), (el) => {
-      el.disabled = state.normanFound;
-    });
-    setEl($('#children-pass-note'), (el) => {
+    setEl($('#scene-children-pass'), (el) => {
       el.classList.toggle('hidden', !state.normanFound);
     });
-    setEl($('#rim-rite'), (el) => {
-      el.checked = state.rimRiteKnown;
+    setEl($('#scene-house-pass'), (el) => {
+      el.classList.toggle('hidden', !state.countingHousePassed);
     });
-    setEl($('#inner-buy'), (el) => {
-      el.textContent = state.innerBuydowns;
+    setEl($('#scene-woman-note'), (el) => {
+      el.textContent = womanPassed
+        ? 'Friendly — won’t fight in Act III'
+        : 'Insight or Persuasion DC 16';
     });
-    renderInnerBust();
-
-    const wins = $('#win-dots');
-    if (wins) {
-      wins.innerHTML = '';
-      for (let i = 0; i < 3; i++) {
-        wins.appendChild(el('span', `dot${i < state.innerWins ? ' win' : ''}`, i + 1));
-      }
-    }
-    const fails = $('#fail-dots');
-    if (fails) {
-      fails.innerHTML = '';
-      for (let i = 0; i < 2; i++) {
-        fails.appendChild(el('span', `dot${i < state.innerFails ? ' fail' : ''}`, i + 1));
-      }
-    }
-
-    setEl($('#grave-val'), (el) => {
-      el.textContent = state.graveChurn;
+    setEl($('#scene-children-note'), (el) => {
+      el.textContent = state.normanFound
+        ? 'Passed — one child walks upstairs'
+        : 'Arcana or Persuasion DC 16 · or say Norm';
     });
-    ['t25', 't50', 't75', 't100'].forEach((t) => {
-      setEl($(`#tier-${t}`), (el) => {
-        el.checked = state.graveTiers[t];
-      });
+    setEl($('#scene-house-note'), (el) => {
+      el.textContent = state.countingHousePassed
+        ? 'Passed — Ritual −3 · break the pylons'
+        : 'Insight or Persuasion DC 18';
     });
-
-    ['north', 'east', 'skull'].forEach((a) => {
-      setEl($(`#anchor-${a}-loc`), (el) => {
-        el.checked = state.anchors[a].located;
-      });
-      setEl($(`#anchor-${a}-bind`), (el) => {
-        el.checked = state.anchors[a].bound;
-      });
-    });
-
-    renderSkullPiles();
   }
 
   function renderSkullPiles() {
@@ -758,7 +728,7 @@
     setEl($('#apostle-scale-note'), (el) => {
       if (!state.apostleOnMat) {
         el.textContent =
-          'Ritual 20 → physical forever (725 HP) · rim rite / early stop → temporary form claws up (580 HP)';
+          'Arrives at 2:15 or Ritual 20 · 110 HP premature · 140 HP if Ritual 20';
         return;
       }
       const manifestation =
@@ -766,8 +736,8 @@
         (scalePct === 125 ? 'permanent' : 'premature');
       el.textContent =
         manifestation === 'permanent'
-          ? 'Physical forever · ritual completed · 725 HP'
-          : 'Temporary form · ritual stopped early · claws up from the abyss · 580 HP';
+          ? 'Physical forever · ritual completed · 140 HP'
+          : 'Temporary form · ritual stopped early · claws up from the abyss · 110 HP';
     });
     setEl($('#apostle-bloodied'), (el) => {
       el.checked = state.apostleBloodied;
@@ -816,8 +786,6 @@
         ...patch,
         gateOpen: true,
         gateRound: state.round,
-        pulseOn: true,
-        breach: Math.min(6, state.breach + 1),
         phase: Math.max(state.phase, 2),
         activeTab: 'phase2',
       };
@@ -899,7 +867,7 @@
       } else if (state.gatePickStarted && state.gateSmashSuccesses > 0) {
         el.textContent = 'Pick & smash in parallel — tap +1 only on smash success · failures don\'t reset progress';
       } else if (state.gateSmashSuccesses > 0) {
-        el.textContent = 'Smashing — need 3 successes (Ath DC 22) · failures don\'t harm progress';
+        el.textContent = 'Smashing — need 3 successes (Ath DC 16) · failures don\'t harm progress';
       } else if (state.gatePickStarted) {
         el.textContent = 'Picking — smash track also available (3 successes · gate can\'t re-close)';
       } else {
@@ -1272,39 +1240,31 @@
       case 'btn-summon-clear-tracker':
         patchSummons(state.summons.map((s) => ({ ...s, inTracker: false })));
         return;
-      case 'btn-new-round': {
-        const d5 = Math.floor(Math.random() * 5) + 1;
-        const steps = d5 === 1 ? 0 : d5 - 1;
+      case 'btn-new-round':
+        setState(G.nextRound(state));
+        return;
+      case 'btn-scene-woman-pass':
+        setState({ womanDisposition: 'friendly' });
+        return;
+      case 'btn-scene-woman-fail':
+        setState({ ritual: Math.min(20, state.ritual + 1) });
+        return;
+      case 'btn-scene-children-pass':
+        setState({ normanFound: true });
+        return;
+      case 'btn-scene-children-fail':
+        setState({ ritual: Math.min(20, state.ritual + 1) });
+        return;
+      case 'btn-scene-house-pass':
+        if (state.countingHousePassed) return;
         setState({
-          round: state.round + 1,
-          fedHordesThisRound: 0,
-          assignment: G.rotateAssignment(state.assignment, steps),
-          shuffleRoll: d5,
-          pulseOn: false,
-          turnHighlight: null,
-          lairPick: null,
-          laKnightsUsed: 0,
-          laApostleUsed: 0,
+          countingHousePassed: true,
+          ritual: Math.max(0, state.ritual - 3),
+          rimRiteKnown: true,
         });
         return;
-      }
-      case 'btn-shuffle-preview': {
-        const d5 = Math.floor(Math.random() * 5) + 1;
-        const steps = d5 === 1 ? 0 : d5 - 1;
-        setState({
-          assignment: G.rotateAssignment(
-            state.round === 1 ? { ...G.DEFAULT_ASSIGNMENT } : state.assignment,
-            steps
-          ),
-          shuffleRoll: d5,
-        });
-        return;
-      }
-      case 'btn-pulse-on':
-        setState({ pulseOn: true });
-        return;
-      case 'btn-pulse-off':
-        setState({ pulseOn: false });
+      case 'btn-scene-house-fail':
+        setState({ ritual: Math.min(20, state.ritual + 1) });
         return;
       case 'btn-woman-friendly':
         setState({ womanDisposition: 'friendly' });
@@ -1345,33 +1305,11 @@
       case 'btn-apostle-arrives':
         setState({ apostleOnMat: true });
         return;
-      case 'a-shield-minus':
-      case 'b-shield-minus': {
-        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
-        const p = { ...state[key], shield: Math.max(0, state[key].shield - 10) };
-        setState({ [key]: p });
-        return;
-      }
-      case 'a-shield-plus':
-      case 'b-shield-plus': {
-        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
-        const p = { ...state[key], shield: Math.min(100, state[key].shield + 10) };
-        setState({ [key]: p });
-        return;
-      }
       case 'a-stone-minus':
       case 'b-stone-minus': {
         const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
-        const p = { ...state[key], stone: Math.max(0, state[key].stone - 10) };
+        const p = { ...state[key], stone: Math.max(0, state[key].stone - 5) };
         if (p.stone === 0) p.destroyed = true;
-        setState({ [key]: p });
-        return;
-      }
-      case 'a-regen':
-      case 'b-regen': {
-        const key = node.id.charAt(0) === 'a' ? 'pylonA' : 'pylonB';
-        const roll = Math.floor(Math.random() * 100) + 1;
-        const p = { ...state[key], shield: Math.min(100, state[key].shield + roll) };
         setState({ [key]: p });
         return;
       }
@@ -1381,7 +1319,7 @@
         const cur = state[key];
         if (cur.destroyed) {
           setState({
-            [key]: { shield: 100, stone: 90, destroyed: false },
+            [key]: { shield: 0, stone: G.PYLON_STONE_MAX, destroyed: false },
           });
         } else {
           setState({

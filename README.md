@@ -52,16 +52,15 @@ That copy works with **no network** at the venue.
 
 At the venue: open the bookmark or tab — **airplane mode is OK** if the file is on **On My iPad**.
 
-## What it tracks
+## What it tracks *(L5)*
 
-- **Initiative batches** — shuffle each round (31 · 25 · 20 · 19 · 16 · 10)
-- **Turn reminders** — tap **Mark** on any row for batch rules · **legendary actions** · lair picker
-- **Lair @ 20** — always-visible quick ref · tap to select in reminder panel
-- **Stats tab** — full stat blocks · actions · specials · LA · filter by batch
-- **Ritual / Breach** clocks · G-track · cone rounds
-- **Pylons** A/B · grave churn · rim anchors
-- **Sanctum** inner track · woman friendly
-- **Apostle** HP · bloodied · LR · damage wheel
+- **Initiative** — fixed order each round: Knights → Hunters → Ghosts → Hordes · Lair 20
+- **Turn reminders** — tap **Mark** on any row for batch rules · LA · lair picker
+- **Acts I / II / III** — Siege · Count · Apostle
+- **Ritual / Breach** clocks · R+2 wail · R+4/R+7 cones
+- **Pylons** — stone HP only · −2 Ritual each
+- **Inner** — three scenes (woman · children · Counting House)
+- **Apostle** — auto at 2:15 or Ritual 20 · HP · bloodied · wheel
 - **Auto-saves** to iPad localStorage
 
 ## Add to Home Screen (iPad 7)
@@ -131,9 +130,9 @@ python3 -m http.server 8080
 
 | Tab | Use at table |
 |---|---|
-| **Ph 1** | Tide · Gate LOCKED · Gate + Lane · open gate → Ph 2 |
-| **Ph 2** | Ledger · Inner track · pylons · grave · anchors · break |
-| **Ph 3** | Apostle · Time Collapse · dismissal · reset |
+| **Act I** | Siege · Gate LOCKED · Gate + Lane |
+| **Act II** | Count · Outer/Inner · pylons · three Inner scenes |
+| **Act III** | Apostle · Time Collapse · dismissal |
 | **Stats** | Stat blocks · filter by batch |
 
 **Clocks + initiative** — split layout on Ph 1–3: **initiative pinned left**, phase tools **right**. Stats tab is full width.
@@ -153,7 +152,7 @@ Copy the new `index.html` to the iPad (iCloud sync or AirDrop). After opening in
 
 - Tap **Mark** on an initiative row to highlight it and show **turn + LA + lair** reminders above the list.
 - **Lair @ 20** cards stay visible under the initiative list every round.
-- **New Round** rolls the d5 shuffle, advances R, and resets LA counters.
+- **New Round** advances R · fixed init · resets LA counters.
 - State persists until **Reset encounter** on the Apostle tab.
 - Works offline once loaded.
 
