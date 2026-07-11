@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#0c0e12" />
-    <title>The Pale Tide</title>
+    <title>Ghoulsburg Cemetery</title>
     <script>
       window.PaleTideApp = {
         _q: [],
@@ -2530,27 +2530,6 @@ main {
     </div>
     <header class="app-header">
       <div class="header-toolbar">
-        <div class="header-clocks clocks-bar" id="header-clocks">
-          <div class="clocks-row">
-            <div class="clock-group ritual">
-              <span class="clock-label">Ritual</span>
-              <div class="clock-stepper">
-                <button type="button" class="clock-step" id="btn-ritual-minus" onclick="PaleTideApp.tap(this,event)">−</button>
-                <span class="clock-value"><strong id="ritual-compact">0</strong><span class="max">/20</span></span>
-                <button type="button" class="clock-step" id="btn-ritual-plus" onclick="PaleTideApp.tap(this,event)">+</button>
-              </div>
-            </div>
-            <div class="clock-group breach">
-              <span class="clock-label">Breach</span>
-              <div class="clock-stepper">
-                <button type="button" class="clock-step" id="btn-breach-minus" onclick="PaleTideApp.tap(this,event)">−</button>
-                <span class="clock-value"><strong id="breach-compact">0</strong><span class="max">/6</span></span>
-                <button type="button" class="clock-step" id="btn-breach-plus" onclick="PaleTideApp.tap(this,event)">+</button>
-              </div>
-              <div class="breach-pips" id="breach-pips"></div>
-            </div>
-          </div>
-        </div>
         <div class="header-round-group">
           <div class="header-round" id="header-round" aria-label="Round">R1</div>
           <div class="header-phase phase-1" id="header-phase" aria-label="Phase">Ph 1</div>
@@ -2614,7 +2593,7 @@ main {
             <div class="init-list" id="init-list"></div>
           </div>
           <div class="btn-row init-actions">
-            <p class="init-fixed-order" style="font-size:0.8rem;color:var(--muted);margin:0">Fixed order: Knights → Hunters → Ghosts → Hordes · Lair 20</p>
+            <p class="init-fixed-order" style="font-size:0.8rem;color:var(--muted);margin:0">Fixed order: Knights 21 → Apex 20 → Hunters 15 → Ghosts 10 → Hordes 5 · Lair 20</p>
           </div>
           </div>
         </aside>
@@ -2952,7 +2931,7 @@ main {
       <button type="button" onclick="PaleTideApp.tap(this,event)" class="tab-btn" data-tab="bestiary"><span class="icon">📖</span>Stats</button>
     </nav>
     <script>
-/* The Pale Tide — game state & rules (no build step) */
+/* Ghoulsburg Cemetery — game state & rules (no build step) */
 (function (global) {
   const STORAGE_KEY = 'pale-tide-v1';
 
@@ -2965,7 +2944,7 @@ main {
   };
 
   /** Slots indexed dead1..dead5; init counts fixed */
-  const SLOT_INIT = { dead1: 10, dead2: 31, dead3: 16, dead4: 19, dead5: 25 };
+  const SLOT_INIT = { dead1: 5, dead2: 21, dead3: 10, dead4: 15, dead5: 20 };
   const SLOT_ORDER = ['dead2', 'dead5', 'dead4', 'dead3', 'dead1']; // high → low
   const LAIR_INIT = 20;
 
@@ -3332,7 +3311,7 @@ main {
     };
   }
 
-  /** Horde (batch 1) is fixed at dead1 / init 10; shuffle rotates batches 2–5 only */
+  /** Horde (batch 1) is fixed at dead1 / init 5; shuffle rotates batches 2–5 only */
   function rotateAssignment(assignment, steps) {
     const keys = ['dead2', 'dead3', 'dead4', 'dead5'];
     const batches = keys.map((k) => assignment[k]);
@@ -3797,12 +3776,12 @@ main {
   };
 
   const INIT_COUNTS = [
-    { init: 31, slot: 'Dead 2', home: 'Knights' },
-    { init: 25, slot: 'Dead 5', home: 'Apex' },
+    { init: 21, slot: 'Dead 2', home: 'Knights' },
+    { init: 20, slot: 'Dead 5', home: 'Apex' },
     { init: 20, slot: 'Lair', home: 'Lair action' },
-    { init: 19, slot: 'Dead 4', home: 'Hunters' },
-    { init: 16, slot: 'Dead 3', home: 'Wraiths' },
-    { init: 10, slot: 'Dead 1', home: 'Horde' },
+    { init: 15, slot: 'Dead 4', home: 'Hunters' },
+    { init: 10, slot: 'Dead 3', home: 'Ghosts' },
+    { init: 5, slot: 'Dead 1', home: 'Horde' },
   ];
 
   function reminderForSlot(state, slot) {
@@ -4219,7 +4198,7 @@ main {
     formatBatchCombatHtml,
   };
 })(window);
-/* The Pale Tide — UI (iPad Safari) */
+/* Ghoulsburg Cemetery — UI (iPad Safari) */
 (function () {
   const APP_OK = 'pale-tide-app-ok-v3';
 
@@ -4371,27 +4350,6 @@ main {
       el.hidden = document.documentElement.getAttribute('data-app') !== APP_OK;
     });
     renderTimer();
-  }
-
-  function renderClocks() {
-    setEl($('#ritual-compact'), (n) => {
-      n.textContent = state.ritual;
-    });
-    setEl($('#breach-compact'), (n) => {
-      n.textContent = state.breach;
-    });
-
-    const pips = $('#breach-pips');
-    pips.innerHTML = '';
-    for (let i = 0; i < 6; i++) {
-      pips.appendChild(el('span', `breach-pip${i < state.breach ? ' filled' : ''}`));
-    }
-
-    setEl($('#header-clocks'), (bar) => {
-      bar.classList.toggle('ritual-stopped', state.ritualStopped);
-      bar.classList.toggle('ritual-high', state.ritual >= 10);
-      bar.classList.toggle('breach-high', state.breach >= 4);
-    });
   }
 
   function clearReminderPopupPosition(panel) {
@@ -5239,7 +5197,6 @@ main {
 
   function render() {
     safe('header', renderHeader);
-    safe('clocks', renderClocks);
     safe('init-ref', renderInitRefStrip);
     safe('initiative', renderInitiative);
     safe('reminders', renderReminderPanel);
@@ -5779,7 +5736,7 @@ main {
       var msg = 'Startup failed: ' + (err && err.message ? err.message : String(err));
       bootError(msg);
       try {
-        alert('Pale Tide: ' + msg);
+        alert('Ghoulsburg Cemetery: ' + msg);
       } catch (_) {}
     }
   }

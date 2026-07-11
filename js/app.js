@@ -1,4 +1,4 @@
-/* The Pale Tide — UI (iPad Safari) */
+/* Ghoulsburg Cemetery — UI (iPad Safari) */
 (function () {
   const APP_OK = 'pale-tide-app-ok-v3';
 
@@ -150,27 +150,6 @@
       el.hidden = document.documentElement.getAttribute('data-app') !== APP_OK;
     });
     renderTimer();
-  }
-
-  function renderClocks() {
-    setEl($('#ritual-compact'), (n) => {
-      n.textContent = state.ritual;
-    });
-    setEl($('#breach-compact'), (n) => {
-      n.textContent = state.breach;
-    });
-
-    const pips = $('#breach-pips');
-    pips.innerHTML = '';
-    for (let i = 0; i < 6; i++) {
-      pips.appendChild(el('span', `breach-pip${i < state.breach ? ' filled' : ''}`));
-    }
-
-    setEl($('#header-clocks'), (bar) => {
-      bar.classList.toggle('ritual-stopped', state.ritualStopped);
-      bar.classList.toggle('ritual-high', state.ritual >= 10);
-      bar.classList.toggle('breach-high', state.breach >= 4);
-    });
   }
 
   function clearReminderPopupPosition(panel) {
@@ -1018,7 +997,6 @@
 
   function render() {
     safe('header', renderHeader);
-    safe('clocks', renderClocks);
     safe('init-ref', renderInitRefStrip);
     safe('initiative', renderInitiative);
     safe('reminders', renderReminderPanel);
@@ -1558,7 +1536,7 @@
       var msg = 'Startup failed: ' + (err && err.message ? err.message : String(err));
       bootError(msg);
       try {
-        alert('Pale Tide: ' + msg);
+        alert('Ghoulsburg Cemetery: ' + msg);
       } catch (_) {}
     }
   }

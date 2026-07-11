@@ -1,4 +1,4 @@
-/* The Pale Tide — game state & rules (no build step) */
+/* Ghoulsburg Cemetery — game state & rules (no build step) */
 (function (global) {
   const STORAGE_KEY = 'pale-tide-v1';
 
@@ -11,7 +11,7 @@
   };
 
   /** Slots indexed dead1..dead5; init counts fixed */
-  const SLOT_INIT = { dead1: 10, dead2: 31, dead3: 16, dead4: 19, dead5: 25 };
+  const SLOT_INIT = { dead1: 5, dead2: 21, dead3: 10, dead4: 15, dead5: 20 };
   const SLOT_ORDER = ['dead2', 'dead5', 'dead4', 'dead3', 'dead1']; // high → low
   const LAIR_INIT = 20;
 
@@ -378,7 +378,7 @@
     };
   }
 
-  /** Horde (batch 1) is fixed at dead1 / init 10; shuffle rotates batches 2–5 only */
+  /** Horde (batch 1) is fixed at dead1 / init 5; shuffle rotates batches 2–5 only */
   function rotateAssignment(assignment, steps) {
     const keys = ['dead2', 'dead3', 'dead4', 'dead5'];
     const batches = keys.map((k) => assignment[k]);

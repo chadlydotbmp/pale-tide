@@ -111,12 +111,12 @@
   };
 
   const INIT_COUNTS = [
-    { init: 31, slot: 'Dead 2', home: 'Knights' },
-    { init: 25, slot: 'Dead 5', home: 'Apex' },
+    { init: 21, slot: 'Dead 2', home: 'Knights' },
+    { init: 20, slot: 'Dead 5', home: 'Apex' },
     { init: 20, slot: 'Lair', home: 'Lair action' },
-    { init: 19, slot: 'Dead 4', home: 'Hunters' },
-    { init: 16, slot: 'Dead 3', home: 'Wraiths' },
-    { init: 10, slot: 'Dead 1', home: 'Horde' },
+    { init: 15, slot: 'Dead 4', home: 'Hunters' },
+    { init: 10, slot: 'Dead 3', home: 'Ghosts' },
+    { init: 5, slot: 'Dead 1', home: 'Horde' },
   ];
 
   function reminderForSlot(state, slot) {

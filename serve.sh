@@ -6,7 +6,7 @@ cd "$DIR"
 IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "YOUR-MAC-IP")
 PORT=8080
 echo ""
-echo "The Pale Tide — local server"
+echo "Ghoulsburg Cemetery — local server"
 echo "  Mac:    http://127.0.0.1:$PORT"
 echo "  iPad:   http://$IP:$PORT  (same Wi‑Fi)"
 echo ""
