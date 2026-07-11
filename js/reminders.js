@@ -50,7 +50,7 @@
       lines: [
         'Living hoods · grave hounds',
         'Hound: bite +6 ×2 · Cold Howl Wis DC 13',
-        'Hood: +5 dagger×2 · targets Brussel',
+        'Hood: +7 dagger×2 · targets exposed gate PC',
       ],
       la: null,
     },

@@ -273,6 +273,7 @@
 
   function defaultPhase1Collapsed() {
     return {
+      arrival: false,
       gate: false,
       fronts: false,
       afterOpen: false,
@@ -505,6 +506,7 @@
   }
 
   function pylonAcBonus(state) {
+    if (!state.gateOpen) return 0;
     const a = !state.pylonA.destroyed && state.pylonA.stone > 0;
     const b = !state.pylonB.destroyed && state.pylonB.stone > 0;
     if (a && b) return 2;
@@ -666,7 +668,7 @@
     {
       id: 'inventory',
       title: "Myrkul's inventory",
-      effect: 'Breach +1 — the cemetery answers on the Outer front.',
+      effect: 'Breach +1 on the Outer front — track manually on your sheet.',
     },
   ];
 

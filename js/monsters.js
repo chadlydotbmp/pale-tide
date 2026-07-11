@@ -69,7 +69,7 @@
         },
         { name: 'Fade into the Column (Bonus)', text: 'Dash or Disengage' },
       ],
-      special: ['Targets Brussel if exposed · flees at half HP'],
+      special: ['Targets exposed PC at gate · flees at half HP'],
     },
     {
       id: 'grave-hound',
@@ -262,16 +262,18 @@
     {
       id: 'pylon',
       name: 'Rim pylon',
-      sub: 'Object · 2 when gate opens',
+      sub: 'On rim at arrival · dormant until gate opens',
       batch: null,
       phases: [2, 3],
       qty: '2',
       cr: '—',
       stats: [
         ['Stone', 'AC 17 · HP 35 · destroyed Ritual −2'],
-        ['Hardening', 'Both +2 AC Outer undead · one +1'],
+        ['Hardening', 'Both +2 AC Outer undead · one +1 (while active)'],
       ],
       traits: [
+        'Dormant on arrival — dark glass · no glow · no ward',
+        'Gate opens → kindle · glow · ward screams · pulses begin',
         'R+2 Wail Wis DC 13 · Breach +1 on fail',
         'R+4 & R+7 cone 4d6 + Stillness Con DC 15',
       ],

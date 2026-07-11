@@ -137,9 +137,6 @@
   }
 
   function renderHeader() {
-    setEl($('#header-round'), (el) => {
-      el.textContent = `R${state.round}`;
-    });
     setEl($('#header-phase'), (el) => {
       const ph = Math.min(3, Math.max(1, state.phase));
       const labels = ['', 'Act I', 'Act II', 'Act III'];
@@ -148,6 +145,11 @@
     });
     setEl($('#header-live'), (el) => {
       el.hidden = document.documentElement.getAttribute('data-app') !== APP_OK;
+    });
+    setEl($('#build-stamp'), (el) => {
+      const id = window.__GHOULSBURG_BUILD__ || '?';
+      el.textContent = id;
+      el.title = `Build ${id} — if stale on iPad: close tab, reopen URL, or remove & re-add Home Screen`;
     });
     renderTimer();
   }
@@ -468,13 +470,10 @@
 
     const prev = state.innerBustChoice;
     let ritual = state.ritual;
-    let breach = state.breach;
     let innerOpposedBonus = state.innerOpposedBonus || 0;
 
     if (prev && prev !== id) {
-      if (prev === 'inventory') {
-        breach = Math.max(0, breach - 1);
-      } else if (!state.ritualStopped) {
+      if (prev !== 'inventory' && !state.ritualStopped) {
         ritual = Math.max(0, ritual - 1);
       }
       if (prev === 'ledger') {
@@ -483,9 +482,7 @@
     }
 
     if (!prev || prev !== id) {
-      if (id === 'inventory') {
-        breach = Math.min(6, breach + 1);
-      } else if (!state.ritualStopped && ritual < 20) {
+      if (id !== 'inventory' && !state.ritualStopped && ritual < 20) {
         ritual = Math.min(20, ritual + 1);
       }
       if (id === 'ledger') {
@@ -497,7 +494,6 @@
       innerBustPending: false,
       innerBustChoice: id,
       ritual,
-      breach,
       innerOpposedBonus,
     });
   }
@@ -550,7 +546,7 @@
     const beatNote = $('#pylon-beat-note');
     setEl(beatNote, (el) => {
       if (!state.gateOpen || g == null) {
-        el.textContent = 'R+2 wail · R+4 & R+7 cone (if pylons stand)';
+        el.textContent = 'On rim at arrival · dormant until gate opens';
         return;
       }
       const parts = [`R+${g} now`];
@@ -559,6 +555,13 @@
       const next = G.nextPylonBeat(state);
       if (next) parts.push(`· next R+${next.at} ${next.kind}`);
       el.textContent = parts.join(' ');
+    });
+
+    setEl($('#pylon-status-note'), (el) => {
+      if (!el) return;
+      el.textContent = state.gateOpen
+        ? 'Active — glow · ward live · chip stone to drop Ritual'
+        : 'Dark glass on the rim · inactive until gate opens — then glow, ward, and pulses';
     });
 
     ['A', 'B'].forEach((id) => {
@@ -825,7 +828,7 @@
       if (state.gateOpen) {
         el.textContent = state.gateHeld
           ? 'GATE HELD · iron re-closed · hold the line'
-          : 'GATE OPEN · pylons live · Inner accessible';
+          : 'GATE OPEN · pylons active · Inner accessible';
       } else if (state.gateSmashSuccesses > 0) {
         el.textContent = `SMASHING · ${state.gateSmashSuccesses}/3 successes`;
       } else if (state.gatePickStarted) {
@@ -839,8 +842,8 @@
         el.textContent = state.gateHeld
           ? `Gate held R${state.gateRound} · iron re-closed · hold-gate buy-down available`
           : state.gateSmashed
-            ? `Gate opened R${state.gateRound} · wrecked — cannot re-close in Ph 2`
-            : `Gate opened R${state.gateRound} · picked — can re-close in Ph 2 to hold Breach`;
+            ? `Gate opened R${state.gateRound} · pylons active · wrecked — cannot re-close in Ph 2`
+            : `Gate opened R${state.gateRound} · pylons kindled · picked — can re-close in Ph 2 to hold the line`;
       } else if (state.gateToolsBroken) {
         el.textContent = 'Tools broken — jammed lock unpickable · finish via smash (3 successes · failures OK)';
       } else if (state.gatePickStarted && state.gateSmashSuccesses > 0) {
@@ -850,7 +853,7 @@
       } else if (state.gatePickStarted) {
         el.textContent = 'Picking — smash track also available (3 successes · gate can\'t re-close)';
       } else {
-        el.textContent = 'Pick both locks OR smash 3× — separate tracks · smash failures OK';
+        el.textContent = 'Rim pylons dormant · prior scouts had thieves\' tools · first gate try triggers the march';
       }
     });
     [1, 2].forEach((n) => {
@@ -1142,12 +1145,6 @@
         });
         return;
       }
-      case 'btn-breach-plus':
-        setState({ breach: Math.min(6, state.breach + 1) });
-        return;
-      case 'btn-breach-minus':
-        setState({ breach: Math.max(0, state.breach - 1) });
-        return;
       case 'btn-buy-pylon':
         setState({ ritual: Math.max(0, state.ritual - 2) });
         return;
@@ -1217,9 +1214,6 @@
         return;
       case 'btn-summon-clear-tracker':
         patchSummons(state.summons.map((s) => ({ ...s, inTracker: false })));
-        return;
-      case 'btn-new-round':
-        setState(G.nextRound(state));
         return;
       case 'btn-scene-woman-pass':
         setState({ womanDisposition: 'friendly' });

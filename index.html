@@ -6,11 +6,16 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="ghoulsburg-build" content="20260711.1650" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#0c0e12" />
     <title>Ghoulsburg Cemetery</title>
     <script>
+      window.__GHOULSBURG_BUILD__ = "20260711.1650";
       window.PaleTideApp = {
         _q: [],
         tap: function (el, ev) {
@@ -136,10 +141,43 @@ header.app-header {
 }
 
 .header-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+}
+
+.header-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.header-side-left {
+  justify-self: start;
+}
+
+.header-center {
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.header-side-right {
+  justify-self: end;
+}
+
+.build-stamp {
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0.85;
 }
 
 .header-btn {
@@ -155,35 +193,14 @@ header.app-header {
 
 .header-reset {
   padding: 0 12px;
-  margin-left: 4px;
 }
 
 .header-timer {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-left: auto;
-  margin-right: 14px;
+  gap: 6px;
   min-width: 0;
-}
-
-.header-round-group {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.header-round {
-  font-size: 1.25rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  color: var(--accent);
-  letter-spacing: -0.02em;
-  flex-shrink: 0;
-  padding: 0 2px;
 }
 
 .header-phase {
@@ -208,13 +225,6 @@ header.app-header {
   color: var(--danger);
 }
 
-.header-next-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
 .header-live {
   font-size: 0.72rem;
   font-weight: 700;
@@ -230,10 +240,6 @@ header.app-header {
 
 .header-live[hidden] {
   display: none;
-}
-
-.header-next-round {
-  white-space: nowrap;
 }
 
 .header-clocks {
@@ -343,9 +349,15 @@ header.app-header {
 .session-timer {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   flex-shrink: 0;
-  text-align: right;
+  text-align: center;
+}
+
+.header-center .timer-face {
+  align-items: center;
+  text-align: center;
 }
 
 .header-timer .timer-btn {
@@ -383,7 +395,7 @@ header.app-header {
 .timer-face {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 2px;
   min-width: 4.5rem;
 }
@@ -431,6 +443,13 @@ header.app-header {
 
 .header-timer .timer-alert:not(.hidden) {
   order: -1;
+  text-align: center;
+  max-width: min(100vw - 32px, 420px);
+  justify-content: center;
+}
+
+.header-timer #timer-alert-text {
+  align-items: center;
 }
 
 .timer-alert.hidden {
@@ -443,10 +462,6 @@ header.app-header {
   align-items: flex-start;
   gap: 1px;
   min-width: 0;
-}
-
-.header-timer #timer-alert-text {
-  align-items: flex-start;
 }
 
 .timer-alert strong {
@@ -1735,7 +1750,8 @@ main {
   border-radius: 0 0 var(--radius) var(--radius);
 }
 
-.gate-brussel-note {
+.gate-brussel-note,
+.gate-scout-note {
   margin: 0 0 12px;
   font-size: 0.84rem;
   line-height: 1.45;
@@ -2530,28 +2546,29 @@ main {
     </div>
     <header class="app-header">
       <div class="header-toolbar">
-        <div class="header-round-group">
-          <div class="header-round" id="header-round" aria-label="Round">R1</div>
-          <div class="header-phase phase-1" id="header-phase" aria-label="Phase">Ph 1</div>
-        </div>
-        <div class="header-next-group">
+        <div class="header-side header-side-left">
+          <div class="header-phase phase-1" id="header-phase" aria-label="Phase">Act I</div>
           <span id="header-live" class="header-live" hidden>live</span>
-          <button type="button" class="header-btn primary header-next-round" id="btn-new-round" onclick="PaleTideApp.tap(this,event)">Next Round</button>
         </div>
-        <div class="header-timer">
-          <div class="timer-alert hidden" id="timer-alert">
-            <span id="timer-alert-text"></span>
-            <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)" title="Dismiss">✕</button>
-          </div>
-          <div class="session-timer" id="session-timer">
-            <button type="button" class="timer-btn header-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
-            <div class="timer-face">
-              <span class="timer-clock" id="timer-clock">0:00</span>
-              <span class="timer-segment" id="timer-segment">Teleport</span>
+        <div class="header-center">
+          <div class="header-timer">
+            <div class="timer-alert hidden" id="timer-alert">
+              <span id="timer-alert-text"></span>
+              <button type="button" class="timer-alert-dismiss" id="btn-timer-dismiss" onclick="PaleTideApp.tap(this,event)" title="Dismiss">✕</button>
+            </div>
+            <div class="session-timer" id="session-timer">
+              <button type="button" class="timer-btn header-btn" id="btn-timer-toggle" onclick="PaleTideApp.tap(this,event)" title="Pause / resume">▶</button>
+              <div class="timer-face">
+                <span class="timer-clock" id="timer-clock">0:00</span>
+                <span class="timer-segment" id="timer-segment">Teleport</span>
+              </div>
             </div>
           </div>
         </div>
-        <button type="button" class="header-btn header-reset danger" id="btn-reset" onclick="PaleTideApp.tap(this,event)" title="Reset all encounter state">Reset</button>
+        <div class="header-side header-side-right">
+          <span id="build-stamp" class="build-stamp" title="App build — bump after deploy"></span>
+          <button type="button" class="header-btn header-reset danger" id="btn-reset" onclick="PaleTideApp.tap(this,event)" title="Reset all encounter state">Reset</button>
+        </div>
       </div>
     </header>
 
@@ -2606,7 +2623,29 @@ main {
       <section class="tab-panel" data-tab="phase1">
         <div class="phase-banner phase-1">
           <strong>Act I · Siege</strong>
-          <span>0:05–0:50 · Gate LOCKED · Gate + Lane · Ritual frozen</span>
+          <span>Quiet arrival · trigger on first gate try · then Gate + Lane</span>
+        </div>
+
+        <div class="panel phase-section" data-phase1-section="arrival">
+          <button type="button" class="phase-section-toggle" data-phase1-section="arrival" onclick="PaleTideApp.tap(this,event)">
+            <span class="phase-section-chevron" aria-hidden="true">▾</span>
+            <h2>Arrival · before trigger</h2>
+          </button>
+          <div class="phase-section-body">
+          <div class="read-aloud-block">
+            <h4>Cold open</h4>
+            <p class="read-aloud-when">0:00 — no initiative until someone tries the gate.</p>
+            <p>You came to Ghoulsburg on <strong>reports</strong>—rim pylons misbehaving, undead spotted nearby. The cemetery is <strong>mostly quiet</strong>: mist, headstones, two black-glass pylons on the rim—dark, silent, inactive. A zombie or two shambles between plots; maybe a skeleton by a fence. <strong>Token dead</strong>—nothing like what's coming. Prior scouts lie dead in the mud, still pointing at the locked gate—thieves' tools on the corpse. The NE road is empty. Graves are still.</p>
+          </div>
+          <div class="read-aloud-block read-aloud-compact">
+            <h4>Trigger · first gate attempt</h4>
+            <p>The iron screams. On the NE road, dead rise—marching en masse. Headstones tilt—the graves wake. Split now—gate and lane.</p>
+          </div>
+          <ul class="phase-list muted">
+            <li>On mat: <strong>1–2 token undead</strong> max · <strong>~18 hordes</strong> stay in the box until trigger</li>
+            <li>Rim pylons visible · <strong>dormant</strong> until gate opens</li>
+          </ul>
+          </div>
         </div>
 
         <div class="panel phase-section gate-section" data-phase1-section="gate">
@@ -2617,11 +2656,11 @@ main {
           <div class="phase-section-body">
         <div class="gate-tracker">
           <div id="gate-banner" class="gate-banner locked">GATE LOCKED</div>
-          <p id="gate-info" class="gate-info">Road spawns only · Lane + Gate fronts · Breach = road lost</p>
+          <p id="gate-info" class="gate-info">Reports: pylons + undead · token shamblers only until first gate try</p>
           <div id="gate-locks-panel" class="gate-locks-panel">
-            <p class="gate-brussel-note">
-              <strong>Brussel</strong> can't work the iron—they point at the <strong>prior Passage's body</strong>
-              (face-down in the mud): <strong>thieves' tools</strong> on the corpse.
+            <p class="gate-scout-note">
+              <strong>Prior scouts</strong> — dead in the mud, <strong>still pointing</strong> at the iron.
+              <strong>Thieves' tools</strong> on the corpse.
             </p>
             <div class="gate-locks">
               <div class="gate-lock" id="gate-lock-1">
@@ -2658,9 +2697,10 @@ main {
           </button>
           <div class="phase-section-body">
           <ul class="phase-list">
-            <li><strong>Gate</strong> — open the iron · <strong>Brussel</strong></li>
-            <li><strong>Lane</strong> — ring + NE column · R1 only while locked</li>
-            <li>~18 hordes · fixed dead order · graves silent until gate opens</li>
+            <li><strong>Gate</strong> — open the iron</li>
+            <li><strong>Lane</strong> — NE column · after trigger only</li>
+            <li>~18 hordes in box until trigger · then recycle on mat</li>
+            <li><strong>Rim pylons</strong> on site · dormant until gate opens</li>
             <li>Lane empty EOR → Breach +1 · all 5 on Gate → Breach +2</li>
           </ul>
           </div>
@@ -2672,9 +2712,13 @@ main {
             <h2>After gate opens</h2>
           </button>
           <div class="phase-section-body">
-          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Same round: place pylons · re-split <strong>Outer</strong> / <strong>Inner</strong></p>
+          <div class="read-aloud-block">
+            <h4>When the gate opens</h4>
+            <p class="read-aloud-when">Same round — pylons kindle · re-split <strong>Outer</strong> / <strong>Inner</strong>.</p>
+            <p>The iron gives. On the rim, the pylons <strong>kindle</strong>—dark glass <strong>lights up</strong>, <strong>glows</strong>, the ward screams. Headstones tilt—the graves join the war. Daylight through the gate—the past. Two jobs now: Outer holds the line and breaks the glass · Inner stops the count.</p>
+          </div>
           <ul class="phase-list muted">
-            <li>Iron gives · black glass rises on the rim</li>
+            <li>Pylons <strong>activate</strong> — glow · ward live · pulses begin</li>
             <li><strong>R+2</strong> wail · <strong>R+4</strong> &amp; <strong>R+7</strong> cones (if pylons stand)</li>
             <li>Ritual +1 starts next EOR · graves join the war</li>
           </ul>
@@ -2709,8 +2753,9 @@ main {
             <h2>Rim pylons</h2>
           </button>
           <div class="phase-section-body">
-          <p id="pylon-beat-note" style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">R+2 wail · R+4 &amp; R+7 cone (if pylons stand)</p>
-          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Stone only · AC 17 · 35 HP · destroyed → Ritual −2 · ward +2/+1 on Outer undead</p>
+          <p id="pylon-beat-note" style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">On rim at arrival · dormant until gate opens · then R+2 wail · R+4 &amp; R+7 cone</p>
+          <p id="pylon-status-note" style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Dark glass on the rim · <strong>inactive</strong> until gate opens — then glow, ward, and pulses</p>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px">Stone only · AC 17 · 35 HP · destroyed → Ritual −2 · ward +2/+1 on Outer undead while active</p>
           <div class="pylon-grid">
             <div class="pylon-card" id="pylon-a">
               <h3>Pylon A</h3>
@@ -2810,7 +2855,7 @@ main {
           </button>
           <div class="phase-section-body">
           <ul class="phase-list">
-            <li><strong>Outer</strong> — gate mouth · road · both pylons · Brussel</li>
+            <li><strong>Outer</strong> — gate mouth · road · both pylons</li>
             <li><strong>Inner</strong> — three scenes · stop the count</li>
             <li>Sweet spot: 2 Outer · 2–3 Inner</li>
             <li>EOR: Ritual +1 · Outer &lt; 2? Breach +1 · Inner empty? Ritual +1</li>
@@ -2869,9 +2914,9 @@ main {
             <li>Apostle out + (bloodied OR both pylons down) at vortex threshold</li>
             <li><strong>Premature</strong> *(rim rite / early stop)* — temporary form · still assails the party</li>
             <li><strong>Permanent</strong> *(ritual 20)* — physical forever unless dismissed or slain</li>
-            <li>Brussel adjacent for step 2 · Religion/Arcana DC 14 each step</li>
+            <li>Step 2 — sing / laugh · Chung-Hin lead · Religion/Arcana DC 14 each step</li>
             <li><strong>Win:</strong> Dismissal · 0 HP</li>
-            <li><strong>Loss:</strong> 2 PCs dead OR Breach 6 + Apostle at 3:45</li>
+            <li><strong>Loss:</strong> 2 PCs dead OR Apostle at 3:45</li>
           </ul>
           </div>
         </div>
@@ -3206,6 +3251,7 @@ main {
 
   function defaultPhase1Collapsed() {
     return {
+      arrival: false,
       gate: false,
       fronts: false,
       afterOpen: false,
@@ -3438,6 +3484,7 @@ main {
   }
 
   function pylonAcBonus(state) {
+    if (!state.gateOpen) return 0;
     const a = !state.pylonA.destroyed && state.pylonA.stone > 0;
     const b = !state.pylonB.destroyed && state.pylonB.stone > 0;
     if (a && b) return 2;
@@ -3599,7 +3646,7 @@ main {
     {
       id: 'inventory',
       title: "Myrkul's inventory",
-      effect: 'Breach +1 — the cemetery answers on the Outer front.',
+      effect: 'Breach +1 on the Outer front — track manually on your sheet.',
     },
   ];
 
@@ -3715,7 +3762,7 @@ main {
       lines: [
         'Living hoods · grave hounds',
         'Hound: bite +6 ×2 · Cold Howl Wis DC 13',
-        'Hood: +5 dagger×2 · targets Brussel',
+        'Hood: +7 dagger×2 · targets exposed gate PC',
       ],
       la: null,
     },
@@ -3896,7 +3943,7 @@ main {
         },
         { name: 'Fade into the Column (Bonus)', text: 'Dash or Disengage' },
       ],
-      special: ['Targets Brussel if exposed · flees at half HP'],
+      special: ['Targets exposed PC at gate · flees at half HP'],
     },
     {
       id: 'grave-hound',
@@ -4089,16 +4136,18 @@ main {
     {
       id: 'pylon',
       name: 'Rim pylon',
-      sub: 'Object · 2 when gate opens',
+      sub: 'On rim at arrival · dormant until gate opens',
       batch: null,
       phases: [2, 3],
       qty: '2',
       cr: '—',
       stats: [
         ['Stone', 'AC 17 · HP 35 · destroyed Ritual −2'],
-        ['Hardening', 'Both +2 AC Outer undead · one +1'],
+        ['Hardening', 'Both +2 AC Outer undead · one +1 (while active)'],
       ],
       traits: [
+        'Dormant on arrival — dark glass · no glow · no ward',
+        'Gate opens → kindle · glow · ward screams · pulses begin',
         'R+2 Wail Wis DC 13 · Breach +1 on fail',
         'R+4 & R+7 cone 4d6 + Stillness Con DC 15',
       ],
@@ -4337,9 +4386,6 @@ main {
   }
 
   function renderHeader() {
-    setEl($('#header-round'), (el) => {
-      el.textContent = `R${state.round}`;
-    });
     setEl($('#header-phase'), (el) => {
       const ph = Math.min(3, Math.max(1, state.phase));
       const labels = ['', 'Act I', 'Act II', 'Act III'];
@@ -4348,6 +4394,11 @@ main {
     });
     setEl($('#header-live'), (el) => {
       el.hidden = document.documentElement.getAttribute('data-app') !== APP_OK;
+    });
+    setEl($('#build-stamp'), (el) => {
+      const id = window.__GHOULSBURG_BUILD__ || '?';
+      el.textContent = id;
+      el.title = `Build ${id} — if stale on iPad: close tab, reopen URL, or remove & re-add Home Screen`;
     });
     renderTimer();
   }
@@ -4668,13 +4719,10 @@ main {
 
     const prev = state.innerBustChoice;
     let ritual = state.ritual;
-    let breach = state.breach;
     let innerOpposedBonus = state.innerOpposedBonus || 0;
 
     if (prev && prev !== id) {
-      if (prev === 'inventory') {
-        breach = Math.max(0, breach - 1);
-      } else if (!state.ritualStopped) {
+      if (prev !== 'inventory' && !state.ritualStopped) {
         ritual = Math.max(0, ritual - 1);
       }
       if (prev === 'ledger') {
@@ -4683,9 +4731,7 @@ main {
     }
 
     if (!prev || prev !== id) {
-      if (id === 'inventory') {
-        breach = Math.min(6, breach + 1);
-      } else if (!state.ritualStopped && ritual < 20) {
+      if (id !== 'inventory' && !state.ritualStopped && ritual < 20) {
         ritual = Math.min(20, ritual + 1);
       }
       if (id === 'ledger') {
@@ -4697,7 +4743,6 @@ main {
       innerBustPending: false,
       innerBustChoice: id,
       ritual,
-      breach,
       innerOpposedBonus,
     });
   }
@@ -4750,7 +4795,7 @@ main {
     const beatNote = $('#pylon-beat-note');
     setEl(beatNote, (el) => {
       if (!state.gateOpen || g == null) {
-        el.textContent = 'R+2 wail · R+4 & R+7 cone (if pylons stand)';
+        el.textContent = 'On rim at arrival · dormant until gate opens';
         return;
       }
       const parts = [`R+${g} now`];
@@ -4759,6 +4804,13 @@ main {
       const next = G.nextPylonBeat(state);
       if (next) parts.push(`· next R+${next.at} ${next.kind}`);
       el.textContent = parts.join(' ');
+    });
+
+    setEl($('#pylon-status-note'), (el) => {
+      if (!el) return;
+      el.textContent = state.gateOpen
+        ? 'Active — glow · ward live · chip stone to drop Ritual'
+        : 'Dark glass on the rim · inactive until gate opens — then glow, ward, and pulses';
     });
 
     ['A', 'B'].forEach((id) => {
@@ -5025,7 +5077,7 @@ main {
       if (state.gateOpen) {
         el.textContent = state.gateHeld
           ? 'GATE HELD · iron re-closed · hold the line'
-          : 'GATE OPEN · pylons live · Inner accessible';
+          : 'GATE OPEN · pylons active · Inner accessible';
       } else if (state.gateSmashSuccesses > 0) {
         el.textContent = `SMASHING · ${state.gateSmashSuccesses}/3 successes`;
       } else if (state.gatePickStarted) {
@@ -5039,8 +5091,8 @@ main {
         el.textContent = state.gateHeld
           ? `Gate held R${state.gateRound} · iron re-closed · hold-gate buy-down available`
           : state.gateSmashed
-            ? `Gate opened R${state.gateRound} · wrecked — cannot re-close in Ph 2`
-            : `Gate opened R${state.gateRound} · picked — can re-close in Ph 2 to hold Breach`;
+            ? `Gate opened R${state.gateRound} · pylons active · wrecked — cannot re-close in Ph 2`
+            : `Gate opened R${state.gateRound} · pylons kindled · picked — can re-close in Ph 2 to hold the line`;
       } else if (state.gateToolsBroken) {
         el.textContent = 'Tools broken — jammed lock unpickable · finish via smash (3 successes · failures OK)';
       } else if (state.gatePickStarted && state.gateSmashSuccesses > 0) {
@@ -5050,7 +5102,7 @@ main {
       } else if (state.gatePickStarted) {
         el.textContent = 'Picking — smash track also available (3 successes · gate can\'t re-close)';
       } else {
-        el.textContent = 'Pick both locks OR smash 3× — separate tracks · smash failures OK';
+        el.textContent = 'Rim pylons dormant · prior scouts had thieves\' tools · first gate try triggers the march';
       }
     });
     [1, 2].forEach((n) => {
@@ -5342,12 +5394,6 @@ main {
         });
         return;
       }
-      case 'btn-breach-plus':
-        setState({ breach: Math.min(6, state.breach + 1) });
-        return;
-      case 'btn-breach-minus':
-        setState({ breach: Math.max(0, state.breach - 1) });
-        return;
       case 'btn-buy-pylon':
         setState({ ritual: Math.max(0, state.ritual - 2) });
         return;
@@ -5417,9 +5463,6 @@ main {
         return;
       case 'btn-summon-clear-tracker':
         patchSummons(state.summons.map((s) => ({ ...s, inTracker: false })));
-        return;
-      case 'btn-new-round':
-        setState(G.nextRound(state));
         return;
       case 'btn-scene-woman-pass':
         setState({ womanDisposition: 'friendly' });

@@ -2,7 +2,7 @@
   "name": "Ghoulsburg Cemetery",
   "short_name": "Ghoulsburg",
   "description": "DM combat tracker — Roll For Adventure L5",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=20260711.1650",
   "display": "standalone",
   "background_color": "#0c0e12",
   "theme_color": "#0c0e12",
